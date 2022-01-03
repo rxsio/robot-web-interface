@@ -33,7 +33,7 @@ export default {
                 width: 640,
                 height: 480,
                 topics: [
-                    '/sirius/camera/image_raw',
+                    '/camera/image_raw',
                     '/sirius/camera/image_raw',
                     '/sirius/camera/image_raw',
                 ],

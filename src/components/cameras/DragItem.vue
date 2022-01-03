@@ -6,42 +6,31 @@
 <script>
 export default {
     props: {
-        dragStartCallback: Function,
-        updateCurLoc: Function,
-    },
-
-    data() {
-        return {
-            dragging: false,
-            startX: null,
-            startY: null,
-        }
+        extraData: Object,
     },
 
     methods: {
         dragStart(evt) {
             console.log('dragging')
             document.addEventListener('mouseup', this.dragEnd)
-            document.addEventListener('mousemove', this.dragMove)
             document.addEventListener('touchup', this.dragEnd)
-            document.addEventListener('touchmove', this.dragMove)
 
-            this.dragging = true
-            this.updateCurLoc(evt.x, evt.y)
-            this.dragStartCallback()
-        },
-        dragMove(evt) {
-            this.updateCurLoc(evt.x, evt.y)
+            let event = new CustomEvent('siriusDragStart', {
+                detail: {
+                    x: evt.x,
+                    y: evt.y,
+                    extraData: this.extraData,
+                },
+            })
+            document.dispatchEvent(event)
         },
         dragEnd() {
             console.log('not dragging')
             document.removeEventListener('mouseup', this.dragEnd)
-            document.removeEventListener('mousemove', this.dragMove)
             document.removeEventListener('touchup', this.dragEnd)
-            document.removeEventListener('touchmove', this.dragMove)
 
-            this.dragging = false
-            this.updateCurLoc(null, null)
+            let event = new CustomEvent('siriusDragEnd')
+            document.dispatchEvent(event)
         },
     },
 }

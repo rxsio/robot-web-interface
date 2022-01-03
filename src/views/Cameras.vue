@@ -1,65 +1,26 @@
 <template>
     <div class="cameras">
-        <DragOutline
-            v-if="dragState.outline"
-            :positionX="dragState.outline.x"
-            :positionY="dragState.outline.y"
-            :height="dragState.outline.height"
-            :width="dragState.outline.width"
-            :label="dragState.data.label"
-        />
-        <DragItem
-            :updateCurLoc="updateDragLoc"
-            :dragStartCallback="
-                () => {
-                    this.dragState.data = { target: 'test', label: 'Test' }
-                }
-            "
-        >
+        <DragItem :extraData="{ target: 'test', label: 'Test' }">
             <div style="background-color: green">Text</div>
         </DragItem>
-        <div style="display: flex">
-            <div
-                class="dropTarget"
-                style="background-color: aqua; width: 300px; height: 200px"
-            />
-            <div
-                class="dropTarget"
-                style="
-                    background-color: red;
-                    display: flex;
-                    flex-grow: 1;
-                    margin: 5px;
-                "
-            />
-            <div
-                class="dropTarget"
-                style="
-                    background-color: yellow;
-                    display: flex;
-                    flex-grow: 1;
-                    margin: 5px;
-                "
-            />
-            <div
-                class="dropTarget"
-                style="
-                    background-color: purple;
-                    display: flex;
-                    flex-grow: 1;
-                    margin: 5px;
-                "
-            />
-        </div>
+        <DragItem
+            v-for="topic in topics"
+            :key="topic"
+            :extraData="{ topic, label: topic }"
+        >
+            <div style="background-color: green">{{ topic }}</div>
+        </DragItem>
+        <DragManager :layout="layout" />
         <VideoStream :ros="ros" :webSocketHostname="webSocketHostname" />
     </div>
 </template>
 <script>
-import DragOutline from '@/components/cameras/DragOutline.vue'
 import DragItem from '@/components/cameras/DragItem.vue'
+import DragManager from '@/components/cameras/DragManager.vue'
 import VideoStream from '@/components/cameras/VideoStream.vue'
+import getImageTopics from '@/components/cameras/getImageTopics'
 export default {
-    components: { DragOutline, DragItem, VideoStream },
+    components: { DragItem, DragManager, VideoStream },
     name: 'Cameras',
 
     props: {
@@ -69,10 +30,15 @@ export default {
 
     data() {
         return {
-            dragState: {
-                outline: null,
-                data: null,
+            layout: {
+                streams: [
+                    { id: 'video1', label: 'test1' },
+                    { id: 'video2', label: 'test2' },
+                    { id: 'video3', label: 'test3' },
+                ],
+                variant: 0,
             },
+            topics: [],
         }
     },
 
@@ -89,47 +55,10 @@ export default {
                 name: 'Home',
             })
         }
-    },
-    methods: {
-        updateDragLoc(x, y) {
-            // if we get null for the input we know the drag has finished
-            if (x === null && y === null) {
-                this.endDrag()
-                return
-            }
 
-            // find the element that is a drop target under the cursor
-            // null if none of the elements under the cursor are a drop target
-            let dropTarget =
-                document
-                    .elementsFromPoint(x, y)
-                    .filter((element) =>
-                        element.classList.contains('dropTarget')
-                    )[0] || null
-
-            if (dropTarget) {
-                // get the bounding box of the target and set the outline to it
-                let rect = dropTarget.getBoundingClientRect()
-                this.dragState.outline = {
-                    x: rect.left,
-                    y: rect.top,
-                    width: rect.width,
-                    height: rect.height,
-                }
-            } else {
-                // move the outline to the cursor otherwise
-                this.dragState.outline = {
-                    x: x - 50,
-                    y: y - 50,
-                    width: 100,
-                    height: 100,
-                }
-            }
-        },
-        endDrag() {
-            this.dragState.outline = null
-            this.dragState.data = null
-        },
+        getImageTopics(`http://${this.webSocketHostname}:8082`).then(
+            (newTopics) => (this.topics = newTopics)
+        )
     },
     beforeDestroy() {
         // Reloading page when going back
