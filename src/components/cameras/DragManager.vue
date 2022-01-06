@@ -1,22 +1,22 @@
 <template>
-    <div ref="container" style="height: 300px">
-        <DragOutline
-            v-if="dragState"
-            :positionX="dragState.x"
-            :positionY="dragState.y"
-            :height="100"
-            :width="100"
-            :label="dragState.extraData.label"
-            variant="drag"
+    <div ref="container" style="height: 600px">
+        <OutlineDisplay
+            :layout="currLayout"
+            :rect="rect"
+            :dragState="dragState"
         />
-        <OutlineDisplay :layout="currLayout" :rect="rect" />
+        <VideoDisplay :layout="layout" :rect="rect" />
     </div>
 </template>
 <script>
-import DragOutline from '@/components/cameras/DragOutline.vue'
 import OutlineDisplay from '@/components/cameras/OutlineDisplay.vue'
+import VideoDisplay from '@/components/cameras/VideoDisplay.vue'
+import {
+    addToLayout,
+    removeFromLayout,
+} from '@/components/cameras/transformLayout'
 export default {
-    components: { DragOutline, OutlineDisplay },
+    components: { OutlineDisplay, VideoDisplay },
     props: {
         layout: Object,
     },
@@ -30,7 +30,17 @@ export default {
 
     methods: {
         dragStart(evt) {
+            if (evt.detail.data.removeIndex !== undefined) {
+                this.$emit(
+                    'changeLayout',
+                    removeFromLayout(this.layout, evt.detail.data.removeIndex)
+                )
+                delete evt.detail.data.removeIndex
+            }
             this.dragState = evt.detail
+            this.dragState.data.main = true
+            this.dragState.data.id =
+                Math.max(...this.layout.streams.map((stream) => stream.id)) + 1
 
             document.addEventListener('mousemove', this.dragMove)
             document.addEventListener('touchmove', this.dragMove)
@@ -40,6 +50,8 @@ export default {
             this.dragState.y = evt.y
         },
         dragEnd() {
+            this.currLayout.streams.forEach((stream) => delete stream.main)
+            this.$emit('changeLayout', this.currLayout)
             this.dragState = null
 
             document.removeEventListener('mousemove', this.dragMove)
@@ -84,16 +96,28 @@ export default {
             let sectY = valueTo1dSector(relativeLoc.y)
             const sectArray = [
                 [0, 1, 2],
-                [3, 4, 5],
-                [6, 7, 8],
+                [7, 8, 3],
+                [6, 5, 4],
             ]
             return sectArray[sectY][sectX]
         },
         currLayout() {
             if (!this.dragState) return { streams: [], variant: 0 }
-            let layout = JSON.parse(JSON.stringify(this.layout))
-            return layout
+            if (this.cursorSector !== -1) {
+                return addToLayout(
+                    this.layout,
+                    this.dragState.data,
+                    this.cursorSector
+                )
+            }
+            return this.layout
         },
+    },
+
+    updated() {
+        /*console.log(JSON.parse(JSON.stringify(this.layout)))
+        console.log(JSON.parse(JSON.stringify(this.currLayout)))
+        console.log(this.cursorSector)*/
     },
 
     mounted() {

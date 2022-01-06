@@ -36,6 +36,7 @@ export default {
 <style scoped>
 .outline {
     position: absolute;
+    z-index: 1000;
 
     background-color: rgba(var(--outline-color), 0.2);
 
@@ -44,8 +45,8 @@ export default {
     border: 5px solid rgba(var(--outline-color), 1);
     border-radius: 5px;
 
-    /* transition: width 0.1s, height 0.1s, top 0.1s, left 0.1s; */
-    transition: width 0.1s, height 0.1s, top 0.05s, left 0.05s;
+    transition: width 0.2s, height 0.2s, top 0.2s, left 0.2s;
+    /*transition: width 0.1s, height 0.1s, top 0.05s, left 0.05s;*/
 
     box-sizing: border-box;
 }

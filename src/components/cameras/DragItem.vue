@@ -19,7 +19,7 @@ export default {
                 detail: {
                     x: evt.x,
                     y: evt.y,
-                    extraData: this.extraData,
+                    data: this.extraData,
                 },
             })
             document.dispatchEvent(event)
