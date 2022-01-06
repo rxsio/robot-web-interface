@@ -18,7 +18,7 @@
 import DragItem from '@/components/cameras/DragItem.vue'
 import DragManager from '@/components/cameras/DragManager.vue'
 //import VideoStream from '@/components/cameras/VideoStream.vue'
-//import getImageTopics from '@/components/cameras/getImageTopics'
+import getImageTopics from '@/components/cameras/getImageTopics'
 export default {
     components: { DragItem, DragManager /*VideoStream*/ },
     name: 'Cameras',
@@ -56,11 +56,7 @@ export default {
             })
         }
 
-        /*
-        getImageTopics(`http://${this.webSocketHostname}:8082`).then(
-            (newTopics) => (this.topics = newTopics)
-        )
-        */
+        getImageTopics(this.ros).then((newTopics) => (this.topics = newTopics))
     },
     beforeDestroy() {
         // Reloading page when going back
