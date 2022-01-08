@@ -1,11 +1,11 @@
 <template>
-    <div ref="container" style="height: 600px">
+    <div ref="container" style="height: 90vh">
         <OutlineDisplay
             :layout="currLayout"
             :rect="rect"
             :dragState="dragState"
         />
-        <VideoDisplay :layout="layout" :rect="rect" />
+        <VideoDisplay :ros="ros" :host="host" :layout="layout" :rect="rect" />
     </div>
 </template>
 <script>
@@ -18,6 +18,8 @@ import {
 export default {
     components: { OutlineDisplay, VideoDisplay },
     props: {
+        ros: Object, // should be a global
+        host: String, // should be a global
         layout: Object,
     },
 
@@ -30,17 +32,22 @@ export default {
 
     methods: {
         dragStart(evt) {
-            if (evt.detail.data.removeIndex !== undefined) {
+            const newStream = evt.detail
+            // handle removing videos that were dragged out of the layout
+            if (newStream.data.removeIndex !== undefined) {
                 this.$emit(
                     'changeLayout',
-                    removeFromLayout(this.layout, evt.detail.data.removeIndex)
+                    removeFromLayout(this.layout, newStream.data.removeIndex)
                 )
-                delete evt.detail.data.removeIndex
+                delete newStream.data.removeIndex
             }
-            this.dragState = evt.detail
-            this.dragState.data.main = true
-            this.dragState.data.id =
-                Math.max(...this.layout.streams.map((stream) => stream.id)) + 1
+            // set the current stream as the main one (for the special outline)
+            newStream.data.main = true
+            // generate new id to avoid collisions
+            newStream.data.id =
+                Math.max(0, ...this.layout.streams.map((stream) => stream.id)) +
+                1
+            this.dragState = newStream
 
             document.addEventListener('mousemove', this.dragMove)
             document.addEventListener('touchmove', this.dragMove)
@@ -50,7 +57,9 @@ export default {
             this.dragState.y = evt.y
         },
         dragEnd() {
+            // remove all special outlines
             this.currLayout.streams.forEach((stream) => delete stream.main)
+            // confirm the created layout
             this.$emit('changeLayout', this.currLayout)
             this.dragState = null
 
@@ -58,6 +67,7 @@ export default {
             document.removeEventListener('touchmove', this.dragMove)
         },
         updateRect() {
+            // returns the current shape of the manager
             if (!this.$refs.container) return null
             let rect = this.$refs.container.getBoundingClientRect()
             this.rect = {
@@ -79,6 +89,8 @@ export default {
 
     computed: {
         cursorSector() {
+            // determines which 1/9th of the manager is hovered over
+            if (!this.dragState) return -2
             let isCursorOver =
                 this.dragState &&
                 document
@@ -102,22 +114,17 @@ export default {
             return sectArray[sectY][sectX]
         },
         currLayout() {
-            if (!this.dragState) return { streams: [], variant: 0 }
-            if (this.cursorSector !== -1) {
-                return addToLayout(
-                    this.layout,
-                    this.dragState.data,
-                    this.cursorSector
-                )
-            }
-            return this.layout
-        },
-    },
+            // creates the new layout based on current drag state and cursor position
 
-    updated() {
-        /*console.log(JSON.parse(JSON.stringify(this.layout)))
-        console.log(JSON.parse(JSON.stringify(this.currLayout)))
-        console.log(this.cursorSector)*/
+            // TO FIX: refreshes increadibly frequently, even though it doesn't need to
+            if (this.cursorSector === -2) return { streams: [], variant: 0 }
+            if (this.cursorSector === -1) return this.layout
+            return addToLayout(
+                this.layout,
+                this.dragState.data,
+                this.cursorSector
+            )
+        },
     },
 
     mounted() {
