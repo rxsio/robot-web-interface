@@ -40,14 +40,14 @@ export default {
             return this.outlines.filter((outline) => !outline.data.main)
         },
         mainOutline() {
-            const forceMainOutline = this.outlines.filter(
+            const forceMainOutline = this.outlines.find(
                 (outline) => outline.data.main
-            )[0]
+            )
             return (
                 forceMainOutline ||
                 (this.dragState && {
-                    x: this.dragState.x,
-                    y: this.dragState.y,
+                    x: this.dragState.x - 50,
+                    y: this.dragState.y - 50,
                     height: 100,
                     width: 100,
                     data: this.dragState.data,

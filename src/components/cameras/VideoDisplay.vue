@@ -1,5 +1,5 @@
 <template>
-    <div>
+    <div class="background">
         <DragItem
             v-for="(stream, index) in streams"
             :key="stream.data.id"
@@ -7,6 +7,9 @@
         >
             <VideoStream :ros="ros" :host="host" :stream="stream" />
         </DragItem>
+        <div v-if="streams.length === 0" class="centered">
+            Drag some streams here!
+        </div>
     </div>
 </template>
 <script>
@@ -29,3 +32,13 @@ export default {
     },
 }
 </script>
+<style scoped>
+.background {
+    background-color: lightgray;
+    height: 100%;
+}
+.centered {
+    margin: 0 auto;
+    padding-top: 10vh;
+}
+</style>

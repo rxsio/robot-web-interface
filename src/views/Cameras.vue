@@ -1,15 +1,6 @@
 <template>
     <div class="cameras">
-        <DragItem :extraData="{ topic: 'test', label: 'Test' }">
-            <div style="background-color: green">Text</div>
-        </DragItem>
-        <DragItem
-            v-for="topic in topics"
-            :key="topic"
-            :extraData="{ topic, label: topic }"
-        >
-            <div style="background-color: green">{{ topic }}</div>
-        </DragItem>
+        <TopicList :ros="ros" />
         <DragManager
             :ros="ros"
             :host="webSocketHostname"
@@ -19,11 +10,10 @@
     </div>
 </template>
 <script>
-import DragItem from '@/components/cameras/DragItem.vue'
 import DragManager from '@/components/cameras/DragManager.vue'
-import getImageTopics from '@/components/cameras/getImageTopics'
+import TopicList from '@/components/cameras/TopicList.vue'
 export default {
-    components: { DragItem, DragManager },
+    components: { DragManager, TopicList },
     name: 'Cameras',
 
     props: {
@@ -37,7 +27,6 @@ export default {
                 streams: [],
                 variant: 0,
             },
-            topics: [],
         }
     },
 
@@ -54,8 +43,6 @@ export default {
                 name: 'Home',
             })
         }
-
-        getImageTopics(this.ros).then((newTopics) => (this.topics = newTopics))
     },
     beforeDestroy() {
         // Reloading page when going back

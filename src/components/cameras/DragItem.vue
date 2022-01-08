@@ -11,7 +11,6 @@ export default {
 
     methods: {
         dragStart(evt) {
-            console.log('dragging')
             document.addEventListener('mouseup', this.dragEnd)
             document.addEventListener('touchup', this.dragEnd)
 
@@ -25,7 +24,6 @@ export default {
             document.dispatchEvent(event)
         },
         dragEnd() {
-            console.log('not dragging')
             document.removeEventListener('mouseup', this.dragEnd)
             document.removeEventListener('touchup', this.dragEnd)
 

@@ -24,6 +24,7 @@ export default (layout, rect) => {
     }
 
     // definitions of variants of item layouts
+    // specifically chosen orders, that allow easy rotations
     const layoutMap = {
         0: { 0: [] },
         1: { 0: ['full'] },

@@ -24,6 +24,8 @@ export const addToLayout = (layout, newStream, cursorSector) => {
         let [a, b] = streamData
         let variantOffset = 0
 
+        // if horizontal, rotate by 90 degrees clockwise and mirror to match vertical
+        // decreasing the offset by 1 to remember to rotate back
         if (variant === 1) {
             cursorSector += 2
             cursorSector %= 8
@@ -31,6 +33,8 @@ export const addToLayout = (layout, newStream, cursorSector) => {
             ;[a, b] = [b, a]
         }
 
+        // if the sector is in the bottom half, it's equivalent to
+        // the top variant rotated and mirrored
         if (cursorSector >= 4) {
             cursorSector -= 4
             variantOffset += 2
@@ -52,6 +56,7 @@ export const addToLayout = (layout, newStream, cursorSector) => {
                 return layout
         }
 
+        // undo rotations from the beginning
         result.variant += variantOffset
         result.variant %= 4
         return result
@@ -59,6 +64,7 @@ export const addToLayout = (layout, newStream, cursorSector) => {
     if (streamData.length === 3) {
         if (cursorSector === 8) return layout
 
+        // reduce all variants to the one 0th one
         cursorSector -= variant * 2
         cursorSector += 8
         cursorSector %= 8
@@ -82,6 +88,7 @@ export const addToLayout = (layout, newStream, cursorSector) => {
                 return layout
         }
 
+        // undo the rotation from the beginning
         for (let i = 0; i < variant; i++) {
             result.streams.unshift(result.streams.pop())
         }
@@ -104,8 +111,8 @@ export const removeFromLayout = (layout, removeIndex) => {
         return { streams: [streamData[(removeIndex + 1) % 2]], variant: 0 }
     }
     if (streamData.length === 3) {
-        let result = null
         const [a, b, c] = streamData
+        let result = null
         switch (removeIndex) {
             case 0:
                 result = { streams: [c, b], variant: variant % 2 }
@@ -117,12 +124,15 @@ export const removeFromLayout = (layout, removeIndex) => {
                 result = { streams: [a, b], variant: (variant + 1) % 2 }
                 break
         }
+
+        // fix variants 2 and 3 which are upside-down which makes the result mirrored
         if (variant >= 2) {
             result.streams.unshift(result.streams.pop())
         }
         return result
     }
     if (streamData.length === 4) {
+        // arbitrarily choose vertical neighbours
         const [a, b, c, d] = streamData
         switch (removeIndex) {
             case 0:
