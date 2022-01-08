@@ -10,6 +10,21 @@
         >
             <div class="list-element">{{ topic }}</div>
         </DragItem>
+        <div style="flex-grow: 1" />
+        <button @click="exportConfig">Export layout</button>
+
+        <button>
+            <label htmlFor="test">
+                Import layout
+                <input
+                    id="test"
+                    type="file"
+                    hidden
+                    accept=".json"
+                    @change="importConfig"
+                />
+            </label>
+        </button>
     </div>
 </template>
 <script>
@@ -19,11 +34,41 @@ export default {
     components: { DragItem },
     props: {
         ros: Object, // should be a global
+        layout: Object,
     },
     data() {
         return {
             topics: [],
         }
+    },
+    methods: {
+        exportConfig() {
+            let dataStr =
+                'data:text/json;charset=utf-8,' +
+                encodeURIComponent(JSON.stringify(this.layout))
+
+            let downloadAnchorNode = document.createElement('a')
+            downloadAnchorNode.setAttribute('href', dataStr)
+            downloadAnchorNode.setAttribute(
+                'download',
+                'siriusCameraConfig.json'
+            )
+            document.body.appendChild(downloadAnchorNode)
+            downloadAnchorNode.click()
+            downloadAnchorNode.remove()
+        },
+        importConfig(evt) {
+            const func = async () => {
+                if (evt.target?.files?.[0]) {
+                    const newLayout = JSON.parse(
+                        await evt.target.files[0].text()
+                    )
+
+                    this.$emit('changeLayout', newLayout)
+                }
+            }
+            func()
+        },
     },
     mounted() {
         getImageTopics(this.ros).then((newTopics) => (this.topics = newTopics))

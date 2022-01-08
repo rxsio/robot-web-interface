@@ -1,6 +1,10 @@
 <template>
     <div class="cameras">
-        <TopicList :ros="ros" />
+        <TopicList
+            :ros="ros"
+            :layout="layout"
+            @changeLayout="layout = $event"
+        />
         <DragManager
             :ros="ros"
             :host="webSocketHostname"
