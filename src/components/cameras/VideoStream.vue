@@ -6,9 +6,7 @@
             width: stream.width + 'px',
             height: stream.height + 'px',
             'background-color': 'black',
-            border: '5px solid black',
             position: 'absolute',
-            'box-sizing': 'border-box',
         }"
     >
         <canvas ref="viewer" />
@@ -120,8 +118,8 @@ export default {
             context.fillStyle = 'white'
             context.strokeStyle = 'black'
             context.lineWidth = 5
-            context.strokeText(this.stream.data.label, 10, 30)
-            context.fillText(this.stream.data.label, 10, 30)
+            context.strokeText(this.stream.data.label, 20, 40)
+            context.fillText(this.stream.data.label, 20, 40)
         },
     },
 }

@@ -54,3 +54,16 @@ export default {
     },
 }
 </script>
+<style scoped>
+.cameras {
+    height: 100vh;
+    padding: 10px;
+
+    position: relative;
+    display: flex;
+    flex-direction: column;
+
+    box-sizing: border-box;
+    overflow: hidden;
+}
+</style>

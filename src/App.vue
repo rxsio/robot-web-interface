@@ -5,6 +5,10 @@
 </template>
 
 <style>
+body {
+  margin: 0;
+}
+
 :root {
   --primary: #001c3b;
   --primary-medium: #102f53;
@@ -151,43 +155,5 @@ details.help > ul > li {
   padding-bottom: 0.4rem;
   margin-bottom: 0;
 }
-
-.slidecontainer {
-  width: 100%;
-  padding-top: 40px;
-}
-
-.slider {
-  -webkit-appearance: none;
-  width: 50%;
-  height: 8px;
-  border-radius: 16px;
-  background: var(--secondary);
-  outline: none;
-  margin-right: 22px;
-}
-
-.slider::-webkit-slider-thumb {
-  -webkit-appearance: none;
-  appearance: none;
-  width: 16px;
-  height: 32px;
-  border-radius: 19px; 
-  border: 4px solid var(--secondary);
-  background: var(--secondary-light);
-  background: var(--secondary-medium);
-  border: 4px solid var(--secondary);
-  cursor: pointer;
-}
-
-.slider::-moz-range-thumb {
-  width: 16px;
-  height: 32px;
-  border-radius: 19px; 
-  background: var(--secondary-medium);
-  border: 4px solid var(--secondary);
-  cursor: pointer;
-}
-
 
 </style>

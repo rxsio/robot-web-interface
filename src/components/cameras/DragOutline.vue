@@ -18,16 +18,23 @@ export default {
 
     computed: {
         style() {
-            let outlineColor = {
-                drag: '0, 200, 150',
-                preview: '0, 180, 200',
+            const options = {
+                drag: {
+                    outlineColor: '0, 200, 150',
+                    zIndex: 1001,
+                },
+                preview: {
+                    outlineColor: '0, 180, 200',
+                    zIndex: 1000,
+                },
             }[this.variant]
             return {
                 top: this.positionY + 'px',
                 left: this.positionX + 'px',
                 height: this.height + 'px',
                 width: this.width + 'px',
-                '--outline-color': outlineColor,
+                '--outline-color': options.outlineColor,
+                '--z-index': options.zIndex,
             }
         },
     },
@@ -36,7 +43,7 @@ export default {
 <style scoped>
 .outline {
     position: absolute;
-    z-index: 1000;
+    z-index: var(--z-index);
 
     background-color: rgba(var(--outline-color), 0.2);
 

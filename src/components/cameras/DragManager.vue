@@ -1,5 +1,5 @@
 <template>
-    <div ref="container" style="height: 90vh">
+    <div ref="container" class="container">
         <OutlineDisplay
             :layout="currLayout"
             :rect="rect"
@@ -53,8 +53,8 @@ export default {
             document.addEventListener('touchmove', this.dragMove)
         },
         dragMove(evt) {
-            this.dragState.x = evt.x
-            this.dragState.y = evt.y
+            this.dragState.x = evt.clientX || evt.targetTouches[0].pageX
+            this.dragState.y = evt.clientY || evt.targetTouches[0].pageY
         },
         dragEnd() {
             // remove all special outlines
@@ -143,3 +143,9 @@ export default {
     },
 }
 </script>
+<style scoped>
+.container {
+    user-select: none;
+    flex-grow: 1;
+}
+</style>
