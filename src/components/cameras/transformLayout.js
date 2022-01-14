@@ -125,8 +125,8 @@ export const removeFromLayout = (layout, removeIndex) => {
                 break
         }
 
-        // fix variants 2 and 3 which are upside-down which makes the result mirrored
-        if (variant >= 2) {
+        // fix variants 1 and 2 which are upside-down which makes the result mirrored
+        if (variant == 1 || variant == 2) {
             result.streams.unshift(result.streams.pop())
         }
         return result
