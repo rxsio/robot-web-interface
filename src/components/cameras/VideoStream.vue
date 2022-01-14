@@ -73,7 +73,7 @@ export default {
             let drawInterval = (1 / this.refreshRate) * 1000
 
             this.image = new Image()
-            let src = `http://${this.host}:${port}/stream?topic=${this.stream.data.topic}&width=640&height=480`
+            let src = `http://${this.host}:${port}/stream?topic=${this.stream.data.topic}&type=ros_compressed&width=640&height=480`
             this.image.src = src
 
             this.drawIntervalHandle = setInterval(this.draw, drawInterval)
