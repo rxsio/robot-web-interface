@@ -1,6 +1,14 @@
 <template>
-  <div style="padding-top: 33vh;">
+  <div style="padding-top: 25vh;">
     <joystick :size="250" :callback="this.joystickMovedCallback"/>
+    <div class="slidecontainer">
+      <input type="range" min="1" max="100" value="50" class="slider" id="linear_speed" v-model="linear_speed_percentage">
+      <label class="sliderLabel"> Linear: {{this.linear_speed_percentage}}%</label>
+    </div>
+    <div class="slidecontainer">
+      <input type="range" min="1" max="100" value="50" class="slider" id="angular_speed" v-model="angular_speed_percentage">
+      <label class="sliderLabel"> Angular: {{this.angular_speed_percentage}}%</label>
+    </div>
   </div>
 </template>
 <script>
@@ -18,6 +26,10 @@
       data () {
         return {
           topic: null,
+          max_linear_speed: 1,
+          max_angular_speed: 1.57,
+          linear_speed_percentage: 25,
+          angular_speed_percentage: 25,
         }
       },
       methods: {
@@ -25,14 +37,14 @@
           console.log(stickData);
           var message = new window.ROSLIB.Message({
             linear : {
-              x : parseFloat(stickData.y),
+              x : parseFloat(stickData.y) * this.max_linear_speed * 0.01 * this.linear_speed_percentage,
               y : 0,
               z : 0
             },
             angular : {
               x : 0,
               y : 0,
-              z : parseFloat(stickData.x)
+              z : parseFloat(stickData.x) * this.max_angular_speed * 0.01 * this.angular_speed_percentage
             }
           });
           this.topic.publish(message);

@@ -42,9 +42,7 @@
 
         methods: {
           isMobile() {
-            console.log(isMobile);
-            return true; // delete when done with testing
-            //return isMobile;
+            return isMobile;
           }
         },
     };
