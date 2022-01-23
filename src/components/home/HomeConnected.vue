@@ -42,7 +42,7 @@
             },
             goToScience () {
                 this.$router.push({
-                name: 'Cameras',
+                name: 'Science',
                 params: {
                     'ws_address': this.ws_address,
                     'ros': this.ros,
