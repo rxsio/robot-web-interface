@@ -1,6 +1,5 @@
 <template>
     <div class="control">
-        <h1>This is the control page.</h1>
         <touch-control v-if="this.isMobile()"
           :ws_address="this.ws_address"
           :ros="this.ros"/>
@@ -43,7 +42,9 @@
 
         methods: {
           isMobile() {
-            return isMobile;
+            console.log(isMobile);
+            return true; // delete when done with testing
+            //return isMobile;
           }
         },
     };
