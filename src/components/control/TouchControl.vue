@@ -56,6 +56,14 @@
         name : '/cmd_vel',
         messageType : 'geometry_msgs/Twist'
         });
+        if (this.$cookies.isKey('linear-speed-percentage')) {
+          this.linear_speed_percentage = this.$cookies.get('linear-speed-percentage');
+          this.angular_speed_percentage = this.$cookies.get('angular-speed-percentage');
+        }
       },
+      beforeDestroy() {
+        this.$cookies.set('linear-speed-percentage', this.linear_speed_percentage);
+        this.$cookies.set('angular-speed-percentage', this.angular_speed_percentage);
+        },
     };
 </script>

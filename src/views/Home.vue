@@ -33,11 +33,8 @@
 
 <script>
 // @ is an alias to /src
-import Vue from "vue"
 import ConnectionForm from '@/components/home/ConnectionForm.vue'
 import HomeConnected from '@/components/home/HomeConnected.vue'
-import VueCookies from 'vue-cookies'
-Vue.use(VueCookies);
 
 export default {
   name: 'Home',
