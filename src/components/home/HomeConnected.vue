@@ -11,7 +11,7 @@
             <button @click="this.goToControl">
                 Control
             </button>
-            <button @click="this.goToCameras">
+            <button @click="this.goToScience">
                 Science
             </button>
             <button @click="this.goToVisualization">
