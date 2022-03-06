@@ -1,5 +1,9 @@
 <template>
     <div class="control">
+        <div style="display: flex; justify-content: flex-end">
+          <input type="checkbox" id="checkbox" v-model="mobile_checkbox_checked">
+          <label>Mobile device mode</label> 
+        </div>
         <touch-control v-if="this.isMobile()"
           :ws_address="this.ws_address"
           :ros="this.ros"/>
@@ -24,7 +28,11 @@
             'ws_address': String,
             'ros': Object,
         },
-
+        data () {
+          return {
+            mobile_checkbox_checked: isMobile,
+          }
+      },
         mounted() {
           // If ROS got disconnected, return to home
           if (this.ros==null) {
@@ -42,7 +50,7 @@
 
         methods: {
           isMobile() {
-            return isMobile;
+            return this.mobile_checkbox_checked;
           }
         },
     };

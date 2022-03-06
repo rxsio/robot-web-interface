@@ -34,7 +34,6 @@
       },
       methods: {
         joystickMovedCallback(stickData) {
-          console.log(stickData);
           var message = new window.ROSLIB.Message({
             linear : {
               x : parseFloat(stickData.y) * this.max_linear_speed * 0.01 * this.linear_speed_percentage,
@@ -56,10 +55,35 @@
         name : '/cmd_vel',
         messageType : 'geometry_msgs/Twist'
         });
+
+        // Read previous percentage settings
         if (this.$cookies.isKey('linear-speed-percentage')) {
           this.linear_speed_percentage = this.$cookies.get('linear-speed-percentage');
           this.angular_speed_percentage = this.$cookies.get('angular-speed-percentage');
         }
+
+        // Read maximum speed from ros params
+        var base = "/sirius/controller/wheels"
+        var maxLinearSpeedParam = new window.ROSLIB.Param({
+          ros : this.ros,
+          name :  base + '/linear/x/max_velocity'
+        });
+        maxLinearSpeedParam.get((value) => {
+          console.log(value)
+          if (value != null) {
+            this.max_linear_speed = value;
+          }
+        });
+        var maxAngularSpeedParam = new window.ROSLIB.Param({
+          ros : this.ros,
+          name :  base + '/angular/z/max_velocity'
+        });
+        maxAngularSpeedParam.get((value) => {
+          console.log(value)
+          if (value != null) {
+            this.max_angular_speed = value;
+          }
+        });
       },
       beforeDestroy() {
         this.$cookies.set('linear-speed-percentage', this.linear_speed_percentage);
