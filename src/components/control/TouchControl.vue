@@ -44,7 +44,7 @@
             angular : {
               x : 0,
               y : 0,
-              z : parseFloat(stickData.x) * this.max_angular_speed * 0.01 * this.angular_speed_percentage
+              z : -parseFloat(stickData.x) * this.max_angular_speed * 0.01 * this.angular_speed_percentage
             }
           });
           this.topic.publish(message);
