@@ -73,7 +73,7 @@
         }
 
         // Read maximum speed from ros params
-        var base = "/sirius/controller/wheels"
+        var base = "/web_interface/control"
         var maxLinearSpeedParam = new window.ROSLIB.Param({
           ros : this.ros,
           name :  base + '/linear/x/max_velocity'
