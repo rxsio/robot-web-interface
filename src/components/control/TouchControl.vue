@@ -26,6 +26,8 @@
       data () {
         return {
           topic: null,
+          message: null,
+          commandInterval: null,
           max_linear_speed: 1,
           max_angular_speed: 1.57,
           linear_speed_percentage: 25,
@@ -34,19 +36,8 @@
       },
       methods: {
         joystickMovedCallback(stickData) {
-          var message = new window.ROSLIB.Message({
-            linear : {
-              x : parseFloat(stickData.y) * this.max_linear_speed * 0.01 * this.linear_speed_percentage,
-              y : 0,
-              z : 0
-            },
-            angular : {
-              x : 0,
-              y : 0,
-              z : -parseFloat(stickData.x) * this.max_angular_speed * 0.01 * this.angular_speed_percentage
-            }
-          });
-          this.topic.publish(message);
+          this.message.linear.x = parseFloat(stickData.y) * this.max_linear_speed * 0.01 * this.linear_speed_percentage,
+          this.message.angular.z = -parseFloat(stickData.x) * this.max_angular_speed * 0.01 * this.angular_speed_percentage
         }
       },
       mounted() {
@@ -55,6 +46,25 @@
         name : '/cmd_vel',
         messageType : 'geometry_msgs/Twist'
         });
+
+        this.message = new window.ROSLIB.Message({
+            linear : {
+              x : 0,
+              y : 0,
+              z : 0
+            },
+            angular : {
+              x : 0,
+              y : 0,
+              z : 0
+            }
+          });
+
+        // Start sending messages to cmd_vel (10Hz)
+        var self = this;
+        this.commandInterval = window.setInterval(function(){
+          self.topic.publish(self.message);
+        }, 100)
 
         // Read previous percentage settings
         if (this.$cookies.isKey('linear-speed-percentage')) {
@@ -86,6 +96,7 @@
         });
       },
       beforeDestroy() {
+        clearInterval(this.commandInterval)
         this.$cookies.set('linear-speed-percentage', this.linear_speed_percentage);
         this.$cookies.set('angular-speed-percentage', this.angular_speed_percentage);
         },
