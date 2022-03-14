@@ -2,11 +2,11 @@
   <div style="padding-top: 25vh;">
     <joystick :size="250" :callback="this.joystickMovedCallback"/>
     <div class="slidecontainer">
-      <input type="range" min="1" max="100" value="50" class="slider" id="linear_speed" v-model="linear_speed_percentage">
+      <input type="range" min="1" max="100" value="50" class="slider" id="linear_speed" v-model="linear_speed_percentage" v-on:input="sliderInputCallback">
       <label class="sliderLabel"> Linear: {{this.linear_speed_percentage}}%</label>
     </div>
     <div class="slidecontainer">
-      <input type="range" min="1" max="100" value="50" class="slider" id="angular_speed" v-model="angular_speed_percentage">
+      <input type="range" min="1" max="100" value="50" class="slider" id="angular_speed" v-model="angular_speed_percentage" v-on:input="sliderInputCallback">
       <label class="sliderLabel"> Angular: {{this.angular_speed_percentage}}%</label>
     </div>
   </div>
@@ -38,6 +38,11 @@
         joystickMovedCallback(stickData) {
           this.message.linear.x = parseFloat(stickData.y) * this.max_linear_speed * 0.01 * this.linear_speed_percentage,
           this.message.angular.z = -parseFloat(stickData.x) * this.max_angular_speed * 0.01 * this.angular_speed_percentage
+        },
+
+        sliderInputCallback(value) {
+          this.$cookies.set('linear-speed-percentage', this.linear_speed_percentage);
+          this.$cookies.set('angular-speed-percentage', this.angular_speed_percentage);
         }
       },
       mounted() {
@@ -79,7 +84,6 @@
           name :  base + '/linear/x/max_velocity'
         });
         maxLinearSpeedParam.get((value) => {
-          console.log(value)
           if (value != null) {
             this.max_linear_speed = value;
           }
@@ -89,7 +93,6 @@
           name :  base + '/angular/z/max_velocity'
         });
         maxAngularSpeedParam.get((value) => {
-          console.log(value)
           if (value != null) {
             this.max_angular_speed = value;
           }
@@ -97,8 +100,6 @@
       },
       beforeDestroy() {
         clearInterval(this.commandInterval)
-        this.$cookies.set('linear-speed-percentage', this.linear_speed_percentage);
-        this.$cookies.set('angular-speed-percentage', this.angular_speed_percentage);
         },
     };
 </script>
