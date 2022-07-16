@@ -14,6 +14,7 @@
 </template>
 <script>
     import KeyboardControl from '@/components/control/KeyboardControl.vue';
+    //import ManipKeyboardControl from '@/components/control/ManipKeyboardControl.vue';
     import TouchControl from '@/components/control/TouchControl.vue';
     import { isMobile } from 'mobile-device-detect';
 
@@ -22,6 +23,7 @@
         
         components: {
           KeyboardControl,
+          //ManipKeyboardControl,
           TouchControl,
         },
         props: {
