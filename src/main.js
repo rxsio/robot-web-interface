@@ -1,21 +1,24 @@
 import Vue from 'vue'
-import App from './App.vue'
 import router from './router'
-import VueCookies from 'vue-cookies'
-Vue.use(VueCookies);
+import vuetify from './plugins/vuetify'
+
+import 'roboto-fontface/css/roboto/roboto-fontface.css'
+import '@mdi/font/css/materialdesignicons.css'
+
+import { createPinia, PiniaVuePlugin } from 'pinia'
+
+Vue.use(PiniaVuePlugin)
+const pinia = createPinia()
+
+import App from './App.vue'
+import '@/styles/overrides.scss'
 
 Vue.config.productionTip = false
 
-
-new Vue({
-  router,
-  render: h => h(App),
-  watch: {
-    $route: {
-        immediate: true,
-        handler(to) {
-            document.title = to.meta.title ? 'Sirius II - ' + to.meta.title : 'Sirius II';
-        }
-    },
-  }
-}).$mount('#app')
+const app = new Vue({
+    router,
+    vuetify,
+    pinia,
+    render: (h) => h(App),
+})
+app.$mount('#app')

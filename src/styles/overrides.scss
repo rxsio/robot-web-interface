@@ -1,0 +1,15 @@
+@font-face {
+    font-family: 'AdagioSlab';
+    src: url('adagio_slab-medium-webfont.woff2') format('woff2'),
+        url('adagio_slab-medium-webfont.woff') format('woff');
+}
+
+$font-family: 'AdagioSlab';
+
+.v-application {
+    [class*='text-'] {
+        color: #36405a;
+        font-family: $font-family, sans-serif !important;
+    }
+    font-family: $font-family, sans-serif !important;
+}

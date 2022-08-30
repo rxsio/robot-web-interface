@@ -1,0 +1,38 @@
+[
+    {
+        "title": "Overview",
+        "name": "overview",
+        "to": "/panel/overview",
+        "icon": "mdi-chart-box"
+    },
+    {
+        "title": "Steering",
+        "name": "steering",
+        "to": "/panel/steering",
+        "icon": "mdi-steering"
+    },
+    {
+        "title": "Manipulator",
+        "name": "manipulator",
+        "to": "/panel/manipulator",
+        "icon": "mdi-robot-industrial"
+    },
+    {
+        "title": "Drilling",
+        "name": "drilling",
+        "to": "/panel/drilling",
+        "icon": "mdi-screw-flat-top"
+    },
+    {
+        "title": "Science",
+        "name": "science",
+        "to": "/panel/science",
+        "icon": "mdi-flask"
+    },
+    {
+        "title": "Terminal",
+        "name": "terminal",
+        "to": "/panel/terminal",
+        "icon": "mdi-console"
+    }
+]
