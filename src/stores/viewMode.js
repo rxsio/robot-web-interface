@@ -2,14 +2,14 @@ import { defineStore } from 'pinia'
 import { ref, getCurrentInstance } from 'vue'
 import pwColors from '@/assets/pwColors.json'
 
-export const useViewStateStore = defineStore('viewState', () => {
+export const useViewModeStore = defineStore('viewMode', () => {
     const mode = ref('normal')
 
     const $vuetify = getCurrentInstance().proxy.$vuetify
     function editMode() {
         mode.value = 'edit'
-        $vuetify.theme.themes.light.primary = pwColors.grafitowy
-        $vuetify.theme.themes.light.secondary = pwColors.słoneczny
+        $vuetify.theme.themes.light.primary = pwColors.słoneczny
+        $vuetify.theme.themes.light.secondary = pwColors.grafitowy
     }
     function normalMode() {
         mode.value = 'normal'
@@ -22,5 +22,20 @@ export const useViewStateStore = defineStore('viewState', () => {
         editDrawer.value = !editDrawer.value
     }
 
-    return { mode, editDrawer, editMode, normalMode, toggleEditDrawer }
+    const screen = ref(1)
+    function setScreen(newScreen) {
+        screen.value = newScreen
+    }
+
+    return {
+        mode,
+        editMode,
+        normalMode,
+
+        editDrawer,
+        toggleEditDrawer,
+
+        screen,
+        setScreen,
+    }
 })

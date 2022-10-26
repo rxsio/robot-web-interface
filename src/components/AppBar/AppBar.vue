@@ -2,12 +2,13 @@
 import { computed } from 'vue'
 
 import SKARLogo from '@/assets/SKARLogo'
-import { useForceNavDrawerStore, useViewStateStore } from '@/stores'
+import { useForceNavDrawerStore, useViewModeStore } from '@/stores'
 import NormalTools from './NormalTools.vue'
 import EditTools from './EditTools.vue'
+import GearSelector from './GearSelector.vue'
 
 const forceNavDrawerStore = useForceNavDrawerStore()
-const viewStateStore = useViewStateStore()
+const viewModeStore = useViewModeStore()
 const toggleDrawer = forceNavDrawerStore.toggle
 
 const menuIcon = computed(() =>
@@ -35,16 +36,18 @@ const menuIcon = computed(() =>
                 height="50px"
                 width="auto"
                 style="margin-top: 7px"
+                :variant="$vuetify.breakpoint.smAndUp ? 'big' : 'small'"
             />
         </v-toolbar-title>
         <v-spacer />
+        <GearSelector />
         <NormalTools
             key="normalTools"
-            :show="viewStateStore.mode === 'normal'"
+            :show="viewModeStore.mode === 'normal'"
         />
         <EditTools
             key="editTools"
-            :show="viewStateStore.mode === 'edit'"
+            :show="viewModeStore.mode === 'edit'"
         />
     </v-app-bar>
 </template>

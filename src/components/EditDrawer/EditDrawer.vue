@@ -1,16 +1,19 @@
 <script setup>
-import { useViewStateStore } from '@/stores'
+import { useViewModeStore } from '@/stores'
+import windowList from '@/windows'
+import WindowListEntry from './WindowListEntry.vue'
 
-const viewStateStore = useViewStateStore()
-const { toggleEditDrawer } = viewStateStore
+const viewModeStore = useViewModeStore()
+const { toggleEditDrawer } = viewModeStore
 </script>
 <template>
     <v-navigation-drawer
         temporary
-        v-model="viewStateStore.editDrawer"
+        v-model="viewModeStore.editDrawer"
         right
         fixed
         hide-overlay
+        touchless
     >
         <v-list dense>
             <v-list-item-group>
@@ -24,6 +27,14 @@ const { toggleEditDrawer } = viewStateStore
                     </v-list-item-content>
                 </v-list-item>
                 <v-divider />
+                <WindowListEntry
+                    v-for="[type, { defaultName }] in Object.entries(
+                        windowList
+                    )"
+                    :key="type"
+                    :name="defaultName"
+                    :type="type"
+                />
             </v-list-item-group>
         </v-list>
     </v-navigation-drawer>

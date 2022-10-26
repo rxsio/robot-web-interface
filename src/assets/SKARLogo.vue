@@ -1,13 +1,24 @@
+<script setup>
+import { defineProps } from 'vue'
+const props = defineProps(['variant'])
+</script>
 <template>
     <svg
         width="304.35"
         height="108.57"
         version="1.1"
-        viewBox="237.98 245.42 304.35 108.57"
+        :viewBox="
+            props.variant === 'big'
+                ? '237.98 245.42 304.35 108.57'
+                : '237.98 245.42 108.57 108.57'
+        "
         xml:space="preserve"
         xmlns="http://www.w3.org/2000/svg"
     >
-        <g transform="translate(-21.26 8.4967)">
+        <g
+            transform="translate(-21.26 8.4967)"
+            v-if="props.variant === 'big'"
+        >
             <path
                 class="st0"
                 d="m396.85 276.82v6c-4.87 0-9.27-1.52-12.4-4.26l3.61-5.48c2.09 2.22 5.57 3.66 8.79 3.74zm-4.65-8.78c-5.09-1.83-6.7-4.65-6.7-8.44 0-4.22 2.61-7.57 6.7-9.05zm5.43-12.31v-6c4.35.09 8.35 1.48 11.01 3.44l-3.22 5.61c-1.96-1.53-4.65-2.92-7.79-3.05zm11.31 16.79c0 4.48-2.44 7.92-6.66 9.44v-17.71c5.01 1.74 6.66 4.35 6.66 8.27z"

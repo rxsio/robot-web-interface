@@ -80,7 +80,7 @@ const paths = [
             <defs>
                 <path
                     v-for="(path, index) in paths"
-                    :key="index"
+                    :key="`path${index}`"
                     :id="`path${index}`"
                     :d="path.d"
                     :stroke-width="path.strokeWidth"
@@ -94,7 +94,7 @@ const paths = [
                 />
                 <clipPath
                     v-for="(path, index) in paths"
-                    :key="index"
+                    :key="`clip${index}`"
                     :id="`clip${index}`"
                 >
                     <use :xlink:href="`#path${index}`" />

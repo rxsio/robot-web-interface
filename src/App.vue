@@ -1,9 +1,9 @@
 <script setup>
-import LoadingScreen from '@/components/LoadingScreen.vue'
+//import LoadingScreen from '@/components/LoadingScreen.vue'
 </script>
 <template>
     <v-app>
-        <LoadingScreen />
+        <!--<LoadingScreen />-->
         <RouterView />
     </v-app>
 </template>

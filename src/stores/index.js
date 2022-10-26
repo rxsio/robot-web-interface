@@ -1,3 +1,4 @@
 export * from './batteryLevel'
 export * from './forceNavDrawer'
-export * from './viewState'
+export * from './viewMode'
+export * from './layout'

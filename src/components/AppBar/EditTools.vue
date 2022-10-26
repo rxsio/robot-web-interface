@@ -1,11 +1,11 @@
 <script setup>
 import { defineProps } from 'vue'
-import { useViewStateStore } from '@/stores'
+import { useViewModeStore } from '@/stores'
 
 const props = defineProps(['show'])
 
-const viewStateStore = useViewStateStore()
-const { normalMode, toggleEditDrawer } = viewStateStore
+const viewModeStore = useViewModeStore()
+const { normalMode, toggleEditDrawer } = viewModeStore
 </script>
 <template>
     <div>

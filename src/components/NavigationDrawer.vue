@@ -1,9 +1,10 @@
 <script setup>
 import { ref, onMounted, getCurrentInstance } from 'vue'
 import panelViewConfig from '@/assets/panelViewConfig.json'
-import { useForceNavDrawerStore } from '@/stores'
+import { useForceNavDrawerStore, useViewModeStore } from '@/stores'
 
 const items = ref(panelViewConfig)
+const viewModeStore = useViewModeStore()
 
 const forceNavDrawer = useForceNavDrawerStore()
 onMounted(() => {
@@ -12,6 +13,10 @@ onMounted(() => {
 
     forceNavDrawer.set($vuetify.breakpoint.mdAndUp)
 })
+
+const isOpen = ref(false)
+const onTransitionEnd = (event) =>
+    (isOpen.value = event.target.clientWidth !== 56)
 </script>
 <template>
     <v-navigation-drawer
@@ -22,6 +27,7 @@ onMounted(() => {
         :mini-variant="$vuetify.breakpoint.mdAndUp"
         :expand-on-hover="$vuetify.breakpoint.mdAndUp"
         :permanent="$vuetify.breakpoint.mdAndUp"
+        @transitionend="onTransitionEnd"
     >
         <v-list
             dense
@@ -50,9 +56,29 @@ onMounted(() => {
             </v-list-item-group>
         </v-list>
         <template v-slot:append>
+            <v-pagination
+                v-model="viewModeStore.screen"
+                v-if="isOpen"
+                :length="3"
+                color="secondary"
+            ></v-pagination>
+            <ul
+                class="v-pagination theme--light"
+                v-if="!isOpen"
+            >
+                <li>
+                    <button
+                        class="v-pagination__item v-pagination__item--active secondary"
+                    >
+                        {{ viewModeStore.screen }}
+                    </button>
+                </li>
+            </ul>
             <v-list-item
+                dense
                 link
                 color="secondary"
+                style="margin-bottom: 8px"
             >
                 <v-list-item-icon>
                     <v-icon>mdi-cog</v-icon>
