@@ -11,6 +11,15 @@ const viewModeStore = useViewModeStore()
 const windowData = computed(() => layoutStore.layout.windows[props.id])
 const window = computed(() => windows[windowData.value.type])
 const WindowContentComponent = computed(() => window.value.component)
+
+const remove = () => {
+    const index = layoutStore.layout.shape
+        .map((item) => item.i)
+        .indexOf(props.id)
+    layoutStore.layout.shape.splice(index, 1)
+
+    delete layoutStore.layout.windows[props.id]
+}
 </script>
 <template>
     <v-sheet
@@ -25,13 +34,19 @@ const WindowContentComponent = computed(() => window.value.component)
             window
             class="header"
         >
-            <v-icon color="primary">
-                {{ window.icon }}
-            </v-icon>
-            <span class="primary--text text-truncate">
-                {{ windowData.name }}
-            </span>
-            <v-spacer></v-spacer>
+            <div
+                style="flex-grow: 1"
+                class="window-grab-handle"
+            >
+                <v-icon color="primary">
+                    {{ window.icon }}
+                </v-icon>
+                <span class="primary--text text-truncate">
+                    {{ windowData.name }}
+                </span>
+                <v-spacer></v-spacer>
+            </div>
+
             <v-icon
                 color="primary"
                 v-if="viewModeStore.mode === 'edit'"
@@ -41,6 +56,7 @@ const WindowContentComponent = computed(() => window.value.component)
             <v-icon
                 color="primary"
                 v-if="viewModeStore.mode === 'edit'"
+                @click="remove()"
             >
                 mdi-close
             </v-icon>

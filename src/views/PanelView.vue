@@ -56,6 +56,7 @@ onUnmounted(() => {
                         :h="item.h"
                         :i="item.i"
                         class="window-wrapper"
+                        dragAllowFrom=".window-grab-handle"
                     >
                         <WindowBorder
                             v-if="item.i !== 'drop'"
