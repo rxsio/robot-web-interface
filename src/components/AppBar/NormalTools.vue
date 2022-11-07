@@ -31,10 +31,10 @@ const { editMode } = viewModeStore
         <v-fab-transition leave-absolute>
             <v-btn
                 icon
-                color="primary"
+                color="red"
                 v-show="props.show"
             >
-                <v-icon>mdi-microsoft-xbox-controller</v-icon>
+                <v-icon>mdi-microsoft-xbox-controller-off</v-icon>
             </v-btn>
         </v-fab-transition>
         <v-fab-transition leave-absolute>

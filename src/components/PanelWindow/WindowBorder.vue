@@ -1,25 +1,9 @@
 <script setup>
-import { defineProps, computed } from 'vue'
-import { useLayoutStore } from '@/stores'
+import { defineProps } from 'vue'
 import { useViewModeStore } from '@/stores'
-import windows from '@/windows'
 
-const props = defineProps(['id'])
-const layoutStore = useLayoutStore()
+const props = defineProps(['name', 'icon'])
 const viewModeStore = useViewModeStore()
-
-const windowData = computed(() => layoutStore.layout.windows[props.id])
-const window = computed(() => windows[windowData.value.type])
-const WindowContentComponent = computed(() => window.value.component)
-
-const remove = () => {
-    const index = layoutStore.layout.shape
-        .map((item) => item.i)
-        .indexOf(props.id)
-    layoutStore.layout.shape.splice(index, 1)
-
-    delete layoutStore.layout.windows[props.id]
-}
 </script>
 <template>
     <v-sheet
@@ -39,10 +23,10 @@ const remove = () => {
                 class="window-grab-handle"
             >
                 <v-icon color="primary">
-                    {{ window.icon }}
+                    {{ props.icon }}
                 </v-icon>
                 <span class="primary--text text-truncate">
-                    {{ windowData.name }}
+                    {{ props.name }}
                 </span>
                 <v-spacer></v-spacer>
             </div>
@@ -50,31 +34,35 @@ const remove = () => {
             <v-icon
                 color="primary"
                 v-if="viewModeStore.mode === 'edit'"
+                @click="$emit('openConfig')"
             >
                 mdi-cog
             </v-icon>
             <v-icon
                 color="primary"
                 v-if="viewModeStore.mode === 'edit'"
-                @click="remove()"
+                @click="$emit('remove')"
             >
                 mdi-close
             </v-icon>
         </v-system-bar>
-        <div class="container">
-            <WindowContentComponent :config="windowData.config" />
+        <div class="content">
+            <slot />
         </div>
     </v-sheet>
 </template>
 <style scoped>
 .background {
     flex-grow: 1;
+    width: inherit;
 }
 .header {
     color: var(--v-primary-base);
 }
-.container {
+.content {
     overflow: scroll;
     height: calc(100% - 30px);
+    width: inherit;
+    display: flex;
 }
 </style>

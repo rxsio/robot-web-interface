@@ -16,13 +16,25 @@ export const useLayoutStore = defineStore('layout', () => {
                 ],
                 windows: {
                     aaa: {
-                        type: 'testWindow',
+                        type: 'testWindowA',
                         name: 'AAA',
-                        config: { test: '123' },
+                        extraConfig: { test: '123' },
                     },
-                    bbb: { type: 'testWindow', name: 'Kamera Tył', config: {} },
-                    ccc: { type: 'testWindow', name: 'Kamera', config: {} },
-                    ddd: { type: 'testWindow', name: 'Kamera Dół', config: {} },
+                    bbb: {
+                        type: 'testWindow',
+                        name: 'Kamera Tył',
+                        extraConfig: {},
+                    },
+                    ccc: {
+                        type: 'testWindow',
+                        name: 'Kamera',
+                        extraConfig: {},
+                    },
+                    ddd: {
+                        type: 'testWindow',
+                        name: 'Kamera Dół',
+                        extraConfig: {},
+                    },
                 },
                 nextId: 0,
             },
@@ -73,25 +85,10 @@ export const useLayoutStore = defineStore('layout', () => {
         return String(layout.value.nextId++)
     }
 
-    const panelContainer = ref(null)
-    const panelGrid = ref(null)
-    function mountPanel(newContainer, newGrid) {
-        panelContainer.value = newContainer
-        panelGrid.value = newGrid
-    }
-    function unMountPanel() {
-        panelContainer.value = null
-        panelGrid.value = null
-    }
-
     return {
         panel,
         allLayouts,
         layout,
         nextLayoutId,
-        panelContainer,
-        panelGrid,
-        mountPanel,
-        unMountPanel,
     }
 })

@@ -1,8 +1,8 @@
 import Vue from 'vue'
 import VueRouter from 'vue-router'
 
-//import HomeView from '../views/HomeView.vue'
-import PanelView from '../views/PanelView.vue'
+//import HomeView from '@/views/HomeView.vue'
+import PanelView from '@/views/PanelView.vue'
 
 Vue.use(VueRouter)
 

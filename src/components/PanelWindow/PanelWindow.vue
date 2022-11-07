@@ -1,0 +1,67 @@
+<script setup>
+import { defineProps, computed, ref } from 'vue'
+import { useLayoutStore } from '@/stores'
+import windows from '@/windows'
+import WindowBorder from './WindowBorder.vue'
+import ConfigDialog from './ConfigDialog.vue'
+import InvalidWindow from '@/windows/InvalidWindow.vue'
+
+const props = defineProps(['id'])
+const layoutStore = useLayoutStore()
+
+const windowData = computed({
+    get() {
+        return layoutStore.layout.windows[props.id]
+    },
+    set(newValue) {
+        layoutStore.layout.windows[props.id] = newValue
+    },
+})
+const window = computed(
+    () =>
+        windows[windowData.value.type] || {
+            typeName: 'Invalid Window',
+            component: InvalidWindow,
+            configOptions: {},
+            icon: 'mdi-alert-circle',
+        }
+)
+const WindowContentComponent = computed(() => window.value.component)
+
+const remove = () => {
+    const index = layoutStore.layout.shape
+        .map((item) => item.i)
+        .indexOf(props.id)
+    layoutStore.layout.shape.splice(index, 1)
+
+    delete layoutStore.layout.windows[props.id]
+}
+
+const showConfigDialog = ref(false)
+const closeConfig = (newConfig) => {
+    showConfigDialog.value = false
+    if (newConfig) {
+        windowData.value = newConfig
+    }
+}
+</script>
+<template>
+    <WindowBorder
+        :name="windowData.name"
+        :icon="window.icon"
+        @remove="remove()"
+        @openConfig="showConfigDialog = true"
+    >
+        <WindowContentComponent
+            :name="windowData.name"
+            :type="windowData.type"
+            :extraConfig="windowData.extraConfig"
+        />
+        <ConfigDialog
+            :isOpen="showConfigDialog"
+            @close="closeConfig"
+            :config="windowData"
+        />
+    </WindowBorder>
+</template>
+<style scoped></style>

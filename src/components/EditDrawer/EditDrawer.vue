@@ -28,11 +28,9 @@ const { toggleEditDrawer } = viewModeStore
                 </v-list-item>
                 <v-divider />
                 <WindowListEntry
-                    v-for="[type, { defaultName }] in Object.entries(
-                        windowList
-                    )"
+                    v-for="[type, { typeName }] in Object.entries(windowList)"
                     :key="type"
-                    :name="defaultName"
+                    :name="typeName"
                     :type="type"
                 />
             </v-list-item-group>

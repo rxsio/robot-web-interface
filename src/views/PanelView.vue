@@ -1,28 +1,19 @@
 <script setup>
-import { computed, onMounted, onUnmounted, ref } from 'vue'
+import { computed } from 'vue'
 import { GridLayout, GridItem } from 'vue-grid-layout'
 
 import AppBar from '@/components/AppBar'
 import NavigationDrawer from '@/components/NavigationDrawer.vue'
 import EditDrawer from '@/components/EditDrawer'
 import BatteryBar from '@/components/BatteryBar.vue'
-import WindowBorder from '@/windows/WindowBorder.vue'
 
 import { useViewModeStore, useLayoutStore } from '@/stores'
+import PanelWindow from '@/components/PanelWindow'
 
 const viewModeStore = useViewModeStore()
 const layoutStore = useLayoutStore()
 
 const isEditMode = computed(() => viewModeStore.mode === 'edit')
-
-const panelContainer = ref(null)
-const panelGrid = ref(null)
-onMounted(() => {
-    layoutStore.mountPanel(panelContainer.value, panelGrid.value)
-})
-onUnmounted(() => {
-    layoutStore.unMountPanel()
-})
 </script>
 <template>
     <div style="width: 100%; flex-grow: 1; display: flex">
@@ -32,12 +23,10 @@ onUnmounted(() => {
         <EditDrawer />
         <v-main>
             <div
-                ref="panelContainer"
                 class="grey lighten-4 content-wrapper"
                 :style="{ 'user-select': isEditMode ? 'none' : 'text' }"
             >
                 <GridLayout
-                    ref="panelGrid"
                     :layout.sync="layoutStore.layout.shape"
                     :col-num="12"
                     :row-height="100"
@@ -58,13 +47,7 @@ onUnmounted(() => {
                         class="window-wrapper"
                         dragAllowFrom=".window-grab-handle"
                     >
-                        <WindowBorder
-                            v-if="item.i !== 'drop'"
-                            :id="item.i"
-                        />
-                        <div v-if="item.i === 'drop'">
-                            AAAAAAAAAAAAAAAAAAAAAAa
-                        </div>
+                        <PanelWindow :id="item.i" />
                     </GridItem>
                 </GridLayout>
             </div>
