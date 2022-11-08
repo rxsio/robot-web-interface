@@ -22,11 +22,6 @@ export const useViewModeStore = defineStore('viewMode', () => {
         editDrawer.value = !editDrawer.value
     }
 
-    const screen = ref(1)
-    function setScreen(newScreen) {
-        screen.value = newScreen
-    }
-
     return {
         mode,
         editMode,
@@ -34,8 +29,5 @@ export const useViewModeStore = defineStore('viewMode', () => {
 
         editDrawer,
         toggleEditDrawer,
-
-        screen,
-        setScreen,
     }
 })

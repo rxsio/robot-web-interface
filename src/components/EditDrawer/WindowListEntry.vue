@@ -6,7 +6,7 @@ const props = defineProps(['type', 'name'])
 const layoutStore = useLayoutStore()
 const viewModeStore = useViewModeStore()
 const addItem = () => {
-    const windowId = layoutStore.nextLayoutId()
+    const windowId = layoutStore.nextWindowId()
     layoutStore.layout.shape.push({
         x: 0,
         y: 0,
@@ -17,7 +17,7 @@ const addItem = () => {
     layoutStore.layout.windows[windowId] = {
         type: props.type,
         name: props.name,
-        config: {},
+        extraConfig: {},
     }
 
     viewModeStore.toggleEditDrawer()

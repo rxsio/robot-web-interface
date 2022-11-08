@@ -1,10 +1,8 @@
 import { defineStore } from 'pinia'
 import { ref, computed, getCurrentInstance } from 'vue'
-import { useViewModeStore } from './viewMode'
+import panelViewConfig from '@/assets/panelViewConfig.json'
 
 export const useLayoutStore = defineStore('layout', () => {
-    const viewMode = useViewModeStore()
-
     const allLayouts = ref([
         {
             overview: {
@@ -41,54 +39,71 @@ export const useLayoutStore = defineStore('layout', () => {
             steering: {
                 shape: [],
                 windows: {},
+                nextId: 0,
             },
             manipulator: {
                 shape: [],
                 windows: {},
+                nextId: 0,
             },
             drilling: {
                 shape: [],
                 windows: {},
+                nextId: 0,
             },
             science: {
                 shape: [],
                 windows: {},
+                nextId: 0,
             },
             terminal: {
                 shape: [],
                 windows: {},
+                nextId: 0,
             },
         },
-        {
-            overview: {
-                shape: [],
-                windows: {},
-            },
-        },
-        {
-            overview: {
-                shape: [],
-                windows: {},
-            },
-        },
+        Object.fromEntries(
+            panelViewConfig.map(({ name }) => [
+                name,
+                {
+                    shape: [],
+                    windows: {},
+                    nextId: 0,
+                },
+            ])
+        ),
+        Object.fromEntries(
+            panelViewConfig.map(({ name }) => [
+                name,
+                {
+                    shape: [],
+                    windows: {},
+                    nextId: 0,
+                },
+            ])
+        ),
     ])
 
-    const $route = getCurrentInstance().proxy.$route
-    const panel = $route.params.variant
-    const layout = computed(() => {
+    const panel = computed(() => {
         const $route = getCurrentInstance().proxy.$route
-        const panel = $route.params.variant
-
-        return allLayouts.value[viewMode.screen - 1][panel]
+        return $route.params.variant
     })
-    function nextLayoutId() {
-        return String(layout.value.nextId++)
+    const screen = computed(() => {
+        const $route = getCurrentInstance().proxy.$route
+        return $route.params.screen
+    })
+    const layout = computed(() => {
+        return allLayouts.value[screen.value - 1][panel.value]
+    })
+    function nextWindowId() {
+        return `${screen.value};${panel.value};${layout.value.nextId++}`
     }
 
     return {
+        screen,
         panel,
         allLayouts,
         layout,
-        nextLayoutId,
+        nextWindowId,
     }
 })

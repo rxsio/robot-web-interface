@@ -1,10 +1,9 @@
 <script setup>
 import { ref, onMounted, getCurrentInstance } from 'vue'
 import panelViewConfig from '@/assets/panelViewConfig.json'
-import { useForceNavDrawerStore, useViewModeStore } from '@/stores'
+import { useForceNavDrawerStore } from '@/stores'
 
 const items = ref(panelViewConfig)
-const viewModeStore = useViewModeStore()
 
 const forceNavDrawer = useForceNavDrawerStore()
 onMounted(() => {
@@ -41,7 +40,13 @@ const onTransitionEnd = (event) =>
                     v-for="item in items"
                     :key="item.title"
                     link
-                    :to="item.to"
+                    :to="{
+                        name: 'panel',
+                        params: {
+                            screen: $route.params.screen,
+                            variant: item.name,
+                        },
+                    }"
                 >
                     <v-list-item-icon>
                         <v-icon>{{ item.icon }}</v-icon>
@@ -57,7 +62,17 @@ const onTransitionEnd = (event) =>
         </v-list>
         <template v-slot:append>
             <v-pagination
-                v-model="viewModeStore.screen"
+                :value="parseInt($route.params.screen)"
+                @input="
+                    (value) =>
+                        $router.push({
+                            name: 'panel',
+                            params: {
+                                screen: value,
+                                variant: $route.params.variant,
+                            },
+                        })
+                "
                 v-if="isOpen"
                 :length="3"
                 color="secondary"
@@ -70,7 +85,7 @@ const onTransitionEnd = (event) =>
                     <button
                         class="v-pagination__item v-pagination__item--active secondary"
                     >
-                        {{ viewModeStore.screen }}
+                        {{ $route.params.screen }}
                     </button>
                 </li>
             </ul>
