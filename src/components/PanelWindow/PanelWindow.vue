@@ -44,6 +44,8 @@ const closeConfig = (newConfig) => {
         windowData.value = newConfig
     }
 }
+
+const windowDimensions = ref({ height: null, width: null })
 </script>
 <template>
     <WindowBorder
@@ -51,11 +53,13 @@ const closeConfig = (newConfig) => {
         :icon="window.icon"
         @remove="remove()"
         @openConfig="showConfigDialog = true"
+        @setDimensions="(value) => (windowDimensions = value)"
     >
         <WindowContentComponent
             :name="windowData.name"
             :type="windowData.type"
             :extraConfig="windowData.extraConfig"
+            :windowDimensions="windowDimensions"
         />
         <ConfigDialog
             :isOpen="showConfigDialog"

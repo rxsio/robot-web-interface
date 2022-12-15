@@ -15,8 +15,7 @@ export const useRosStore = defineStore('ros', () => {
         port.value = newPort
     }
 
-    const ros = ref(null)
-
+    const ws = ref(null)
     const reconnectTimeout = ref(null)
 
     function connect() {
@@ -24,33 +23,35 @@ export const useRosStore = defineStore('ros', () => {
         reconnectTimeout.value = null
 
         if (
-            ros.value &&
-            ros.value.readyState !== WebSocket.CLOSED &&
-            ros.value.readyState !== WebSocket.CLOSING
+            ws.value &&
+            ws.value.readyState !== WebSocket.CLOSED &&
+            ws.value.readyState !== WebSocket.CLOSING
         ) {
-            if (ros.value.socket.url === url.value) return
-            else ros.value.close()
+            if (ws.value.socket.url === url.value) return
+            else ws.value.close()
         }
 
         console.log('[ROS]', 'connecting...', url.value)
 
-        const newRos = new Ros({
+        const newWs = new Ros({
             url: url.value,
         })
 
-        newRos.on('connection', () => {
-            console.log('[ROS]', 'connected!', newRos.socket.url)
+        newWs.on('connection', () => {
+            console.log('[ROS]', 'connected!', newWs.socket.url)
         })
-        newRos.on('error', () => {
-            console.log('[ROS]', 'error :(', newRos.socket.url)
+        newWs.on('error', () => {
+            console.log('[ROS]', 'error :(', newWs.socket.url)
 
             scheduleReconnect()
         })
-        newRos.on('close', () => {
-            console.log('[ROS]', 'closed', newRos.socket.url)
+        newWs.on('close', () => {
+            console.log('[ROS]', 'closed', newWs.socket.url)
+
+            scheduleReconnect()
         })
 
-        ros.value = newRos
+        ws.value = newWs
     }
 
     function scheduleReconnect() {
@@ -63,11 +64,9 @@ export const useRosStore = defineStore('ros', () => {
     })
 
     return {
-        ros,
+        ws,
         url,
         connect,
-
-        port,
 
         setPort,
         setAddress,

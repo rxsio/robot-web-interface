@@ -1,4 +1,6 @@
 import TestWindow from './TestWindow.vue'
+import CameraWindow from './CameraWindow.vue'
+import { useGstreamerStore } from '@/stores'
 
 export default {
     testWindow: {
@@ -8,7 +10,10 @@ export default {
             videoSource: {
                 name: 'Video Source',
                 type: 'select',
-                possibleValues: () => ['kamera_przod', 'kamera_tyl'],
+                possibleValues: () => {
+                    const gstreamerStore = useGstreamerStore()
+                    return Object.keys(gstreamerStore.peers)
+                },
             },
             textTest: {
                 name: 'Text test',
@@ -31,6 +36,21 @@ export default {
             bbbb: {
                 name: 'BBBBBB',
                 type: 'boolean',
+            },
+        },
+        icon: 'mdi-camera',
+    },
+    cameraWindow: {
+        typeName: 'Camera Window',
+        component: CameraWindow,
+        configOptions: {
+            videoSource: {
+                name: 'Video Source',
+                type: 'select',
+                possibleValues: () => {
+                    const gstreamerStore = useGstreamerStore()
+                    return Object.keys(gstreamerStore.peers)
+                },
             },
         },
         icon: 'mdi-camera',

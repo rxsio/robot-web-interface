@@ -1,9 +1,34 @@
 <script setup>
-import { defineProps } from 'vue'
+import { defineProps, defineEmits, onBeforeUnmount, onMounted, ref } from 'vue'
 import { useViewModeStore } from '@/stores'
 
 const props = defineProps(['name', 'icon'])
+const emit = defineEmits(['setDimensions'])
 const viewModeStore = useViewModeStore()
+
+const container = ref(null)
+const resizeObserver = ref(
+    new ResizeObserver((entries) => {
+        for (const entry of entries) {
+            if (entry.contentRect) {
+                const contentRect = Array.isArray(entry.contentRect)
+                    ? entry.contentRect[0]
+                    : entry.contentRect
+
+                emit('setDimensions', {
+                    height: contentRect.height,
+                    width: contentRect.width,
+                })
+            }
+        }
+    })
+)
+onMounted(() => {
+    resizeObserver.value.observe(container.value)
+})
+onBeforeUnmount(() => {
+    resizeObserver.value.unobserve(container.value)
+})
 </script>
 <template>
     <v-sheet
@@ -16,20 +41,15 @@ const viewModeStore = useViewModeStore()
             color="secondary"
             dark
             window
-            class="header"
+            class="window-grab-handle"
         >
-            <div
-                style="flex-grow: 1"
-                class="window-grab-handle"
-            >
-                <v-icon color="primary">
-                    {{ props.icon }}
-                </v-icon>
-                <span class="primary--text text-truncate">
-                    {{ props.name }}
-                </span>
-                <v-spacer></v-spacer>
-            </div>
+            <v-icon color="primary">
+                {{ props.icon }}
+            </v-icon>
+            <span class="primary--text text-truncate">
+                {{ props.name }}
+            </span>
+            <v-spacer></v-spacer>
 
             <v-icon
                 color="primary"
@@ -46,7 +66,10 @@ const viewModeStore = useViewModeStore()
                 mdi-close
             </v-icon>
         </v-system-bar>
-        <div class="content">
+        <div
+            ref="container"
+            class="content"
+        >
             <slot />
         </div>
     </v-sheet>
@@ -55,9 +78,6 @@ const viewModeStore = useViewModeStore()
 .background {
     flex-grow: 1;
     width: inherit;
-}
-.header {
-    color: var(--v-primary-base);
 }
 .content {
     overflow: scroll;

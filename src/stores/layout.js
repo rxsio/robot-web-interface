@@ -8,8 +8,8 @@ export const useLayoutStore = defineStore('layout', () => {
             overview: {
                 shape: [
                     { i: 'aaa', x: 0, y: 0, w: 2, h: 2 },
-                    { i: 'bbb', x: 0, y: 0, w: 2, h: 2 },
-                    { i: 'ccc', x: 0, y: 0, w: 2, h: 2 },
+                    { i: 'bbb', x: 3, y: 0, w: 3, h: 2 },
+                    { i: 'ccc', x: 6, y: 0, w: 3, h: 2 },
                     { i: 'ddd', x: 0, y: 0, w: 2, h: 2 },
                 ],
                 windows: {
@@ -19,14 +19,18 @@ export const useLayoutStore = defineStore('layout', () => {
                         extraConfig: { test: '123' },
                     },
                     bbb: {
-                        type: 'testWindow',
-                        name: 'Kamera Tył',
-                        extraConfig: {},
+                        type: 'cameraWindow',
+                        name: 'Kamera 1',
+                        extraConfig: {
+                            videoSource: 'testing',
+                        },
                     },
                     ccc: {
-                        type: 'testWindow',
-                        name: 'Kamera',
-                        extraConfig: {},
+                        type: 'cameraWindow',
+                        name: 'Kamera 2',
+                        extraConfig: {
+                            videoSource: 'testing2',
+                        },
                     },
                     ddd: {
                         type: 'testWindow',
