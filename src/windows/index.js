@@ -1,5 +1,6 @@
 import TestWindow from './TestWindow.vue'
 import CameraWindow from './CameraWindow.vue'
+import ControlWindow from './ControlWindow.vue'
 import { useGstreamerStore } from '@/stores'
 
 export default {
@@ -54,5 +55,19 @@ export default {
             },
         },
         icon: 'mdi-camera',
+    },
+    controlWindow: {
+        typeName: 'Control Window',
+        component: ControlWindow,
+        configOptions: {
+            controlledObject: {
+                name: 'Controlled Object',
+                type: 'select',
+                possibleValues: () => {
+                    return ['Rover', 'Manipulator']
+                },
+            },
+        },
+        icon: 'mdi-controller',
     },
 }
