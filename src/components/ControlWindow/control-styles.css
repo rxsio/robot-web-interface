@@ -71,3 +71,71 @@ div.control .slider::-moz-range-thumb {
     border: 4px solid var(--control-secondary);
     cursor: pointer;
 }
+
+div.keyboardControl {
+    display: flex;
+    flex-flow: column;
+    align-items: center;
+    margin: 10px 5px;
+    width: calc(100% - 5px);
+    height: calc(100% - 10px);
+}
+
+div.keyboardControl div.slidecontainer {
+    height: 40px;
+    width: 80%;
+    display: inline-table;
+    padding: 5px;
+}
+
+div.keyboardControl div.slidecontainer td.col1 {
+    width: auto;
+    text-align: right;
+    vertical-align: middle;
+}
+
+div.keyboardControl div.slidecontainer td.col2 {
+    width: 8.5em;
+    text-align: left;
+    vertical-align: middle;
+}
+
+div.keyboardControl div.slidecontainer td.col3 {
+    width: 3em;
+    text-align: right;
+    vertical-align: middle;
+}
+
+div.keyboardControl div.slidecontainer .slider {
+    width: 90%;
+}
+
+div.keyboardControl div.slidecontainer .slider.focused {
+    background: var(--control-secondary-light);
+    height: 12px;
+}
+
+div.keyboardBox {
+    padding: 10px;
+    text-align: center;
+    background: #eee;
+    margin: 15px;
+    display: inline-block;
+    align-items: center;
+    border-radius: 15px;
+}
+
+div.keyboardBox p {
+    margin: 0;
+}
+
+div.keyboardBox p button {
+    margin: 8px;
+    width: 80px;
+    height: 80px;
+    font-size: 40px;
+}
+
+div.keyboardBox p button.pressed {
+    background-color: var(--control-secondary-light);
+}
