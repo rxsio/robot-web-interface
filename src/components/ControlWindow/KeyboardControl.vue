@@ -1,132 +1,131 @@
-<script>
+<script setup>
+import { defineProps, onMounted, onBeforeUnmount, ref } from 'vue'
 import { Topic, Message, Param } from 'roslib'
-export default {
-    name: 'KeyboardControl',
-    props: {
-        ros: Object,
+
+const props = defineProps(['ros'])
+
+const elements = ref([
+    {
+        id: 'linear_speed',
+        text: 'Linear velocity',
+        speedPercentage: 25,
     },
-    data() {
-        return {
-            topic: null,
-            timer: null,
-            message_rate: 100, // [ms]
-            max_linear_speed: 1,
-            max_angular_speed: 1.57,
-            focus_index: 0,
-            is_focused: false,
-            pressed: { W: false, A: false, S: false, D: false },
-            elements: [
-                {
-                    id: 'linear_speed',
-                    text: 'Linear velocity',
-                    speed_percentage: 25,
-                },
-                {
-                    id: 'angular_speed',
-                    text: 'Angular velocity',
-                    speed_percentage: 25,
-                },
-            ],
-            key_down_callback: (event) => {
-                this.keyListener(event, true)
+    {
+        id: 'angular_speed',
+        text: 'Angular velocity',
+        speedPercentage: 25,
+    },
+])
+
+// Publish steering informations
+const timer = ref(null)
+const topic = ref(null)
+const maxLinearSpeed = ref(1)
+const maxAngularSpeed = ref(1.57)
+const messageRate = 100 // [ms]
+
+function startPublishing() {
+    timer.value = setInterval(() => {
+        let message = new Message({
+            linear: {
+                x:
+                    (pressed.value.W - pressed.value.S) *
+                    maxLinearSpeed.value *
+                    0.01 *
+                    elements.value[0].speedPercentage,
+                y: 0,
+                z: 0,
             },
-            key_up_callback: (event) => {
-                this.keyListener(event, false)
+            angular: {
+                x: 0,
+                y: 0,
+                z:
+                    (pressed.value.A - pressed.value.D) *
+                    maxAngularSpeed.value *
+                    0.01 *
+                    elements.value[1].speedPercentage,
             },
-        }
-    },
-    methods: {
-        startPublishing() {
-            this.timer = setInterval(() => {
-                let message = new Message({
-                    linear: {
-                        x:
-                            (this.pressed.W - this.pressed.S) *
-                            this.max_linear_speed *
-                            0.01 *
-                            this.elements[0].speed_percentage,
-                        y: 0,
-                        z: 0,
-                    },
-                    angular: {
-                        x: 0,
-                        y: 0,
-                        z:
-                            (this.pressed.A - this.pressed.D) *
-                            this.max_angular_speed *
-                            0.01 *
-                            this.elements[1].speed_percentage,
-                    },
-                })
-                // console.log(message)
-                this.topic.publish(message)
-            }, this.message_rate)
-        },
-        keyListener(e, isPressed) {
-            if (!this.is_focused) return
-            let key = e.key.toUpperCase()
-
-            if (this.pressed[key] !== undefined) this.pressed[key] = isPressed
-
-            if (key === 'TAB' && isPressed) {
-                this.focus_index = (this.focus_index + 1) % this.elements.length
-                document
-                    .getElementById(this.elements[this.focus_index].id)
-                    .focus()
-            }
-        },
-        focus() {
-            this.is_focused = true
-            document.getElementById(this.elements[this.focus_index].id).focus()
-        },
-        unfocus() {
-            this.is_focused = false
-            this.pressed.W = false
-            this.pressed.A = false
-            this.pressed.S = false
-            this.pressed.D = false
-        },
-    },
-    mounted() {
-        this.topic = new Topic({
-            ros: this.ros,
-            name: '/cmd_vel',
-            messageType: 'geometry_msgs/Twist',
         })
-        window.addEventListener('keydown', this.key_down_callback)
-        window.addEventListener('keyup', this.key_up_callback)
-
-        // Read maximum speed from ros params
-        let base = '/web_interface/control'
-        let maxLinearSpeedParam = new Param({
-            ros: this.ros,
-            name: base + '/linear/x/max_velocity',
-        })
-        maxLinearSpeedParam.get((value) => {
-            if (value != null) {
-                this.max_linear_speed = value
-            }
-        })
-        let maxAngularSpeedParam = new Param({
-            ros: this.ros,
-            name: base + '/angular/z/max_velocity',
-        })
-        maxAngularSpeedParam.get((value) => {
-            if (value != null) {
-                this.max_angular_speed = value
-            }
-        })
-        this.startPublishing()
-
-        // Set focus on first slider
-        document.getElementById(this.elements[this.focus_index].id).focus()
-    },
-    beforeDestroy() {
-        clearInterval(this.timer)
-        window.removeEventListener('keydown', this.key_down_callback)
-        window.removeEventListener('keyup', this.key_up_callback)
-    },
+        // console.log(message)
+        topic.value.publish(message)
+    }, messageRate)
 }
+
+// Check pressed keys
+const pressed = ref({ W: false, A: false, S: false, D: false })
+
+let keyDownCallback = (event) => {
+    keyListener(event.key.toUpperCase(), true)
+}
+let keyUpCallback = (event) => {
+    keyListener(event.key.toUpperCase(), false)
+}
+function keyListener(key, isPressed) {
+    if (!isWindowFocused.value) return
+
+    if (pressed.value[key] !== undefined) pressed.value[key] = isPressed
+
+    if (key === 'TAB' && isPressed) {
+        focusIndex.value = (focusIndex.value + 1) % elements.value.length
+        document.getElementById(elements.value[focusIndex.value].id).focus()
+    }
+}
+
+// Set focus to proper object
+const isWindowFocused = ref(false)
+const focusIndex = ref(0)
+
+function focus() {
+    isWindowFocused.value = true
+    document.getElementById(elements.value[focusIndex.value].id).focus()
+}
+function unfocus() {
+    isWindowFocused.value = false
+    pressed.value.W = false
+    pressed.value.A = false
+    pressed.value.S = false
+    pressed.value.D = false
+}
+
+onMounted(() => {
+    // Read maximum speed from ros params
+    let base = '/web_interface/control'
+    let maxLinearSpeedParam = new Param({
+        ros: props.ros,
+        name: base + '/linear/x/max_velocity',
+    })
+    maxLinearSpeedParam.get((value) => {
+        if (value != null) {
+            maxLinearSpeed.value = value
+        }
+    })
+    let maxAngularSpeedParam = new Param({
+        ros: props.ros,
+        name: base + '/angular/z/max_velocity',
+    })
+    maxAngularSpeedParam.get((value) => {
+        if (value != null) {
+            maxAngularSpeed.value = value
+        }
+    })
+
+    // Start listening keyboard signals
+    window.addEventListener('keydown', keyDownCallback)
+    window.addEventListener('keyup', keyUpCallback)
+
+    // Start publishing steering informations
+    topic.value = new Topic({
+        ros: props.ros,
+        name: '/cmd_vel',
+        messageType: 'geometry_msgs/Twist',
+    })
+    startPublishing()
+})
+onBeforeUnmount(() => {
+    clearInterval(timer.value)
+    window.removeEventListener('keydown', keyDownCallback)
+    window.removeEventListener('keyup', keyUpCallback)
+})
 </script>
 <template>
     <div
@@ -136,7 +135,7 @@ export default {
         @focusin="focus()"
     >
         <div
-            v-for="(element, i) in this.elements"
+            v-for="(element, i) in elements"
             :key="element.name"
             class="slidecontainer"
         >
@@ -146,10 +145,10 @@ export default {
                     min="1"
                     max="100"
                     class="slider"
-                    :class="{ focused: focus_index == i && is_focused }"
+                    :class="{ focused: focusIndex == i && isWindowFocused }"
                     :id="element.id"
-                    v-model="element.speed_percentage"
-                    @click="focus_index = i"
+                    v-model="element.speedPercentage"
+                    @click="focusIndex = i"
                 />
             </td>
             <td class="col2">
@@ -157,7 +156,7 @@ export default {
             </td>
             <td class="col3">
                 <label class="sliderLabel">
-                    {{ element.speed_percentage }}%
+                    {{ element.speedPercentage }}%
                 </label>
             </td>
         </div>
@@ -178,6 +177,6 @@ export default {
         </p>
     </div>
 </template>
-<style>
-@import './control-styles.css';
+<style scoped>
+@import '@/styles/control-styles.css';
 </style>
