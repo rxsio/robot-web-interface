@@ -64,7 +64,7 @@ export default {
                 name: 'Controlled Object',
                 type: 'select',
                 possibleValues: () => {
-                    return ['Rover', 'Manipulator']
+                    return ['Rover', 'Manipulator', 'Touch']
                 },
             },
         },

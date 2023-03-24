@@ -1,6 +1,7 @@
 <script setup>
 import KeyboardControl from '@/components/ControlWindow/KeyboardControl.vue'
 import ManipKeyboardControl from '@/components/ControlWindow/ManipKeyboardControl.vue'
+import TouchControl from '@/components/ControlWindow/TouchControl.vue'
 import { useRosStore } from '@/stores'
 import { defineProps } from 'vue'
 
@@ -19,6 +20,10 @@ const rosStore = useRosStore()
             v-else-if="props.extraConfig.controlledObject === 'Manipulator'"
             :ros="rosStore.ws"
         />
+        <TouchControl
+            v-else-if="props.extraConfig.controlledObject === 'Touch'"
+            :ros="rosStore.ws"
+        ></TouchControl>
         <div v-else>Choose the window type.</div>
     </div>
 </template>
