@@ -1,100 +1,86 @@
-<script>
+<script setup>
 import Joystick from './Joystick.vue'
+import { defineProps, onMounted, onBeforeUnmount, ref } from 'vue'
 import { Topic, Message, Param } from 'roslib'
 
-export default {
-    name: 'TouchControl',
-    components: {
-        Joystick,
-    },
-    props: {
-        ros: Object,
-    },
-    data() {
-        return {
-            topic: null,
-            message: null,
-            commandInterval: null,
-            max_linear_speed: 1,
-            max_angular_speed: 1.57,
-            linear_speed_percentage: 25,
-            angular_speed_percentage: 25,
-        }
-    },
-    methods: {
-        joystickMovedCallback(stickData) {
-            this.message.linear.x =
-                parseFloat(stickData.y) *
-                this.max_linear_speed *
-                0.01 *
-                this.linear_speed_percentage
-            this.message.angular.z =
-                -parseFloat(stickData.x) *
-                this.max_angular_speed *
-                0.01 *
-                this.angular_speed_percentage
-        },
-    },
-    mounted() {
-        this.topic = new Topic({
-            ros: this.ros,
-            name: '/cmd_vel',
-            messageType: 'geometry_msgs/Twist',
-        })
+const props = defineProps(['ros'])
 
-        this.message = new Message({
-            linear: {
-                x: 0,
-                y: 0,
-                z: 0,
-            },
-            angular: {
-                x: 0,
-                y: 0,
-                z: 0,
-            },
-        })
+const topic = ref(null)
+const message = ref(null)
+const commandInterval = ref(null)
+const max_linear_speed = ref(1)
+const max_angular_speed = ref(1.57)
+const linear_speed_percentage = ref(25)
+const angular_speed_percentage = ref(25)
 
-        // Start sending messages to cmd_vel (10Hz)
-        var self = this
-        this.commandInterval = window.setInterval(function () {
-            self.topic.publish(self.message)
-        }, 100)
-
-        // Read maximum speed from ros params
-        var base = '/web_interface/control'
-        var maxLinearSpeedParam = new Param({
-            ros: this.ros,
-            name: base + '/linear/x/max_velocity',
-        })
-        maxLinearSpeedParam.get((value) => {
-            if (value != null) {
-                this.max_linear_speed = value
-            }
-        })
-        var maxAngularSpeedParam = new Param({
-            ros: this.ros,
-            name: base + '/angular/z/max_velocity',
-        })
-        maxAngularSpeedParam.get((value) => {
-            if (value != null) {
-                this.max_angular_speed = value
-            }
-        })
-    },
-    beforeDestroy() {
-        clearInterval(this.commandInterval)
-    },
+function joystickMovedCallback(stickData) {
+    message.value.linear.x =
+        parseFloat(stickData.y) *
+        max_linear_speed.value *
+        0.01 *
+        linear_speed_percentage.value
+    message.value.angular.z =
+        -parseFloat(stickData.x) *
+        max_angular_speed.value *
+        0.01 *
+        angular_speed_percentage.value
 }
+
+onMounted(() => {
+    topic.value = new Topic({
+        ros: props.ros,
+        name: '/cmd_vel',
+        messageType: 'geometry_msgs/Twist',
+    })
+
+    message.value = new Message({
+        linear: {
+            x: 0,
+            y: 0,
+            z: 0,
+        },
+        angular: {
+            x: 0,
+            y: 0,
+            z: 0,
+        },
+    })
+
+    // Start sending messages to cmd_vel (10Hz)
+    commandInterval.value = setInterval(() => {
+        topic.value.publish(message.value)
+    }, 100)
+
+    // Read maximum speed from ros params
+    let base = '/web_interface/control'
+    let maxLinearSpeedParam = new Param({
+        ros: props.ros,
+        name: base + '/linear/x/max_velocity',
+    })
+    maxLinearSpeedParam.get((value) => {
+        if (value != null) {
+            max_linear_speed.value = value
+        }
+    })
+    let maxAngularSpeedParam = new Param({
+        ros: props.ros,
+        name: base + '/angular/z/max_velocity',
+    })
+    maxAngularSpeedParam.get((value) => {
+        if (value != null) {
+            max_angular_speed.value = value
+        }
+    })
+})
+onBeforeUnmount(() => {
+    clearInterval(commandInterval.value)
+})
 </script>
 <template>
-    <div
-        class="control"
-        style="padding-top: 25vh"
-    >
+    <div class="control">
         <joystick
             :size="250"
-            :callback="this.joystickMovedCallback"
+            :callback="joystickMovedCallback"
         />
         <div class="slidecontainer">
             <input
@@ -107,7 +93,7 @@ export default {
                 v-model="linear_speed_percentage"
             />
             <label class="sliderLabel">
-                Linear: {{ this.linear_speed_percentage }}%
+                Linear: {{ linear_speed_percentage }}%
             </label>
         </div>
         <div class="slidecontainer">
@@ -121,7 +107,7 @@ export default {
                 v-model="angular_speed_percentage"
             />
             <label class="sliderLabel">
-                Angular: {{ this.angular_speed_percentage }}%
+                Angular: {{ angular_speed_percentage }}%
             </label>
         </div>
     </div>
