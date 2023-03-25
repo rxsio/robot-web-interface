@@ -5,28 +5,61 @@ import { Topic, Message, Param } from 'roslib'
 
 const props = defineProps(['ros'])
 
+const elements = ref([
+    {
+        id: 'linear_speed',
+        text: 'Linear',
+        speedPercentage: 25,
+    },
+    {
+        id: 'angular_speed',
+        text: 'Angular',
+        speedPercentage: 25,
+    },
+])
+
+const commandInterval = ref(null)
 const topic = ref(null)
 const message = ref(null)
-const commandInterval = ref(null)
-const max_linear_speed = ref(1)
-const max_angular_speed = ref(1.57)
-const linear_speed_percentage = ref(25)
-const angular_speed_percentage = ref(25)
+const maxLinearSpeed = ref(1)
+const maxAngularSpeed = ref(1.57)
+const messageRate = 100 // [ms]
 
 function joystickMovedCallback(stickData) {
     message.value.linear.x =
         parseFloat(stickData.y) *
-        max_linear_speed.value *
+        maxLinearSpeed.value *
         0.01 *
-        linear_speed_percentage.value
+        elements.value[0].speedPercentage
     message.value.angular.z =
         -parseFloat(stickData.x) *
-        max_angular_speed.value *
+        maxAngularSpeed.value *
         0.01 *
-        angular_speed_percentage.value
+        elements.value[1].speedPercentage
 }
 
 onMounted(() => {
+    // Read maximum speed from ros params
+    let base = '/web_interface/control'
+    let maxLinearSpeedParam = new Param({
+        ros: props.ros,
+        name: base + '/linear/x/max_velocity',
+    })
+    maxLinearSpeedParam.get((value) => {
+        if (value != null) {
+            maxLinearSpeed.value = value
+        }
+    })
+    let maxAngularSpeedParam = new Param({
+        ros: props.ros,
+        name: base + '/angular/z/max_velocity',
+    })
+    maxAngularSpeedParam.get((value) => {
+        if (value != null) {
+            maxAngularSpeed.value = value
+        }
+    })
+
     topic.value = new Topic({
         ros: props.ros,
         name: '/cmd_vel',
@@ -46,31 +79,10 @@ onMounted(() => {
         },
     })
 
-    // Start sending messages to cmd_vel (10Hz)
+    // Start sending messages to cmd_vel
     commandInterval.value = setInterval(() => {
         topic.value.publish(message.value)
-    }, 100)
-
-    // Read maximum speed from ros params
-    let base = '/web_interface/control'
-    let maxLinearSpeedParam = new Param({
-        ros: props.ros,
-        name: base + '/linear/x/max_velocity',
-    })
-    maxLinearSpeedParam.get((value) => {
-        if (value != null) {
-            max_linear_speed.value = value
-        }
-    })
-    let maxAngularSpeedParam = new Param({
-        ros: props.ros,
-        name: base + '/angular/z/max_velocity',
-    })
-    maxAngularSpeedParam.get((value) => {
-        if (value != null) {
-            max_angular_speed.value = value
-        }
-    })
+    }, messageRate)
 })
 onBeforeUnmount(() => {
     clearInterval(commandInterval.value)
@@ -82,32 +94,22 @@ onBeforeUnmount(() => {
             :size="250"
             :callback="joystickMovedCallback"
         />
-        <div class="slidecontainer">
+        <div
+            v-for="element in elements"
+            :key="element.name"
+            class="slidecontainer"
+        >
             <input
                 type="range"
                 min="1"
                 max="100"
                 value="50"
                 class="slider"
-                id="linear_speed"
-                v-model="linear_speed_percentage"
+                :id="element.id"
+                v-model="element.speedPercentage"
             />
             <label class="sliderLabel">
-                Linear: {{ linear_speed_percentage }}%
-            </label>
-        </div>
-        <div class="slidecontainer">
-            <input
-                type="range"
-                min="1"
-                max="100"
-                value="50"
-                class="slider"
-                id="angular_speed"
-                v-model="angular_speed_percentage"
-            />
-            <label class="sliderLabel">
-                Angular: {{ angular_speed_percentage }}%
+                {{ element.text }}: {{ element.speedPercentage }}%
             </label>
         </div>
     </div>

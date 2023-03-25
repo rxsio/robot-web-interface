@@ -113,6 +113,11 @@ onMounted(() => {
     window.addEventListener('keydown', keyDownCallback)
     window.addEventListener('keyup', keyUpCallback)
 
+    // Set unique IDs
+    const randId = String(parseInt(1000000 * Math.random()))
+    for (let i = 0; i < elements.value.length; ++i)
+        elements.value[i].id = randId + i
+
     // Start publishing steering informations
     topic.value = new Topic({
         ros: props.ros,
