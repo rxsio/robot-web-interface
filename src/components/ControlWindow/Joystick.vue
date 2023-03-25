@@ -280,16 +280,20 @@ var JoyStick = function (container, parameters, callback) {
     /* To simplify this code there was a new experimental feature here: https://developer.mozilla.org/en-US/docs/Web/API/MouseEvent/offsetX , but it present only in Mouse case not metod presents in Touch case :-( */
     function onMouseMove(event) {
         if (pressed === 1) {
-            movedX = event.pageX
-            movedY = event.pageY
-            // Manage offset
-            if (canvas.offsetParent.tagName.toUpperCase() === 'BODY') {
-                movedX -= canvas.offsetLeft
-                movedY -= canvas.offsetTop
-            } else {
-                movedX -= canvas.offsetParent.offsetLeft
-                movedY -= canvas.offsetParent.offsetTop
-            }
+            // Changed by Mateusz Frejlich 2023-03-25
+            const rect = canvas.getBoundingClientRect()
+            movedX = event.pageX - rect.left + window.scrollX
+            movedY = event.pageY - rect.top + window.scrollY
+            // movedX = event.pageX
+            // movedY = event.pageY
+            // // Manage offset
+            // if (canvas.offsetParent.tagName.toUpperCase() === 'BODY') {
+            //     movedX -= canvas.offsetLeft
+            //     movedY -= canvas.offsetTop
+            // } else {
+            //     movedX -= canvas.offsetParent.offsetLeft
+            //     movedY -= canvas.offsetParent.offsetTop
+            // }
             // Delete canvas
             context.clearRect(0, 0, canvas.width, canvas.height)
             // Redraw object
