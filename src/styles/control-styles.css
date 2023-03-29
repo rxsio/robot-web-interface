@@ -87,25 +87,29 @@ div.keyboardControl {
 div.keyboardControl div.slidecontainer {
     height: 40px;
     width: 80%;
-    display: inline-table;
+    display: inline-flex;
     padding: 5px;
 }
 
-div.keyboardControl div.slidecontainer td.col1 {
+div.keyboardControl div.slidecontainer .col1 {
+    display: flex;
     width: auto;
     text-align: right;
     vertical-align: middle;
+    flex-grow: 1;
 }
 
-div.keyboardControl div.slidecontainer td.col2 {
-    width: 8.5em;
+div.keyboardControl div.slidecontainer .col2 {
+    display: flex;
+    min-width: 8.5em;
     text-align: left;
     vertical-align: middle;
 }
 
-div.keyboardControl div.slidecontainer td.col3 {
-    width: 3em;
-    text-align: right;
+div.keyboardControl div.slidecontainer .col3 {
+    display: flex;
+    min-width: 3em;
+    justify-content: right;
     vertical-align: middle;
 }
 

@@ -51,23 +51,19 @@ const messageRate = 100 // [ms]
 
 function startPublishing() {
     timer.value = setInterval(() => {
-        let currentTime = new Date()
-        let names = []
-        elements.value.forEach((element) => {
-            names.push(element.name)
-        })
+        let currentTime = new Date().getTime()
         let message = new Message({
             header: {
                 stamp: {
-                    secs: Math.floor(currentTime.getTime() / 1000),
+                    secs: Math.floor(currentTime / 1000),
                     nsecs: Math.round(
                         1000000000 *
-                            (currentTime.getTime() / 1000 -
-                                Math.floor(currentTime.getTime() / 1000))
+                            (currentTime / 1000 -
+                                Math.floor(currentTime / 1000))
                     ),
                 },
             },
-            name: names,
+            name: elements.value.map((element) => element.name),
             effort: [0, 0, 0, 0, 0, 0],
         })
         if (focusIndex.value >= 0 && focusIndex.value <= 2) {
@@ -104,7 +100,7 @@ function startPublishing() {
                 elements.value[5].effortPercentage
         }
         topic.value.publish(message)
-    }, messageRate.value)
+    }, messageRate)
 }
 
 // Check pressed keys
@@ -198,32 +194,34 @@ onBeforeUnmount(() => {
         @focusout="unfocus()"
         @focusin="focus()"
     >
-        <div
-            v-for="(element, i) in elements"
-            :key="element.name"
-            class="slidecontainer"
-        >
-            <td class="col1">
-                <input
-                    type="range"
-                    min="1"
-                    max="100"
-                    class="slider"
-                    :class="{ focused: focusIndex == i && isWindowFocused }"
-                    :id="element.id"
-                    v-model="element.effortPercentage"
-                    @click="focusIndex = i"
-                />
-            </td>
-            <td class="col2">
-                <label class="sliderLabel">{{ element.text }}:</label>
-            </td>
-            <td class="col3">
-                <label class="sliderLabel">
-                    {{ element.effortPercentage }}%
-                </label>
-            </td>
-        </div>
+        <v-list>
+            <v-list-item
+                v-for="(element, i) in elements"
+                :key="element.name"
+                class="slidecontainer"
+            >
+                <div class="col1">
+                    <input
+                        type="range"
+                        min="1"
+                        max="100"
+                        class="slider"
+                        :class="{ focused: focusIndex == i && isWindowFocused }"
+                        :id="element.id"
+                        v-model="element.effortPercentage"
+                        @click="focusIndex = i"
+                    />
+                </div>
+                <div class="col2">
+                    <label class="sliderLabel">{{ element.text }}:</label>
+                </div>
+                <div class="col3">
+                    <label class="sliderLabel">
+                        {{ element.effortPercentage }}%
+                    </label>
+                </div>
+            </v-list-item>
+        </v-list>
         <div class="keyboardBox">
             <p>
                 <button :class="{ pressed: pressed.Q }">Q</button>

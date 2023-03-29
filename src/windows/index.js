@@ -64,8 +64,30 @@ export default {
                 name: 'Controlled Object',
                 type: 'select',
                 possibleValues: () => {
-                    return ['Rover', 'Manipulator', 'Touch']
+                    return ['Rover', 'Manipulator']
                 },
+            },
+            controlMode: {
+                name: 'Control Mode',
+                type: 'select',
+                possibleValues: () => {
+                    return ['Keyboard', 'Touch']
+                },
+            },
+            movementStrategy: {
+                name: 'Movement Strategy',
+                type: 'select',
+                possibleValues: () => {
+                    return ['Forward', 'Inverse']
+                },
+            },
+            maxLinearSpeed: {
+                name: 'Max Linear Velocity [m/s]',
+                type: 'number',
+            },
+            maxAngularSpeed: {
+                name: 'Max Angular Velocity [rad/s]',
+                type: 'number',
             },
         },
         icon: 'mdi-controller',

@@ -139,33 +139,34 @@ onBeforeUnmount(() => {
         @focusout="unfocus()"
         @focusin="focus()"
     >
-        <div
-            v-for="(element, i) in elements"
-            :key="element.name"
-            class="slidecontainer"
-        >
-            <td class="col1">
-                <input
-                    type="range"
-                    min="1"
-                    max="100"
-                    class="slider"
-                    :class="{ focused: focusIndex == i && isWindowFocused }"
-                    :id="element.id"
-                    v-model="element.speedPercentage"
-                    @click="focusIndex = i"
-                />
-            </td>
-            <td class="col2">
-                <label class="sliderLabel">{{ element.text }}:</label>
-            </td>
-            <td class="col3">
-                <label class="sliderLabel">
-                    {{ element.speedPercentage }}%
-                </label>
-            </td>
-        </div>
-
+        <v-list>
+            <v-list-item
+                v-for="(element, i) in elements"
+                :key="element.name"
+                class="slidecontainer"
+            >
+                <div class="col1">
+                    <input
+                        type="range"
+                        min="1"
+                        max="100"
+                        class="slider"
+                        :class="{ focused: focusIndex == i && isWindowFocused }"
+                        :id="element.id"
+                        v-model="element.speedPercentage"
+                        @click="focusIndex = i"
+                    />
+                </div>
+                <div class="col2">
+                    <label class="sliderLabel">{{ element.text }}:</label>
+                </div>
+                <div class="col3">
+                    <label class="sliderLabel">
+                        {{ element.speedPercentage }}%
+                    </label>
+                </div>
+            </v-list-item>
+        </v-list>
         <div class="keyboardBox">
             <p>
                 <button :class="{ pressed: pressed.W }">W</button>

@@ -18,6 +18,7 @@ const elements = ref([
     },
 ])
 
+// Publish steering informations
 const commandInterval = ref(null)
 const topic = ref(null)
 const message = ref(null)
