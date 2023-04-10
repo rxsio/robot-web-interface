@@ -142,7 +142,7 @@ onBeforeUnmount(() => {
         <v-list>
             <v-list-item
                 v-for="(element, i) in elements"
-                :key="element.name"
+                :key="i"
                 class="slidecontainer"
             >
                 <div class="col1">

@@ -78,7 +78,7 @@ export default {
                 name: 'Movement Strategy',
                 type: 'select',
                 possibleValues: () => {
-                    return ['Forward', 'Inverse']
+                    return ['Position', 'Velocity']
                 },
             },
             maxLinearSpeed: {

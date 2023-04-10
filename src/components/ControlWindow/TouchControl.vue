@@ -8,12 +8,12 @@ const props = defineProps(['ros'])
 const elements = ref([
     {
         id: 'linear_speed',
-        text: 'Linear',
+        text: 'Linear speed',
         speedPercentage: 25,
     },
     {
         id: 'angular_speed',
-        text: 'Angular',
+        text: 'Angular speed',
         speedPercentage: 25,
     },
 ])
@@ -90,29 +90,38 @@ onBeforeUnmount(() => {
 })
 </script>
 <template>
-    <div class="control">
+    <div class="control keyboardControl">
         <joystick
             :size="250"
             :callback="joystickMovedCallback"
         />
-        <div
-            v-for="element in elements"
-            :key="element.name"
-            class="slidecontainer"
-        >
-            <input
-                type="range"
-                min="1"
-                max="100"
-                value="50"
-                class="slider"
-                :id="element.id"
-                v-model="element.speedPercentage"
-            />
-            <label class="sliderLabel">
-                {{ element.text }}: {{ element.speedPercentage }}%
-            </label>
-        </div>
+        <v-list>
+            <v-list-item
+                v-for="(element, i) in elements"
+                :key="i"
+                class="slidecontainer"
+            >
+                <div class="col1">
+                    <input
+                        type="range"
+                        min="1"
+                        max="100"
+                        value="50"
+                        class="slider"
+                        :id="element.id"
+                        v-model="element.speedPercentage"
+                    />
+                </div>
+                <div class="col2">
+                    <label class="sliderLabel">{{ element.text }}:</label>
+                </div>
+                <div class="col3">
+                    <label class="sliderLabel">
+                        {{ element.speedPercentage }}%
+                    </label>
+                </div>
+            </v-list-item>
+        </v-list>
     </div>
 </template>
 <style scoped>

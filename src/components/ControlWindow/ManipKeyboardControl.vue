@@ -7,99 +7,95 @@ const props = defineProps(['ros'])
 const elements = ref([
     {
         id: 0,
-        name: 'arm_rotate',
-        text: 'Arm rotate effort',
-        effortPercentage: 25,
+        text: 'X velocity',
+        speedPercentage: 25,
     },
     {
         id: 1,
-        name: 'arm_lift',
-        text: 'Arm lift effort',
-        effortPercentage: 25,
+        text: 'Y velocity',
+        speedPercentage: 25,
     },
     {
         id: 2,
-        name: 'arm_tilt',
-        text: 'Arm tilt effort',
-        effortPercentage: 25,
+        text: 'Z velocity',
+        speedPercentage: 25,
     },
     {
         id: 3,
-        name: 'claw_rotate',
-        text: 'Claw rotate effort',
-        effortPercentage: 25,
+        text: 'Roll velocity',
+        speedPercentage: 25,
     },
     {
         id: 4,
-        name: 'claw_lift',
-        text: 'Claw lift effort',
-        effortPercentage: 25,
+        text: 'Pitch velocity',
+        speedPercentage: 25,
     },
     {
         id: 5,
-        name: 'claw_clamp',
-        text: 'Claw clamp effort',
-        effortPercentage: 25,
+        text: 'Clamp effort',
+        speedPercentage: 25,
     },
 ])
 
 // Publish steering informations
 const timer = ref(null)
-const topic = ref(null)
-const maxEffort = ref(1.0)
+const manipTopic = ref(null)
+const gripperTopic = ref(null)
+const maxSpeed = ref(1.0)
 const messageRate = 100 // [ms]
 
 function startPublishing() {
     timer.value = setInterval(() => {
-        let currentTime = new Date().getTime()
-        let message = new Message({
-            header: {
-                stamp: {
-                    secs: Math.floor(currentTime / 1000),
-                    nsecs: Math.round(
-                        1000000000 *
-                            (currentTime / 1000 -
-                                Math.floor(currentTime / 1000))
-                    ),
-                },
+        let manipMessage = new Message({
+            linear: {
+                x: 0,
+                y: 0,
+                z: 0,
             },
-            name: elements.value.map((element) => element.name),
-            effort: [0, 0, 0, 0, 0, 0],
+            angular: {
+                x: 0,
+                y: 0,
+                z: 0,
+            },
+        })
+        let gripperMessage = new Message({
+            data: 0,
         })
         if (focusIndex.value >= 0 && focusIndex.value <= 2) {
-            message.effort[0] =
-                (pressed.value.A - pressed.value.D) *
-                maxEffort.value *
-                0.01 *
-                elements.value[0].effortPercentage
-            message.effort[1] =
+            manipMessage.linear.x =
                 (pressed.value.W - pressed.value.S) *
-                maxEffort.value *
+                maxSpeed.value *
                 0.01 *
-                elements.value[1].effortPercentage
-            message.effort[2] =
+                elements.value[0].speedPercentage
+            manipMessage.linear.y =
+                (pressed.value.A - pressed.value.D) *
+                maxSpeed.value *
+                0.01 *
+                elements.value[1].speedPercentage
+            manipMessage.linear.z =
                 (pressed.value.Q - pressed.value.E) *
-                maxEffort.value *
+                maxSpeed.value *
                 0.01 *
-                elements.value[2].effortPercentage
+                elements.value[2].speedPercentage
         } else if (focusIndex.value >= 3 && focusIndex.value <= 5) {
-            message.effort[3] =
+            manipMessage.angular.x =
                 (pressed.value.A - pressed.value.D) *
-                maxEffort.value *
+                maxSpeed.value *
                 0.01 *
-                elements.value[3].effortPercentage
-            message.effort[4] =
+                elements.value[3].speedPercentage
+            manipMessage.angular.y =
                 (pressed.value.W - pressed.value.S) *
-                maxEffort.value *
+                maxSpeed.value *
                 0.01 *
-                elements.value[4].effortPercentage
-            message.effort[5] =
+                elements.value[4].speedPercentage
+            gripperMessage.data =
                 (pressed.value.Q - pressed.value.E) *
-                maxEffort.value *
+                maxSpeed.value *
                 0.01 *
-                elements.value[5].effortPercentage
+                elements.value[5].speedPercentage
         }
-        topic.value.publish(message)
+        manipTopic.value.publish(manipMessage)
+        gripperTopic.value.publish(gripperMessage)
     }, messageRate)
 }
 
@@ -157,7 +153,7 @@ onMounted(() => {
     })
     maxEffortParam.get((value) => {
         if (value != null) {
-            maxEffort.value = value
+            maxSpeed.value = value
         }
     })
 
@@ -174,10 +170,15 @@ onMounted(() => {
         elements.value[i].id = randId + i
 
     // Start publishing steering informations
-    topic.value = new Topic({
+    manipTopic.value = new Topic({
         ros: props.ros,
-        name: '/manip_vel',
-        messageType: 'sensor_msgs/JointState',
+        name: '/cmd_manip',
+        messageType: 'geometry_msgs/Twist',
+    })
+    gripperTopic.value = new Topic({
+        ros: props.ros,
+        name: '/cmd_grip',
+        messageType: 'std_msgs/Float64',
     })
     startPublishing()
 })
@@ -197,7 +198,7 @@ onBeforeUnmount(() => {
         <v-list>
             <v-list-item
                 v-for="(element, i) in elements"
-                :key="element.name"
+                :key="i"
                 class="slidecontainer"
             >
                 <div class="col1">
@@ -208,7 +209,7 @@ onBeforeUnmount(() => {
                         class="slider"
                         :class="{ focused: focusIndex == i && isWindowFocused }"
                         :id="element.id"
-                        v-model="element.effortPercentage"
+                        v-model="element.speedPercentage"
                         @click="focusIndex = i"
                     />
                 </div>
@@ -217,7 +218,7 @@ onBeforeUnmount(() => {
                 </div>
                 <div class="col3">
                     <label class="sliderLabel">
-                        {{ element.effortPercentage }}%
+                        {{ element.speedPercentage }}%
                     </label>
                 </div>
             </v-list-item>
