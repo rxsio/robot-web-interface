@@ -1,8 +1,13 @@
 <script setup>
 import { defineProps, onMounted, onBeforeUnmount, ref } from 'vue'
-import { Topic, Message, Param } from 'roslib'
+import { Topic, Message } from 'roslib'
 
-const props = defineProps(['ros'])
+const props = defineProps([
+    'ros',
+    'maxLinearSpeed',
+    'maxAngularSpeed',
+    'maxEffort',
+])
 
 const elements = ref([
     {
@@ -38,14 +43,16 @@ const elements = ref([
 ])
 
 // Publish steering informations
-const timer = ref(null)
+const commandInterval = ref(null)
 const manipTopic = ref(null)
 const gripperTopic = ref(null)
-const maxSpeed = ref(1.0)
+const maxLinearSpeed = ref(1.0)
+const maxAngularSpeed = ref(1.0)
+const maxEffort = ref(1.0)
 const messageRate = 100 // [ms]
 
 function startPublishing() {
-    timer.value = setInterval(() => {
+    commandInterval.value = setInterval(() => {
         let manipMessage = new Message({
             linear: {
                 x: 0,
@@ -64,33 +71,33 @@ function startPublishing() {
         if (focusIndex.value >= 0 && focusIndex.value <= 2) {
             manipMessage.linear.x =
                 (pressed.value.W - pressed.value.S) *
-                maxSpeed.value *
+                maxLinearSpeed.value *
                 0.01 *
                 elements.value[0].speedPercentage
             manipMessage.linear.y =
                 (pressed.value.A - pressed.value.D) *
-                maxSpeed.value *
+                maxLinearSpeed.value *
                 0.01 *
                 elements.value[1].speedPercentage
             manipMessage.linear.z =
                 (pressed.value.Q - pressed.value.E) *
-                maxSpeed.value *
+                maxLinearSpeed.value *
                 0.01 *
                 elements.value[2].speedPercentage
         } else if (focusIndex.value >= 3 && focusIndex.value <= 5) {
             manipMessage.angular.x =
                 (pressed.value.A - pressed.value.D) *
-                maxSpeed.value *
+                maxAngularSpeed.value *
                 0.01 *
                 elements.value[3].speedPercentage
             manipMessage.angular.y =
                 (pressed.value.W - pressed.value.S) *
-                maxSpeed.value *
+                maxAngularSpeed.value *
                 0.01 *
                 elements.value[4].speedPercentage
             gripperMessage.data =
                 (pressed.value.Q - pressed.value.E) *
-                maxSpeed.value *
+                maxEffort.value *
                 0.01 *
                 elements.value[5].speedPercentage
         }
@@ -145,17 +152,10 @@ function unfocus() {
 }
 
 onMounted(() => {
-    // Read maximum effort from ros params
-    let base = '/web_interface/control'
-    let maxEffortParam = new Param({
-        ros: props.ros,
-        name: base + '/max_effort',
-    })
-    maxEffortParam.get((value) => {
-        if (value != null) {
-            maxSpeed.value = value
-        }
-    })
+    // Read maximum speed and effort from props
+    if (props.maxLinearSpeed) maxLinearSpeed.value = props.maxLinearSpeed
+    if (props.maxAngularSpeed) maxAngularSpeed.value = props.maxAngularSpeed
+    if (props.maxEffort) maxEffort.value = props.maxEffort
 
     // Start listening keyboard signals
     window.addEventListener('keydown', keyDownCallback)
@@ -183,72 +183,18 @@ onMounted(() => {
     startPublishing()
 })
 onBeforeUnmount(() => {
-    clearInterval(timer.value)
+    clearInterval(commandInterval.value)
     window.removeEventListener('keydown', keyDownCallback)
     window.removeEventListener('keyup', keyUpCallback)
 })
 </script>
 <template>
     <div
-        class="control keyboardControl manip"
+        class="control keyboardControl"
         @click.left="focus()"
         @focusout="unfocus()"
         @focusin="focus()"
     >
-        <div style="position: absolute; top: 30px; right: 15px">
-            <v-tooltip
-                left
-                max-width="400px"
-            >
-                <template v-slot:activator="{ on, attrs }">
-                    <v-btn
-                        v-bind="attrs"
-                        v-on="on"
-                        :icon="true"
-                        style="
-                            background: none;
-                            border: none;
-                            border-radius: 100%;
-                        "
-                    >
-                        <v-icon>mdi-information</v-icon>
-                    </v-btn>
-                </template>
-                <span>
-                    <p>
-                        Use
-                        <b>'TAB'</b>
-                        to switch between sliders or
-                        <b>'Arrow Keys'</b>
-                        to change each value.
-                    </p>
-                    <p>
-                        Steering will be automaticly switched between the arm or
-                        the gripper by changing the choosen slider. Use keys:
-                    </p>
-                    <div class="description">
-                        <li>
-                            <b>'A'</b>
-                            and
-                            <b>'D'</b>
-                            to move left/right or roll the gripper
-                        </li>
-                        <li>
-                            <b>'W'</b>
-                            and
-                            <b>'S'</b>
-                            to move forward/back or pitch the gripper
-                        </li>
-                        <li>
-                            <b>'Q'</b>
-                            and
-                            <b>'E'</b>
-                            to move up/down or clamp the gripper
-                        </li>
-                    </div>
-                </span>
-            </v-tooltip>
-        </div>
         <div class="keyboardBox">
             <p>
                 <button :class="{ pressed: pressed.Q }">Q</button>
@@ -289,24 +235,63 @@ onBeforeUnmount(() => {
                 </div>
             </v-list-item>
         </v-list>
+        <div style="position: absolute; top: 30px; right: 15px">
+            <v-tooltip
+                left
+                max-width="420px"
+            >
+                <template v-slot:activator="{ on, attrs }">
+                    <v-btn
+                        v-bind="attrs"
+                        v-on="on"
+                        :icon="true"
+                        style="
+                            background: none;
+                            border: none;
+                            border-radius: 100%;
+                        "
+                    >
+                        <v-icon>mdi-information</v-icon>
+                    </v-btn>
+                </template>
+                <span>
+                    <p>
+                        Use
+                        <b>'TAB'</b>
+                        to switch between sliders or
+                        <b>'Arrow Keys'</b>
+                        to change each value.
+                    </p>
+                    <p>
+                        Steering will be automaticly switched between the arm or
+                        the gripper by changing the choosen slider. Use keys:
+                    </p>
+                    <ul>
+                        <li>
+                            <b>'A'</b>
+                            and
+                            <b>'D'</b>
+                            to move left/right or roll the gripper
+                        </li>
+                        <li>
+                            <b>'W'</b>
+                            and
+                            <b>'S'</b>
+                            to move forward/back or pitch the gripper
+                        </li>
+                        <li>
+                            <b>'Q'</b>
+                            and
+                            <b>'E'</b>
+                            to move up/down or clamp the gripper
+                        </li>
+                    </ul>
+                </span>
+            </v-tooltip>
+        </div>
     </div>
 </template>
 
 <style scoped>
 @import '@/styles/control-styles.css';
-
-div.keyboardControl.manip {
-    height: max-content;
-}
-
-div.keyboardControl.manip div.description {
-    width: 22em;
-    display: inline-block;
-}
-
-div.keyboardControl.manip div.description li {
-    margin-left: 2em;
-    padding: 0.25em;
-    text-align: left;
-}
 </style>

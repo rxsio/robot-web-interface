@@ -1,9 +1,14 @@
 <script setup>
 import Joystick from './Joystick.vue'
 import { defineProps, onMounted, onBeforeUnmount, ref } from 'vue'
-import { Topic, Message, Param } from 'roslib'
+import { Topic, Message } from 'roslib'
 
-const props = defineProps(['ros'])
+const props = defineProps([
+    'ros',
+    'maxLinearSpeed',
+    'maxAngularSpeed',
+    'maxEffort',
+])
 
 const elements = ref([
     {
@@ -44,58 +49,53 @@ const manipTopic = ref(null)
 const gripperTopic = ref(null)
 const manipMessage = ref(null)
 const gripperMessage = ref(null)
-const maxSpeed = ref(1.0)
+const maxLinearSpeed = ref(1.0)
+const maxAngularSpeed = ref(1.0)
+const maxEffort = ref(1.0)
 const messageRate = 100 // [ms]
 
 function joystickMovedCallbackXY(stickData) {
     manipMessage.value.linear.x =
         parseFloat(stickData.y) *
-        maxSpeed.value *
+        maxLinearSpeed.value *
         0.01 *
         elements.value[0].speedPercentage
     manipMessage.value.linear.y =
         -parseFloat(stickData.x) *
-        maxSpeed.value *
+        maxLinearSpeed.value *
         0.01 *
         elements.value[1].speedPercentage
 }
 function joystickMovedCallbackZPitch(stickData) {
     manipMessage.value.linear.z =
         parseFloat(stickData.y) *
-        maxSpeed.value *
+        maxLinearSpeed.value *
         0.01 *
         elements.value[2].speedPercentage
     manipMessage.value.angular.y =
         parseFloat(stickData.x) *
-        maxSpeed.value *
+        maxAngularSpeed.value *
         0.01 *
         elements.value[4].speedPercentage
 }
 function joystickMovedCallbackRollClamp(stickData) {
     manipMessage.value.angular.x =
         parseFloat(stickData.x) *
-        maxSpeed.value *
+        maxAngularSpeed.value *
         0.01 *
         elements.value[3].speedPercentage
     gripperMessage.value.data =
         parseFloat(stickData.y) *
-        maxSpeed.value *
+        maxEffort.value *
         0.01 *
         elements.value[5].speedPercentage
 }
 
 onMounted(() => {
-    // Read maximum effort from ros params
-    let base = '/web_interface/control'
-    let maxEffortParam = new Param({
-        ros: props.ros,
-        name: base + '/max_effort',
-    })
-    maxEffortParam.get((value) => {
-        if (value != null) {
-            maxSpeed.value = value
-        }
-    })
+    // Read maximum speed and effort from props
+    if (props.maxLinearSpeed) maxLinearSpeed.value = props.maxLinearSpeed
+    if (props.maxAngularSpeed) maxAngularSpeed.value = props.maxAngularSpeed
+    if (props.maxEffort) maxEffort.value = props.maxEffort
 
     manipTopic.value = new Topic({
         ros: props.ros,
@@ -145,12 +145,15 @@ onBeforeUnmount(() => {
                     :size="250"
                     :callback="joystickMovedCallbackXY"
                 />
-                <p style="position: relative; top: -250px">- Move Y -</p>
+                <p style="margin: 0; position: relative; top: -250px">
+                    - Move Y -
+                </p>
                 <p
                     style="
                         position: relative;
                         writing-mode: sideways-lr;
-                        top: -210px;
+                        top: -280px;
+                        height: 100%;
                     "
                 >
                     - Move X -
@@ -162,12 +165,15 @@ onBeforeUnmount(() => {
                     :size="250"
                     :callback="joystickMovedCallbackZPitch"
                 />
-                <p style="position: relative; top: -250px">- Pitch -</p>
+                <p style="margin: 0; position: relative; top: -250px">
+                    - Pitch -
+                </p>
                 <p
                     style="
                         position: relative;
                         writing-mode: sideways-lr;
-                        top: -210px;
+                        top: -280px;
+                        height: 100%;
                     "
                 >
                     - Move Z -
@@ -179,12 +185,15 @@ onBeforeUnmount(() => {
                     :size="250"
                     :callback="joystickMovedCallbackRollClamp"
                 />
-                <p style="position: relative; top: -250px">- Roll -</p>
+                <p style="margin: 0; position: relative; top: -250px">
+                    - Roll -
+                </p>
                 <p
                     style="
                         position: relative;
                         writing-mode: sideways-lr;
-                        top: -210px;
+                        top: -280px;
+                        height: 100%;
                     "
                 >
                     - Clamp -

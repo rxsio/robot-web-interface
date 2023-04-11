@@ -1,9 +1,9 @@
 <script setup>
 import Joystick from './Joystick.vue'
 import { defineProps, onMounted, onBeforeUnmount, ref } from 'vue'
-import { Topic, Message, Param } from 'roslib'
+import { Topic, Message } from 'roslib'
 
-const props = defineProps(['ros'])
+const props = defineProps(['ros', 'maxLinearSpeed', 'maxAngularSpeed'])
 
 const elements = ref([
     {
@@ -40,26 +40,9 @@ function joystickMovedCallback(stickData) {
 }
 
 onMounted(() => {
-    // Read maximum speed from ros params
-    let base = '/web_interface/control'
-    let maxLinearSpeedParam = new Param({
-        ros: props.ros,
-        name: base + '/linear/x/max_velocity',
-    })
-    maxLinearSpeedParam.get((value) => {
-        if (value != null) {
-            maxLinearSpeed.value = value
-        }
-    })
-    let maxAngularSpeedParam = new Param({
-        ros: props.ros,
-        name: base + '/angular/z/max_velocity',
-    })
-    maxAngularSpeedParam.get((value) => {
-        if (value != null) {
-            maxAngularSpeed.value = value
-        }
-    })
+    // Read maximum speed from props
+    if (props.maxLinearSpeed) maxLinearSpeed.value = props.maxLinearSpeed
+    if (props.maxAngularSpeed) maxAngularSpeed.value = props.maxAngularSpeed
 
     topic.value = new Topic({
         ros: props.ros,

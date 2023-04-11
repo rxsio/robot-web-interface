@@ -1,8 +1,8 @@
 <script setup>
 import { defineProps, onMounted, onBeforeUnmount, ref } from 'vue'
-import { Topic, Message, Param } from 'roslib'
+import { Topic, Message } from 'roslib'
 
-const props = defineProps(['ros'])
+const props = defineProps(['ros', 'maxLinearSpeed', 'maxAngularSpeed'])
 
 const elements = ref([
     {
@@ -18,14 +18,14 @@ const elements = ref([
 ])
 
 // Publish steering informations
-const timer = ref(null)
+const commandInterval = ref(null)
 const topic = ref(null)
 const maxLinearSpeed = ref(1)
 const maxAngularSpeed = ref(1.57)
 const messageRate = 100 // [ms]
 
 function startPublishing() {
-    timer.value = setInterval(() => {
+    commandInterval.value = setInterval(() => {
         let message = new Message({
             linear: {
                 x:
@@ -88,26 +88,9 @@ function unfocus() {
 }
 
 onMounted(() => {
-    // Read maximum speed from ros params
-    let base = '/web_interface/control'
-    let maxLinearSpeedParam = new Param({
-        ros: props.ros,
-        name: base + '/linear/x/max_velocity',
-    })
-    maxLinearSpeedParam.get((value) => {
-        if (value != null) {
-            maxLinearSpeed.value = value
-        }
-    })
-    let maxAngularSpeedParam = new Param({
-        ros: props.ros,
-        name: base + '/angular/z/max_velocity',
-    })
-    maxAngularSpeedParam.get((value) => {
-        if (value != null) {
-            maxAngularSpeed.value = value
-        }
-    })
+    // Read maximum speed from props
+    if (props.maxLinearSpeed) maxLinearSpeed.value = props.maxLinearSpeed
+    if (props.maxAngularSpeed) maxAngularSpeed.value = props.maxAngularSpeed
 
     // Start listening keyboard signals
     window.addEventListener('keydown', keyDownCallback)
@@ -127,7 +110,7 @@ onMounted(() => {
     startPublishing()
 })
 onBeforeUnmount(() => {
-    clearInterval(timer.value)
+    clearInterval(commandInterval.value)
     window.removeEventListener('keydown', keyDownCallback)
     window.removeEventListener('keyup', keyUpCallback)
 })
@@ -139,34 +122,6 @@ onBeforeUnmount(() => {
         @focusout="unfocus()"
         @focusin="focus()"
     >
-        <div style="position: absolute; top: 30px; right: 15px">
-            <v-tooltip
-                left
-                max-width="300px"
-            >
-                <template v-slot:activator="{ on, attrs }">
-                    <v-btn
-                        v-bind="attrs"
-                        v-on="on"
-                        :icon="true"
-                        style="
-                            background: none;
-                            border: none;
-                            border-radius: 100%;
-                        "
-                    >
-                        <v-icon>mdi-information</v-icon>
-                    </v-btn>
-                </template>
-                <span>
-                    Use
-                    <b>'TAB'</b>
-                    to switch between sliders or
-                    <b>'Arrow Keys'</b>
-                    to change each speed value.
-                </span>
-            </v-tooltip>
-        </div>
         <div class="keyboardBox">
             <p>
                 <button :class="{ pressed: pressed.W }">W</button>
@@ -205,6 +160,34 @@ onBeforeUnmount(() => {
                 </div>
             </v-list-item>
         </v-list>
+        <div style="position: absolute; top: 30px; right: 15px">
+            <v-tooltip
+                left
+                max-width="300px"
+            >
+                <template v-slot:activator="{ on, attrs }">
+                    <v-btn
+                        v-bind="attrs"
+                        v-on="on"
+                        :icon="true"
+                        style="
+                            background: none;
+                            border: none;
+                            border-radius: 100%;
+                        "
+                    >
+                        <v-icon>mdi-information</v-icon>
+                    </v-btn>
+                </template>
+                <span>
+                    Use
+                    <b>'TAB'</b>
+                    to switch between sliders or
+                    <b>'Arrow Keys'</b>
+                    to change each speed value.
+                </span>
+            </v-tooltip>
+        </div>
     </div>
 </template>
 <style scoped>
