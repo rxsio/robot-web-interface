@@ -195,6 +195,72 @@ onBeforeUnmount(() => {
         @focusout="unfocus()"
         @focusin="focus()"
     >
+        <div style="position: absolute; top: 30px; right: 15px">
+            <v-tooltip
+                left
+                max-width="400px"
+            >
+                <template v-slot:activator="{ on, attrs }">
+                    <v-btn
+                        v-bind="attrs"
+                        v-on="on"
+                        :icon="true"
+                        style="
+                            background: none;
+                            border: none;
+                            border-radius: 100%;
+                        "
+                    >
+                        <v-icon>mdi-information</v-icon>
+                    </v-btn>
+                </template>
+                <span>
+                    <p>
+                        Use
+                        <b>'TAB'</b>
+                        to switch between sliders or
+                        <b>'Arrow Keys'</b>
+                        to change each value.
+                    </p>
+                    <p>
+                        Steering will be automaticly switched between the arm or
+                        the gripper by changing the choosen slider. Use keys:
+                    </p>
+                    <div class="description">
+                        <li>
+                            <b>'A'</b>
+                            and
+                            <b>'D'</b>
+                            to move left/right or roll the gripper
+                        </li>
+                        <li>
+                            <b>'W'</b>
+                            and
+                            <b>'S'</b>
+                            to move forward/back or pitch the gripper
+                        </li>
+                        <li>
+                            <b>'Q'</b>
+                            and
+                            <b>'E'</b>
+                            to move up/down or clamp the gripper
+                        </li>
+                    </div>
+                </span>
+            </v-tooltip>
+        </div>
+        <div class="keyboardBox">
+            <p>
+                <button :class="{ pressed: pressed.Q }">Q</button>
+                <button :class="{ pressed: pressed.W }">W</button>
+                <button :class="{ pressed: pressed.E }">E</button>
+            </p>
+            <p>
+                <button :class="{ pressed: pressed.A }">A</button>
+                <button :class="{ pressed: pressed.S }">S</button>
+                <button :class="{ pressed: pressed.D }">D</button>
+            </p>
+        </div>
         <v-list>
             <v-list-item
                 v-for="(element, i) in elements"
@@ -223,47 +289,6 @@ onBeforeUnmount(() => {
                 </div>
             </v-list-item>
         </v-list>
-        <div class="keyboardBox">
-            <p>
-                <button :class="{ pressed: pressed.Q }">Q</button>
-                <button :class="{ pressed: pressed.W }">W</button>
-                <button :class="{ pressed: pressed.E }">E</button>
-            </p>
-            <p>
-                <button :class="{ pressed: pressed.A }">A</button>
-                <button :class="{ pressed: pressed.S }">S</button>
-                <button :class="{ pressed: pressed.D }">D</button>
-            </p>
-        </div>
-
-        <p>
-            Use 'TAB' to switch between sliders or 'Arrow Keys' to change each
-            effort value.
-        </p>
-        <p>
-            Steering will be automaticly switched between the arm or the claw by
-            changing the choosen slider. Use keys:
-        </p>
-        <div class="description">
-            <li>
-                <b>'A'</b>
-                and
-                <b>'D'</b>
-                to rotate the arm or the claw
-            </li>
-            <li>
-                <b>'W'</b>
-                and
-                <b>'S'</b>
-                to lift the arm or the claw
-            </li>
-            <li>
-                <b>'Q'</b>
-                and
-                <b>'E'</b>
-                to tilt the arm or clamp the claw
-            </li>
-        </div>
     </div>
 </template>
 

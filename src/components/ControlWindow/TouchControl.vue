@@ -92,6 +92,7 @@ onBeforeUnmount(() => {
 <template>
     <div class="control keyboardControl">
         <joystick
+            id="rover-1"
             :size="250"
             :callback="joystickMovedCallback"
         />

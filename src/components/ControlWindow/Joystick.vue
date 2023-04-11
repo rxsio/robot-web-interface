@@ -1,5 +1,5 @@
 <template>
-    <div id="joystick"></div>
+    <div :id="this.id"></div>
 </template>
 <script>
 /*
@@ -395,6 +395,7 @@ export default {
     props: {
         size: Number,
         callback: Function,
+        id: String,
     },
     data() {
         return {
@@ -403,7 +404,7 @@ export default {
     },
     mounted() {
         this.joystick = new JoyStick(
-            'joystick',
+            this.id,
             {
                 // The ID of canvas element
                 title: 'joystick',

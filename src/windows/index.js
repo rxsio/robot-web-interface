@@ -89,6 +89,10 @@ export default {
                 name: 'Max Angular Velocity [rad/s]',
                 type: 'number',
             },
+            maxEffort: {
+                name: 'Max Effort [Nm]',
+                type: 'number',
+            },
         },
         icon: 'mdi-controller',
     },

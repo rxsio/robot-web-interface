@@ -139,6 +139,44 @@ onBeforeUnmount(() => {
         @focusout="unfocus()"
         @focusin="focus()"
     >
+        <div style="position: absolute; top: 30px; right: 15px">
+            <v-tooltip
+                left
+                max-width="300px"
+            >
+                <template v-slot:activator="{ on, attrs }">
+                    <v-btn
+                        v-bind="attrs"
+                        v-on="on"
+                        :icon="true"
+                        style="
+                            background: none;
+                            border: none;
+                            border-radius: 100%;
+                        "
+                    >
+                        <v-icon>mdi-information</v-icon>
+                    </v-btn>
+                </template>
+                <span>
+                    Use
+                    <b>'TAB'</b>
+                    to switch between sliders or
+                    <b>'Arrow Keys'</b>
+                    to change each speed value.
+                </span>
+            </v-tooltip>
+        </div>
+        <div class="keyboardBox">
+            <p>
+                <button :class="{ pressed: pressed.W }">W</button>
+            </p>
+            <p>
+                <button :class="{ pressed: pressed.A }">A</button>
+                <button :class="{ pressed: pressed.S }">S</button>
+                <button :class="{ pressed: pressed.D }">D</button>
+            </p>
+        </div>
         <v-list>
             <v-list-item
                 v-for="(element, i) in elements"
@@ -167,20 +205,6 @@ onBeforeUnmount(() => {
                 </div>
             </v-list-item>
         </v-list>
-        <div class="keyboardBox">
-            <p>
-                <button :class="{ pressed: pressed.W }">W</button>
-            </p>
-            <p>
-                <button :class="{ pressed: pressed.A }">A</button>
-                <button :class="{ pressed: pressed.S }">S</button>
-                <button :class="{ pressed: pressed.D }">D</button>
-            </p>
-        </div>
-        <p>
-            Use 'TAB' to switch between sliders or 'Arrow Keys' to change each
-            speed value.
-        </p>
     </div>
 </template>
 <style scoped>

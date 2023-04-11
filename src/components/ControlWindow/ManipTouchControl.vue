@@ -49,12 +49,12 @@ const messageRate = 100 // [ms]
 
 function joystickMovedCallbackXY(stickData) {
     manipMessage.value.linear.x =
-        -parseFloat(stickData.y) *
+        parseFloat(stickData.y) *
         maxSpeed.value *
         0.01 *
         elements.value[0].speedPercentage
     manipMessage.value.linear.y =
-        parseFloat(stickData.x) *
+        -parseFloat(stickData.x) *
         maxSpeed.value *
         0.01 *
         elements.value[1].speedPercentage
@@ -136,18 +136,61 @@ onBeforeUnmount(() => {
 </script>
 <template>
     <div class="control keyboardControl">
-        <joystick
-            :size="250"
-            :callback="joystickMovedCallbackXY"
-        />
-        <joystick
-            :size="250"
-            :callback="joystickMovedCallbackZPitch"
-        />
-        <joystick
-            :size="250"
-            :callback="joystickMovedCallbackRollClamp"
-        />
+        <div
+            style="display: inline-flex; flex-wrap: wrap; place-content: center"
+        >
+            <div style="height: 250px">
+                <joystick
+                    id="manip-1"
+                    :size="250"
+                    :callback="joystickMovedCallbackXY"
+                />
+                <p style="position: relative; top: -250px">- Move Y -</p>
+                <p
+                    style="
+                        position: relative;
+                        writing-mode: sideways-lr;
+                        top: -210px;
+                    "
+                >
+                    - Move X -
+                </p>
+            </div>
+            <div style="height: 250px">
+                <joystick
+                    id="manip-2"
+                    :size="250"
+                    :callback="joystickMovedCallbackZPitch"
+                />
+                <p style="position: relative; top: -250px">- Pitch -</p>
+                <p
+                    style="
+                        position: relative;
+                        writing-mode: sideways-lr;
+                        top: -210px;
+                    "
+                >
+                    - Move Z -
+                </p>
+            </div>
+            <div style="height: 250px">
+                <joystick
+                    id="manip-3"
+                    :size="250"
+                    :callback="joystickMovedCallbackRollClamp"
+                />
+                <p style="position: relative; top: -250px">- Roll -</p>
+                <p
+                    style="
+                        position: relative;
+                        writing-mode: sideways-lr;
+                        top: -210px;
+                    "
+                >
+                    - Clamp -
+                </p>
+            </div>
+        </div>
         <v-list>
             <v-list-item
                 v-for="(element, i) in elements"
@@ -165,9 +208,7 @@ onBeforeUnmount(() => {
                     />
                 </div>
                 <div class="col2">
-                    <label class="sliderLabel">
-                        {{ element.text }}
-                    </label>
+                    <label class="sliderLabel">{{ element.text }}:</label>
                 </div>
                 <div class="col3">
                     <label class="sliderLabel">
