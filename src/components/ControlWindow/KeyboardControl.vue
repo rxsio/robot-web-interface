@@ -23,29 +23,48 @@ const topic = ref(null)
 const maxLinearSpeed = ref(1)
 const maxAngularSpeed = ref(1.57)
 const messageRate = 100 // [ms]
+const carMode = ref(true)
 
 function startPublishing() {
     commandInterval.value = setInterval(() => {
         let message = new Message({
             linear: {
-                x:
-                    (pressed.value.W - pressed.value.S) *
-                    maxLinearSpeed.value *
-                    0.01 *
-                    elements.value[0].speedPercentage,
+                x: 0,
                 y: 0,
                 z: 0,
             },
             angular: {
                 x: 0,
                 y: 0,
-                z:
-                    (pressed.value.A - pressed.value.D) *
-                    maxAngularSpeed.value *
-                    0.01 *
-                    elements.value[1].speedPercentage,
+                z: 0,
             },
         })
+        if (carMode.value) {
+            message.linear.x =
+                (pressed.value.W - pressed.value.S) *
+                maxLinearSpeed.value *
+                0.01 *
+                elements.value[0].speedPercentage
+            message.angular.z =
+                (pressed.value.A - pressed.value.D) *
+                maxAngularSpeed.value *
+                0.01 *
+                elements.value[1].speedPercentage
+        } else {
+            message.linear.x =
+                (pressed.value.W - pressed.value.S) *
+                maxLinearSpeed.value *
+                0.01 *
+                elements.value[0].speedPercentage
+            message.angular.z =
+                (message.linear.x / maxLinearSpeed.value) *
+                maxAngularSpeed.value *
+                Math.tan(
+                    (pressed.value.A - pressed.value.D) *
+                        0.01 *
+                        elements.value[1].speedPercentage
+                )
+        }
         // console.log(message)
         topic.value.publish(message)
     }, messageRate)
@@ -69,6 +88,8 @@ function keyListener(key, isPressed) {
         focusIndex.value = (focusIndex.value + 1) % elements.value.length
         document.getElementById(elements.value[focusIndex.value].id).focus()
     }
+
+    if (key === 'Z' && isPressed) carMode.value = !carMode.value
 }
 
 // Set focus to proper object
@@ -122,15 +143,55 @@ onBeforeUnmount(() => {
         @focusout="unfocus()"
         @focusin="focus()"
     >
-        <div class="keyboardBox">
-            <p>
-                <button :class="{ pressed: pressed.W }">W</button>
-            </p>
-            <p>
-                <button :class="{ pressed: pressed.A }">A</button>
-                <button :class="{ pressed: pressed.S }">S</button>
-                <button :class="{ pressed: pressed.D }">D</button>
-            </p>
+        <div
+            style="
+                display: flex;
+                flex-flow: row;
+                flex-wrap: wrap;
+                align-items: center;
+                justify-content: space-evenly;
+                width: 80%;
+            "
+        >
+            <div class="keyboardBox">
+                <p>
+                    <button :class="{ pressed: pressed.W }">W</button>
+                </p>
+                <p>
+                    <button :class="{ pressed: pressed.A }">A</button>
+                    <button :class="{ pressed: pressed.S }">S</button>
+                    <button :class="{ pressed: pressed.D }">D</button>
+                </p>
+            </div>
+            <div
+                style="
+                    display: flex;
+                    flex-flow: row;
+                    justify-content: center;
+                    background-color: #eee;
+                    border-radius: 25px
+                    height: 220px;
+                    padding: 5px;
+                    margin: 15px;
+                "
+            >
+                <v-btn
+                    icon
+                    @click="carMode = true"
+                    class="mode-switch"
+                    :class="{ active: carMode === true }"
+                >
+                    <v-icon size="60">mdi-car</v-icon>
+                </v-btn>
+                <v-btn
+                    icon
+                    @click="carMode = false"
+                    class="mode-switch"
+                    :class="{ active: carMode === false }"
+                >
+                    <v-icon size="60">mdi-tank</v-icon>
+                </v-btn>
+            </div>
         </div>
         <v-list>
             <v-list-item
@@ -167,9 +228,9 @@ onBeforeUnmount(() => {
             >
                 <template v-slot:activator="{ on, attrs }">
                     <v-btn
+                        icon
                         v-bind="attrs"
                         v-on="on"
-                        :icon="true"
                         style="
                             background: none;
                             border: none;
@@ -180,11 +241,18 @@ onBeforeUnmount(() => {
                     </v-btn>
                 </template>
                 <span>
-                    Use
-                    <b>'TAB'</b>
-                    to switch between sliders or
-                    <b>'Arrow Keys'</b>
-                    to change each speed value.
+                    <p>
+                        Use
+                        <b>'TAB'</b>
+                        to switch between sliders or
+                        <b>'Arrow Keys'</b>
+                        to change each speed value.
+                        <br />
+                        Steering can be switched between the car and the tank
+                        mode using
+                        <b>'Z'</b>
+                        key or choosing the icon.
+                    </p>
                 </span>
             </v-tooltip>
         </div>

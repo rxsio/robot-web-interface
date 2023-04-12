@@ -25,18 +25,35 @@ const message = ref(null)
 const maxLinearSpeed = ref(1)
 const maxAngularSpeed = ref(1.57)
 const messageRate = 100 // [ms]
+const carMode = ref(true)
 
 function joystickMovedCallback(stickData) {
-    message.value.linear.x =
-        parseFloat(stickData.y) *
-        maxLinearSpeed.value *
-        0.01 *
-        elements.value[0].speedPercentage
-    message.value.angular.z =
-        -parseFloat(stickData.x) *
-        maxAngularSpeed.value *
-        0.01 *
-        elements.value[1].speedPercentage
+    if (carMode.value) {
+        message.value.linear.x =
+            parseFloat(stickData.y) *
+            maxLinearSpeed.value *
+            0.01 *
+            elements.value[0].speedPercentage
+        message.value.angular.z =
+            -parseFloat(stickData.x) *
+            maxAngularSpeed.value *
+            0.01 *
+            elements.value[1].speedPercentage
+    } else {
+        message.value.linear.x =
+            parseFloat(stickData.y) *
+            maxLinearSpeed.value *
+            0.01 *
+            elements.value[0].speedPercentage
+        message.value.angular.z =
+            (message.value.linear.x / maxLinearSpeed.value) *
+            maxAngularSpeed.value *
+            Math.tan(
+                -parseFloat(stickData.x) *
+                    0.01 *
+                    elements.value[1].speedPercentage
+            )
+    }
 }
 
 onMounted(() => {
@@ -74,11 +91,51 @@ onBeforeUnmount(() => {
 </script>
 <template>
     <div class="control keyboardControl">
-        <joystick
-            id="rover-1"
-            :size="250"
-            :callback="joystickMovedCallback"
-        />
+        <div
+            style="
+                display: flex;
+                flex-flow: row;
+                flex-wrap: wrap;
+                align-items: center;
+                justify-content: space-evenly;
+                width: 80%;
+            "
+        >
+            <joystick
+                id="rover-1"
+                :size="250"
+                :callback="joystickMovedCallback"
+            />
+            <div
+                style="
+                    display: flex;
+                    flex-flow: row;
+                    justify-content: center;
+                    background-color: #eee;
+                    border-radius: 25px
+                    height: 220px;
+                    padding: 5px;
+                    margin: 15px;
+                "
+            >
+                <v-btn
+                    icon
+                    @click="carMode = true"
+                    class="mode-switch"
+                    :class="{ active: carMode === true }"
+                >
+                    <v-icon size="60">mdi-car</v-icon>
+                </v-btn>
+                <v-btn
+                    icon
+                    @click="carMode = false"
+                    class="mode-switch"
+                    :class="{ active: carMode === false }"
+                >
+                    <v-icon size="60">mdi-tank</v-icon>
+                </v-btn>
+            </div>
+        </div>
         <v-list>
             <v-list-item
                 v-for="(element, i) in elements"

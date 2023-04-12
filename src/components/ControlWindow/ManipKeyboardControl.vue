@@ -50,6 +50,7 @@ const maxLinearSpeed = ref(1.0)
 const maxAngularSpeed = ref(1.0)
 const maxEffort = ref(1.0)
 const messageRate = 100 // [ms]
+const positionMode = ref(true)
 
 function startPublishing() {
     commandInterval.value = setInterval(() => {
@@ -68,7 +69,7 @@ function startPublishing() {
         let gripperMessage = new Message({
             data: 0,
         })
-        if (focusIndex.value >= 0 && focusIndex.value <= 2) {
+        if (positionMode.value) {
             manipMessage.linear.x =
                 (pressed.value.W - pressed.value.S) *
                 maxLinearSpeed.value *
@@ -84,7 +85,7 @@ function startPublishing() {
                 maxLinearSpeed.value *
                 0.01 *
                 elements.value[2].speedPercentage
-        } else if (focusIndex.value >= 3 && focusIndex.value <= 5) {
+        } else {
             manipMessage.angular.x =
                 (pressed.value.A - pressed.value.D) *
                 maxAngularSpeed.value *
@@ -131,6 +132,8 @@ function keyListener(key, isPressed) {
         focusIndex.value = (focusIndex.value + 1) % elements.value.length
         document.getElementById(elements.value[focusIndex.value].id).focus()
     }
+
+    if (key === 'Z' && isPressed) positionMode.value = !positionMode.value
 }
 
 // Set focus to proper object
@@ -195,17 +198,57 @@ onBeforeUnmount(() => {
         @focusout="unfocus()"
         @focusin="focus()"
     >
-        <div class="keyboardBox">
-            <p>
-                <button :class="{ pressed: pressed.Q }">Q</button>
-                <button :class="{ pressed: pressed.W }">W</button>
-                <button :class="{ pressed: pressed.E }">E</button>
-            </p>
-            <p>
-                <button :class="{ pressed: pressed.A }">A</button>
-                <button :class="{ pressed: pressed.S }">S</button>
-                <button :class="{ pressed: pressed.D }">D</button>
-            </p>
+        <div
+            style="
+                display: flex;
+                flex-flow: row;
+                flex-wrap: wrap;
+                align-items: center;
+                justify-content: space-evenly;
+                width: 80%;
+            "
+        >
+            <div class="keyboardBox">
+                <p>
+                    <button :class="{ pressed: pressed.Q }">Q</button>
+                    <button :class="{ pressed: pressed.W }">W</button>
+                    <button :class="{ pressed: pressed.E }">E</button>
+                </p>
+                <p>
+                    <button :class="{ pressed: pressed.A }">A</button>
+                    <button :class="{ pressed: pressed.S }">S</button>
+                    <button :class="{ pressed: pressed.D }">D</button>
+                </p>
+            </div>
+            <div
+                style="
+                    display: flex;
+                    flex-flow: row;
+                    justify-content: center;
+                    background-color: #eee;
+                    border-radius: 25px
+                    height: 220px;
+                    padding: 5px;
+                    margin: 15px;
+                "
+            >
+                <v-btn
+                    icon
+                    @click="positionMode = true"
+                    class="mode-switch"
+                    :class="{ active: positionMode === true }"
+                >
+                    <v-icon size="60">mdi-axis-arrow</v-icon>
+                </v-btn>
+                <v-btn
+                    icon
+                    @click="positionMode = false"
+                    class="mode-switch"
+                    :class="{ active: positionMode === false }"
+                >
+                    <v-icon size="60">mdi-rotate-orbit</v-icon>
+                </v-btn>
+            </div>
         </div>
         <v-list>
             <v-list-item
@@ -242,9 +285,9 @@ onBeforeUnmount(() => {
             >
                 <template v-slot:activator="{ on, attrs }">
                     <v-btn
+                        icon
                         v-bind="attrs"
                         v-on="on"
-                        :icon="true"
                         style="
                             background: none;
                             border: none;
@@ -263,8 +306,9 @@ onBeforeUnmount(() => {
                         to change each value.
                     </p>
                     <p>
-                        Steering will be automaticly switched between the arm or
-                        the gripper by changing the choosen slider. Use keys:
+                        Steering can be switched between the arm (position) and
+                        the gripper (orientation) by choosing the icon. Use
+                        keys:
                     </p>
                     <ul>
                         <li>
@@ -284,6 +328,10 @@ onBeforeUnmount(() => {
                             and
                             <b>'E'</b>
                             to move up/down or clamp the gripper
+                        </li>
+                        <li>
+                            <b>'Z'</b>
+                            to change the steering mode
                         </li>
                     </ul>
                 </span>

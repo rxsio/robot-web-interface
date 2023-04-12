@@ -146,3 +146,27 @@ div.keyboardBox p button {
 div.keyboardBox p button.pressed {
     background-color: var(--control-secondary-light);
 }
+
+.control .mode-switch {
+    background-color: var(--v-morelowy-base);
+    border: none;
+    width: 80px;
+    height: 80px;
+    border-radius: 20%;
+    opacity: 20%;
+}
+
+.control .mode-switch:hover {
+    background-color: var(--v-morelowy-lighten1);
+    opacity: 30%;
+}
+
+.control .mode-switch.active {
+    background-color: var(--v-miętowy-base);
+    opacity: 90%;
+}
+
+.control .mode-switch.active:hover {
+    background-color: var(--v-miętowy-lighten1);
+    opacity: 100%;
+}
