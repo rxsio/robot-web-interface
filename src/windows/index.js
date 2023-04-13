@@ -93,6 +93,10 @@ export default {
                 name: 'Max Effort [Nm]',
                 type: 'number',
             },
+            shapeCoefficient: {
+                name: 'Shape Coefficient (1.0 - linear)',
+                type: 'number',
+            },
         },
         icon: 'mdi-controller',
     },

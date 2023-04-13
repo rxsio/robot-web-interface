@@ -8,6 +8,7 @@ const props = defineProps([
     'maxLinearSpeed',
     'maxAngularSpeed',
     'maxEffort',
+    'shapeCoefficient',
 ])
 
 const elements = ref([
@@ -53,42 +54,39 @@ const maxLinearSpeed = ref(1.0)
 const maxAngularSpeed = ref(1.0)
 const maxEffort = ref(1.0)
 const messageRate = 100 // [ms]
+const shapeCoefficient = ref(1.0)
+const controlCommands = ref([0, 0, 0, 0, 0, 0])
 
+function startPublishing() {
+    commandInterval.value = setInterval(() => {
+        const values = controlCommands.value.map(
+            (value, index) =>
+                Math.sign(value) *
+                Math.pow(value, shapeCoefficient.value) *
+                0.01 *
+                elements.value[index].speedPercentage
+        )
+        manipMessage.value.linear.x = values[0] * maxLinearSpeed.value
+        manipMessage.value.linear.y = values[1] * maxLinearSpeed.value
+        manipMessage.value.linear.z = values[2] * maxLinearSpeed.value
+        manipMessage.value.angular.x = values[3] * maxAngularSpeed.value
+        manipMessage.value.angular.y = values[4] * maxAngularSpeed.value
+        gripperMessage.value.data = values[5] * maxEffort.value
+        manipTopic.value.publish(manipMessage.value)
+        gripperTopic.value.publish(gripperMessage.value)
+    }, messageRate)
+}
 function joystickMovedCallbackXY(stickData) {
-    manipMessage.value.linear.x =
-        parseFloat(stickData.y) *
-        maxLinearSpeed.value *
-        0.01 *
-        elements.value[0].speedPercentage
-    manipMessage.value.linear.y =
-        -parseFloat(stickData.x) *
-        maxLinearSpeed.value *
-        0.01 *
-        elements.value[1].speedPercentage
+    controlCommands.value[0] = parseFloat(stickData.y)
+    controlCommands.value[1] = -parseFloat(stickData.x)
 }
 function joystickMovedCallbackZPitch(stickData) {
-    manipMessage.value.linear.z =
-        parseFloat(stickData.y) *
-        maxLinearSpeed.value *
-        0.01 *
-        elements.value[2].speedPercentage
-    manipMessage.value.angular.y =
-        parseFloat(stickData.x) *
-        maxAngularSpeed.value *
-        0.01 *
-        elements.value[4].speedPercentage
+    controlCommands.value[2] = parseFloat(stickData.y)
+    controlCommands.value[4] = parseFloat(stickData.x)
 }
 function joystickMovedCallbackRollClamp(stickData) {
-    manipMessage.value.angular.x =
-        parseFloat(stickData.x) *
-        maxAngularSpeed.value *
-        0.01 *
-        elements.value[3].speedPercentage
-    gripperMessage.value.data =
-        parseFloat(stickData.y) *
-        maxEffort.value *
-        0.01 *
-        elements.value[5].speedPercentage
+    controlCommands.value[3] = parseFloat(stickData.x)
+    controlCommands.value[5] = parseFloat(stickData.y)
 }
 
 onMounted(() => {
@@ -96,6 +94,7 @@ onMounted(() => {
     if (props.maxLinearSpeed) maxLinearSpeed.value = props.maxLinearSpeed
     if (props.maxAngularSpeed) maxAngularSpeed.value = props.maxAngularSpeed
     if (props.maxEffort) maxEffort.value = props.maxEffort
+    if (props.shapeCoefficient) shapeCoefficient.value = props.shapeCoefficient
 
     manipTopic.value = new Topic({
         ros: props.ros,
@@ -125,10 +124,7 @@ onMounted(() => {
     })
 
     // Start sending messages to cmd_manip and cmd_grip
-    commandInterval.value = setInterval(() => {
-        manipTopic.value.publish(manipMessage.value)
-        gripperTopic.value.publish(gripperMessage.value)
-    }, messageRate)
+    startPublishing()
 })
 onBeforeUnmount(() => {
     clearInterval(commandInterval.value)

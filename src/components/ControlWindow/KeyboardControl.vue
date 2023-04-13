@@ -2,7 +2,12 @@
 import { defineProps, onMounted, onBeforeUnmount, ref } from 'vue'
 import { Topic, Message } from 'roslib'
 
-const props = defineProps(['ros', 'maxLinearSpeed', 'maxAngularSpeed'])
+const props = defineProps([
+    'ros',
+    'maxLinearSpeed',
+    'maxAngularSpeed',
+    'shapeCoefficient',
+])
 
 const elements = ref([
     {
@@ -26,54 +31,47 @@ const maxAngularSpeed = ref(1.57)
 const messageRate = 100 // [ms]
 const carMode = ref(true)
 const inertia = 0.9
+const shapeCoefficient = ref(1.0)
+const controlCommands = ref({ drive: 0, turn: 0 })
 
 function startPublishing() {
     commandInterval.value = setInterval(() => {
-        let newMessage = new Message({
-            linear: {
-                x: 0,
-                y: 0,
-                z: 0,
-            },
-            angular: {
-                x: 0,
-                y: 0,
-                z: 0,
-            },
-        })
+        // save movement inercia on user commands level
+        controlCommands.value.drive =
+            controlCommands.value.drive * inertia +
+            (1 - inertia) * (pressed.value.W - pressed.value.S)
+        controlCommands.value.turn =
+            controlCommands.value.turn * inertia +
+            (1 - inertia) * (pressed.value.A - pressed.value.D)
+
+        // non-linearly scale each value depending on the selected mode
+        message.value.linear.x =
+            Math.sign(controlCommands.value.drive) *
+            Math.pow(controlCommands.value.drive, shapeCoefficient.value) *
+            maxLinearSpeed.value *
+            0.01 *
+            elements.value[0].speedPercentage
         if (carMode.value) {
-            newMessage.linear.x =
-                (pressed.value.W - pressed.value.S) *
-                maxLinearSpeed.value *
-                0.01 *
-                elements.value[0].speedPercentage
-            newMessage.angular.z =
-                (pressed.value.A - pressed.value.D) *
+            message.value.angular.z =
+                Math.sign(controlCommands.value.turn) *
+                Math.pow(controlCommands.value.turn, shapeCoefficient.value) *
                 maxAngularSpeed.value *
                 0.01 *
                 elements.value[1].speedPercentage
         } else {
-            newMessage.linear.x =
-                (pressed.value.W - pressed.value.S) *
-                maxLinearSpeed.value *
-                0.01 *
-                elements.value[0].speedPercentage
-            newMessage.angular.z =
-                (newMessage.linear.x / maxLinearSpeed.value) *
+            message.value.angular.z =
+                (message.value.linear.x / maxLinearSpeed.value) *
                 maxAngularSpeed.value *
                 Math.tan(
-                    (pressed.value.A - pressed.value.D) *
+                    Math.sign(controlCommands.value.turn) *
+                        Math.pow(
+                            controlCommands.value.turn,
+                            shapeCoefficient.value
+                        ) *
                         0.01 *
                         elements.value[1].speedPercentage
                 )
         }
-        message.value.linear.x =
-            inertia * message.value.linear.x +
-            (1.0 - inertia) * newMessage.linear.x
-        message.value.angular.z =
-            inertia * message.value.angular.z +
-            (1.0 - inertia) * newMessage.angular.z
-        // console.log(message)
         topic.value.publish(message.value)
     }, messageRate)
 }
@@ -120,6 +118,7 @@ onMounted(() => {
     // Read maximum speed from props
     if (props.maxLinearSpeed) maxLinearSpeed.value = props.maxLinearSpeed
     if (props.maxAngularSpeed) maxAngularSpeed.value = props.maxAngularSpeed
+    if (props.shapeCoefficient) shapeCoefficient.value = props.shapeCoefficient
 
     // Start listening keyboard signals
     window.addEventListener('keydown', keyDownCallback)

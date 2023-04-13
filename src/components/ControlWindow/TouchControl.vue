@@ -3,7 +3,12 @@ import Joystick from './Joystick.vue'
 import { defineProps, onMounted, onBeforeUnmount, ref } from 'vue'
 import { Topic, Message } from 'roslib'
 
-const props = defineProps(['ros', 'maxLinearSpeed', 'maxAngularSpeed'])
+const props = defineProps([
+    'ros',
+    'maxLinearSpeed',
+    'maxAngularSpeed',
+    'shapeCoefficient',
+])
 
 const elements = ref([
     {
@@ -26,33 +31,33 @@ const maxLinearSpeed = ref(1)
 const maxAngularSpeed = ref(1.57)
 const messageRate = 100 // [ms]
 const carMode = ref(true)
+const shapeCoefficient = ref(1.0)
 
 function joystickMovedCallback(stickData) {
+    // non-linearly scale each value depending on the selected mode
+    message.value.linear.x = parseFloat(stickData.y)
+    message.value.linear.x *=
+        Math.pow(message.value.linear.x, shapeCoefficient.value - 1.0) *
+        maxLinearSpeed.value *
+        0.01 *
+        elements.value[0].speedPercentage
     if (carMode.value) {
-        message.value.linear.x =
-            parseFloat(stickData.y) *
-            maxLinearSpeed.value *
-            0.01 *
-            elements.value[0].speedPercentage
-        message.value.angular.z =
-            -parseFloat(stickData.x) *
+        message.value.angular.z = -parseFloat(stickData.x)
+        message.value.angular.z *=
+            Math.pow(message.value.angular.z, shapeCoefficient.value - 1.0) *
             maxAngularSpeed.value *
             0.01 *
             elements.value[1].speedPercentage
     } else {
-        message.value.linear.x =
-            parseFloat(stickData.y) *
-            maxLinearSpeed.value *
+        let angle = -parseFloat(stickData.x)
+        angle *=
+            Math.pow(angle, shapeCoefficient.value - 1.0) *
             0.01 *
-            elements.value[0].speedPercentage
+            elements.value[1].speedPercentage
         message.value.angular.z =
             (message.value.linear.x / maxLinearSpeed.value) *
             maxAngularSpeed.value *
-            Math.tan(
-                -parseFloat(stickData.x) *
-                    0.01 *
-                    elements.value[1].speedPercentage
-            )
+            Math.tan(angle)
     }
 }
 
@@ -60,6 +65,7 @@ onMounted(() => {
     // Read maximum speed from props
     if (props.maxLinearSpeed) maxLinearSpeed.value = props.maxLinearSpeed
     if (props.maxAngularSpeed) maxAngularSpeed.value = props.maxAngularSpeed
+    if (props.shapeCoefficient) shapeCoefficient.value = props.shapeCoefficient
 
     topic.value = new Topic({
         ros: props.ros,

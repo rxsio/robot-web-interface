@@ -7,6 +7,7 @@ const props = defineProps([
     'maxLinearSpeed',
     'maxAngularSpeed',
     'maxEffort',
+    'shapeCoefficient',
 ])
 
 const elements = ref([
@@ -54,76 +55,38 @@ const maxEffort = ref(1.0)
 const messageRate = 100 // [ms]
 const positionMode = ref(true)
 const inertia = 0.9
+const shapeCoefficient = ref(1.0)
+const controlCommands = ref([0, 0, 0, 0, 0, 0])
 
 function startPublishing() {
     commandInterval.value = setInterval(() => {
-        let newManipMessage = new Message({
-            linear: {
-                x: 0,
-                y: 0,
-                z: 0,
-            },
-            angular: {
-                x: 0,
-                y: 0,
-                z: 0,
-            },
-        })
-        let newGripperMessage = new Message({
-            data: 0,
-        })
+        let newCommands = [0, 0, 0, 0, 0, 0]
         if (positionMode.value) {
-            newManipMessage.linear.x =
-                (pressed.value.W - pressed.value.S) *
-                maxLinearSpeed.value *
-                0.01 *
-                elements.value[0].speedPercentage
-            newManipMessage.linear.y =
-                (pressed.value.A - pressed.value.D) *
-                maxLinearSpeed.value *
-                0.01 *
-                elements.value[1].speedPercentage
-            newManipMessage.linear.z =
-                (pressed.value.Q - pressed.value.E) *
-                maxLinearSpeed.value *
-                0.01 *
-                elements.value[2].speedPercentage
+            newCommands[0] = pressed.value.W - pressed.value.S
+            newCommands[1] = pressed.value.A - pressed.value.D
+            newCommands[2] = pressed.value.Q - pressed.value.E
         } else {
-            newManipMessage.angular.x =
-                (pressed.value.A - pressed.value.D) *
-                maxAngularSpeed.value *
-                0.01 *
-                elements.value[3].speedPercentage
-            newManipMessage.angular.y =
-                (pressed.value.W - pressed.value.S) *
-                maxAngularSpeed.value *
-                0.01 *
-                elements.value[4].speedPercentage
-            newGripperMessage.data =
-                (pressed.value.Q - pressed.value.E) *
-                maxEffort.value *
-                0.01 *
-                elements.value[5].speedPercentage
+            newCommands[3] = pressed.value.A - pressed.value.D
+            newCommands[4] = pressed.value.W - pressed.value.S
+            newCommands[5] = pressed.value.Q - pressed.value.E
         }
-        manipMessage.value.linear.x =
-            inertia * manipMessage.value.linear.x +
-            (1.0 - inertia) * newManipMessage.linear.x
-        manipMessage.value.linear.y =
-            inertia * manipMessage.value.linear.y +
-            (1.0 - inertia) * newManipMessage.linear.y
-        manipMessage.value.linear.z =
-            inertia * manipMessage.value.linear.z +
-            (1.0 - inertia) * newManipMessage.linear.z
-        manipMessage.value.angular.x =
-            inertia * manipMessage.value.angular.x +
-            (1.0 - inertia) * newManipMessage.angular.x
-        manipMessage.value.angular.y =
-            inertia * manipMessage.value.angular.y +
-            (1.0 - inertia) * newManipMessage.angular.y
-        gripperMessage.value.data =
-            inertia * gripperMessage.value.data +
-            (1.0 - inertia) * newGripperMessage.data
-        // console.log(message)
+        controlCommands.value.forEach(
+            (value, index) =>
+                (value = inertia * value + (1 - inertia) * newCommands[index])
+        )
+        const values = controlCommands.value.map(
+            (value, index) =>
+                Math.sign(value) *
+                Math.pow(value, shapeCoefficient.value) *
+                0.01 *
+                elements.value[index].speedPercentage
+        )
+        manipMessage.value.linear.x = values[0] * maxLinearSpeed.value
+        manipMessage.value.linear.y = values[1] * maxLinearSpeed.value
+        manipMessage.value.linear.z = values[2] * maxLinearSpeed.value
+        manipMessage.value.angular.x = values[3] * maxAngularSpeed.value
+        manipMessage.value.angular.y = values[4] * maxAngularSpeed.value
+        gripperMessage.value.data = values[5] * maxEffort.value
         manipTopic.value.publish(manipMessage.value)
         gripperTopic.value.publish(gripperMessage.value)
     }, messageRate)
@@ -181,6 +144,7 @@ onMounted(() => {
     if (props.maxLinearSpeed) maxLinearSpeed.value = props.maxLinearSpeed
     if (props.maxAngularSpeed) maxAngularSpeed.value = props.maxAngularSpeed
     if (props.maxEffort) maxEffort.value = props.maxEffort
+    if (props.shapeCoefficient) shapeCoefficient.value = props.shapeCoefficient
 
     // Start listening keyboard signals
     window.addEventListener('keydown', keyDownCallback)

@@ -31,6 +31,7 @@ const rosStore = useRosStore()
             :ros="rosStore.ws"
             :maxLinearSpeed="props.extraConfig.maxLinearSpeed"
             :maxAngularSpeed="props.extraConfig.maxAngularSpeed"
+            :shapeCoefficient="props.extraConfig.shapeCoefficient"
         />
         <ManipKeyboardControl
             v-else-if="
@@ -40,6 +41,7 @@ const rosStore = useRosStore()
             :ros="rosStore.ws"
             :maxLinearSpeed="props.extraConfig.maxLinearSpeed"
             :maxAngularSpeed="props.extraConfig.maxAngularSpeed"
+            :shapeCoefficient="props.extraConfig.shapeCoefficient"
         />
         <TouchControl
             v-else-if="
@@ -50,6 +52,7 @@ const rosStore = useRosStore()
             :maxLinearSpeed="props.extraConfig.maxLinearSpeed"
             :maxAngularSpeed="props.extraConfig.maxAngularSpeed"
             :maxEffort="props.extraConfig.maxEffort"
+            :shapeCoefficient="props.extraConfig.shapeCoefficient"
         />
         <ManipTouchControl
             v-else-if="
@@ -60,6 +63,7 @@ const rosStore = useRosStore()
             :maxLinearSpeed="props.extraConfig.maxLinearSpeed"
             :maxAngularSpeed="props.extraConfig.maxAngularSpeed"
             :maxEffort="props.extraConfig.maxEffort"
+            :shapeCoefficient="props.extraConfig.shapeCoefficient"
         />
         <div
             v-else
