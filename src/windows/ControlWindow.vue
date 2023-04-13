@@ -3,6 +3,7 @@ import KeyboardControl from '@/components/ControlWindow/KeyboardControl.vue'
 import ManipKeyboardControl from '@/components/ControlWindow/ManipKeyboardControl.vue'
 import TouchControl from '@/components/ControlWindow/TouchControl.vue'
 import ManipTouchControl from '@/components/ControlWindow/ManipTouchControl.vue'
+import PositionSteering from '@/components/ControlWindow/PositionSteering.vue'
 import { useRosStore } from '@/stores'
 import { defineProps } from 'vue'
 
@@ -19,8 +20,11 @@ const rosStore = useRosStore()
 
 <template>
     <div>
+        <PositionSteering
+            v-if="props.extraConfig.movementStrategy === 'Position'"
+        />
         <KeyboardControl
-            v-if="
+            v-else-if="
                 props.extraConfig.controlledObject === 'Rover' &&
                 props.extraConfig.controlMode === 'Keyboard'
             "
@@ -59,9 +63,9 @@ const rosStore = useRosStore()
         />
         <div
             v-else
-            style="align-items: center; justify-content: center"
+            style="align-items: center; justify-content: center; display: flex"
         >
-            Choose the window type.
+            Invalid choice. Choose the window type correctly.
         </div>
     </div>
 </template>

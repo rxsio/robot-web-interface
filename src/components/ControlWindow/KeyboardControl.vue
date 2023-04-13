@@ -20,14 +20,16 @@ const elements = ref([
 // Publish steering informations
 const commandInterval = ref(null)
 const topic = ref(null)
+const message = ref(null)
 const maxLinearSpeed = ref(1)
 const maxAngularSpeed = ref(1.57)
 const messageRate = 100 // [ms]
 const carMode = ref(true)
+const inertia = 0.9
 
 function startPublishing() {
     commandInterval.value = setInterval(() => {
-        let message = new Message({
+        let newMessage = new Message({
             linear: {
                 x: 0,
                 y: 0,
@@ -40,24 +42,24 @@ function startPublishing() {
             },
         })
         if (carMode.value) {
-            message.linear.x =
+            newMessage.linear.x =
                 (pressed.value.W - pressed.value.S) *
                 maxLinearSpeed.value *
                 0.01 *
                 elements.value[0].speedPercentage
-            message.angular.z =
+            newMessage.angular.z =
                 (pressed.value.A - pressed.value.D) *
                 maxAngularSpeed.value *
                 0.01 *
                 elements.value[1].speedPercentage
         } else {
-            message.linear.x =
+            newMessage.linear.x =
                 (pressed.value.W - pressed.value.S) *
                 maxLinearSpeed.value *
                 0.01 *
                 elements.value[0].speedPercentage
-            message.angular.z =
-                (message.linear.x / maxLinearSpeed.value) *
+            newMessage.angular.z =
+                (newMessage.linear.x / maxLinearSpeed.value) *
                 maxAngularSpeed.value *
                 Math.tan(
                     (pressed.value.A - pressed.value.D) *
@@ -65,8 +67,14 @@ function startPublishing() {
                         elements.value[1].speedPercentage
                 )
         }
+        message.value.linear.x =
+            inertia * message.value.linear.x +
+            (1.0 - inertia) * newMessage.linear.x
+        message.value.angular.z =
+            inertia * message.value.angular.z +
+            (1.0 - inertia) * newMessage.angular.z
         // console.log(message)
-        topic.value.publish(message)
+        topic.value.publish(message.value)
     }, messageRate)
 }
 
@@ -127,6 +135,18 @@ onMounted(() => {
         ros: props.ros,
         name: '/cmd_vel',
         messageType: 'geometry_msgs/Twist',
+    })
+    message.value = new Message({
+        linear: {
+            x: 0,
+            y: 0,
+            z: 0,
+        },
+        angular: {
+            x: 0,
+            y: 0,
+            z: 0,
+        },
     })
     startPublishing()
 })

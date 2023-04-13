@@ -46,15 +46,18 @@ const elements = ref([
 const commandInterval = ref(null)
 const manipTopic = ref(null)
 const gripperTopic = ref(null)
+const manipMessage = ref(null)
+const gripperMessage = ref(null)
 const maxLinearSpeed = ref(1.0)
 const maxAngularSpeed = ref(1.0)
 const maxEffort = ref(1.0)
 const messageRate = 100 // [ms]
 const positionMode = ref(true)
+const inertia = 0.9
 
 function startPublishing() {
     commandInterval.value = setInterval(() => {
-        let manipMessage = new Message({
+        let newManipMessage = new Message({
             linear: {
                 x: 0,
                 y: 0,
@@ -66,44 +69,63 @@ function startPublishing() {
                 z: 0,
             },
         })
-        let gripperMessage = new Message({
+        let newGripperMessage = new Message({
             data: 0,
         })
         if (positionMode.value) {
-            manipMessage.linear.x =
+            newManipMessage.linear.x =
                 (pressed.value.W - pressed.value.S) *
                 maxLinearSpeed.value *
                 0.01 *
                 elements.value[0].speedPercentage
-            manipMessage.linear.y =
+            newManipMessage.linear.y =
                 (pressed.value.A - pressed.value.D) *
                 maxLinearSpeed.value *
                 0.01 *
                 elements.value[1].speedPercentage
-            manipMessage.linear.z =
+            newManipMessage.linear.z =
                 (pressed.value.Q - pressed.value.E) *
                 maxLinearSpeed.value *
                 0.01 *
                 elements.value[2].speedPercentage
         } else {
-            manipMessage.angular.x =
+            newManipMessage.angular.x =
                 (pressed.value.A - pressed.value.D) *
                 maxAngularSpeed.value *
                 0.01 *
                 elements.value[3].speedPercentage
-            manipMessage.angular.y =
+            newManipMessage.angular.y =
                 (pressed.value.W - pressed.value.S) *
                 maxAngularSpeed.value *
                 0.01 *
                 elements.value[4].speedPercentage
-            gripperMessage.data =
+            newGripperMessage.data =
                 (pressed.value.Q - pressed.value.E) *
                 maxEffort.value *
                 0.01 *
                 elements.value[5].speedPercentage
         }
-        manipTopic.value.publish(manipMessage)
-        gripperTopic.value.publish(gripperMessage)
+        manipMessage.value.linear.x =
+            inertia * manipMessage.value.linear.x +
+            (1.0 - inertia) * newManipMessage.linear.x
+        manipMessage.value.linear.y =
+            inertia * manipMessage.value.linear.y +
+            (1.0 - inertia) * newManipMessage.linear.y
+        manipMessage.value.linear.z =
+            inertia * manipMessage.value.linear.z +
+            (1.0 - inertia) * newManipMessage.linear.z
+        manipMessage.value.angular.x =
+            inertia * manipMessage.value.angular.x +
+            (1.0 - inertia) * newManipMessage.angular.x
+        manipMessage.value.angular.y =
+            inertia * manipMessage.value.angular.y +
+            (1.0 - inertia) * newManipMessage.angular.y
+        gripperMessage.value.data =
+            inertia * gripperMessage.value.data +
+            (1.0 - inertia) * newGripperMessage.data
+        // console.log(message)
+        manipTopic.value.publish(manipMessage.value)
+        gripperTopic.value.publish(gripperMessage.value)
     }, messageRate)
 }
 
@@ -182,6 +204,21 @@ onMounted(() => {
         ros: props.ros,
         name: '/cmd_grip',
         messageType: 'std_msgs/Float64',
+    })
+    manipMessage.value = new Message({
+        linear: {
+            x: 0,
+            y: 0,
+            z: 0,
+        },
+        angular: {
+            x: 0,
+            y: 0,
+            z: 0,
+        },
+    })
+    gripperMessage.value = new Message({
+        data: 0,
     })
     startPublishing()
 })
@@ -339,7 +376,6 @@ onBeforeUnmount(() => {
         </div>
     </div>
 </template>
-
 <style scoped>
 @import '@/styles/control-styles.css';
 </style>
