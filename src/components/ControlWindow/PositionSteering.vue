@@ -64,7 +64,7 @@ onBeforeMount(() => {
 })
 </script>
 <template>
-    <div class="control keyboardControl">
+    <div class="control">
         <div style="border: 1px solid #666; border-radius: 15px">
             <p style="font-size: 16pt; margin: 10px 0">Set position</p>
             <v-divider style="border-color: #bbb"></v-divider>

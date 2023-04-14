@@ -131,76 +131,41 @@ onBeforeUnmount(() => {
 })
 </script>
 <template>
-    <div class="control keyboardControl">
-        <div
-            style="display: inline-flex; flex-wrap: wrap; place-content: center"
-        >
-            <div style="height: 250px">
+    <div class="control">
+        <div class="joystick-wrapper">
+            <div class="joystick-container">
                 <joystick
                     id="manip-1"
                     :size="250"
                     :callback="joystickMovedCallbackXY"
                 />
-                <p style="margin: 0; position: relative; top: -250px">
-                    - Move Y -
-                </p>
-                <p
-                    style="
-                        position: relative;
-                        writing-mode: sideways-lr;
-                        top: -280px;
-                        height: 100%;
-                    "
-                >
-                    - Move X -
-                </p>
+                <p class="horizontal-description">- Move Y -</p>
+                <p class="vertical-description">- Move X -</p>
             </div>
-            <div style="height: 250px">
+            <div class="joystick-container">
                 <joystick
                     id="manip-2"
                     :size="250"
                     :callback="joystickMovedCallbackZPitch"
                 />
-                <p style="margin: 0; position: relative; top: -250px">
-                    - Pitch -
-                </p>
-                <p
-                    style="
-                        position: relative;
-                        writing-mode: sideways-lr;
-                        top: -280px;
-                        height: 100%;
-                    "
-                >
-                    - Move Z -
-                </p>
+                <p class="horizontal-description">- Pitch -</p>
+                <p class="vertical-description">- Move Z -</p>
             </div>
-            <div style="height: 250px">
+            <div class="joystick-container">
                 <joystick
                     id="manip-3"
                     :size="250"
                     :callback="joystickMovedCallbackRollClamp"
                 />
-                <p style="margin: 0; position: relative; top: -250px">
-                    - Roll -
-                </p>
-                <p
-                    style="
-                        position: relative;
-                        writing-mode: sideways-lr;
-                        top: -280px;
-                        height: 100%;
-                    "
-                >
-                    - Clamp -
-                </p>
+                <p class="horizontal-description">- Roll -</p>
+                <p class="vertical-description">- Clamp -</p>
             </div>
         </div>
         <v-list>
             <v-list-item
                 v-for="(element, i) in elements"
                 :key="i"
-                class="slidecontainer"
+                class="slider-container"
             >
                 <div class="col1">
                     <input
@@ -213,10 +178,10 @@ onBeforeUnmount(() => {
                     />
                 </div>
                 <div class="col2">
-                    <label class="sliderLabel">{{ element.text }}:</label>
+                    <label class="slider-label">{{ element.text }}:</label>
                 </div>
                 <div class="col3">
-                    <label class="sliderLabel">
+                    <label class="slider-label">
                         {{ element.speedPercentage }}%
                     </label>
                 </div>
@@ -226,4 +191,24 @@ onBeforeUnmount(() => {
 </template>
 <style scoped>
 @import '@/styles/control-styles.css';
+
+div.joystick-wrapper {
+    display: inline-flex;
+    flex-wrap: wrap;
+    place-content: center;
+}
+div.joystick-container {
+    height: 250px;
+}
+div.joystick-container p.horizontal-description {
+    margin: 0;
+    position: relative;
+    top: -250px;
+}
+div.joystick-container p.vertical-description {
+    position: relative;
+    writing-mode: sideways-lr;
+    top: -280px;
+    height: 100%;
+}
 </style>

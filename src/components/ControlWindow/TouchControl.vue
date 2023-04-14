@@ -96,34 +96,14 @@ onBeforeUnmount(() => {
 })
 </script>
 <template>
-    <div class="control keyboardControl">
-        <div
-            style="
-                display: flex;
-                flex-flow: row;
-                flex-wrap: wrap;
-                align-items: center;
-                justify-content: space-evenly;
-                width: 80%;
-            "
-        >
+    <div class="control">
+        <div class="top-wrapper">
             <joystick
                 id="rover-1"
                 :size="250"
                 :callback="joystickMovedCallback"
             />
-            <div
-                style="
-                    display: flex;
-                    flex-flow: row;
-                    justify-content: center;
-                    background-color: #eee;
-                    border-radius: 25px
-                    height: 220px;
-                    padding: 5px;
-                    margin: 15px;
-                "
-            >
+            <div class="mode-switch-container">
                 <v-btn
                     icon
                     @click="carMode = true"
@@ -146,7 +126,7 @@ onBeforeUnmount(() => {
             <v-list-item
                 v-for="(element, i) in elements"
                 :key="i"
-                class="slidecontainer"
+                class="slider-container"
             >
                 <div class="col1">
                     <input
@@ -160,10 +140,10 @@ onBeforeUnmount(() => {
                     />
                 </div>
                 <div class="col2">
-                    <label class="sliderLabel">{{ element.text }}:</label>
+                    <label class="slider-label">{{ element.text }}:</label>
                 </div>
                 <div class="col3">
-                    <label class="sliderLabel">
+                    <label class="slider-label">
                         {{ element.speedPercentage }}%
                     </label>
                 </div>

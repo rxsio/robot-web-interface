@@ -8,12 +8,21 @@
     --control-secondary-medium: #8e7e9b;
 }
 
-div.control {
+.control {
     font-family: Arial, Helvetica, sans-serif;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
     text-align: center;
     color: var(--control-primary);
+}
+
+div.control {
+    display: flex;
+    flex-flow: column;
+    align-items: center;
+    margin: 10px 5px;
+    width: calc(100% - 5px);
+    height: calc(100% - 10px);
 }
 
 div.control button {
@@ -35,24 +44,57 @@ div.control button:hover {
     color: white;
 }
 
-div.control label.sliderLabel {
+div.control .slider-container {
+    /* width: 100%;
+    padding-top: 40px; */
+    height: 40px;
+    width: 80%;
+    display: inline-flex;
+    padding: 5px;
+}
+
+div.control .slider-container .col1 {
+    display: flex;
+    width: auto;
+    text-align: right;
+    vertical-align: middle;
+    flex-grow: 1;
+}
+
+div.control .slider-container .col2 {
+    display: flex;
+    min-width: 8.5em;
+    text-align: left;
+    vertical-align: middle;
+}
+
+div.control .slider-container .col3 {
+    display: flex;
+    min-width: 3em;
+    justify-content: right;
+    vertical-align: middle;
+}
+
+div.control label.slider-label {
     color: var(--control-primary);
     font-size: 17px;
 }
 
-div.control .slidecontainer {
-    width: 100%;
-    padding-top: 40px;
-}
-
 div.control .slider {
     -webkit-appearance: none;
-    width: 50%;
+    appearance: none;
+    /* width: 50%; */
     height: 8px;
     border-radius: 16px;
     background: var(--control-secondary);
     outline: none;
     margin-right: 22px;
+    width: 90%;
+}
+
+div.control .slider:focus {
+    background: var(--control-secondary-light);
+    height: 12px;
 }
 
 div.control .slider::-webkit-slider-thumb {
@@ -75,54 +117,7 @@ div.control .slider::-moz-range-thumb {
     cursor: pointer;
 }
 
-div.keyboardControl {
-    display: flex;
-    flex-flow: column;
-    align-items: center;
-    margin: 10px 5px;
-    width: calc(100% - 5px);
-    height: calc(100% - 10px);
-}
-
-div.keyboardControl div.slidecontainer {
-    height: 40px;
-    width: 80%;
-    display: inline-flex;
-    padding: 5px;
-}
-
-div.keyboardControl div.slidecontainer .col1 {
-    display: flex;
-    width: auto;
-    text-align: right;
-    vertical-align: middle;
-    flex-grow: 1;
-}
-
-div.keyboardControl div.slidecontainer .col2 {
-    display: flex;
-    min-width: 8.5em;
-    text-align: left;
-    vertical-align: middle;
-}
-
-div.keyboardControl div.slidecontainer .col3 {
-    display: flex;
-    min-width: 3em;
-    justify-content: right;
-    vertical-align: middle;
-}
-
-div.keyboardControl div.slidecontainer .slider {
-    width: 90%;
-}
-
-div.keyboardControl div.slidecontainer .slider.focused {
-    background: var(--control-secondary-light);
-    height: 12px;
-}
-
-div.keyboardBox {
+div.control div.keyboard-box {
     padding: 10px;
     text-align: center;
     background: #eee;
@@ -132,22 +127,22 @@ div.keyboardBox {
     border-radius: 15px;
 }
 
-div.keyboardBox p {
+div.control div.keyboard-box p {
     margin: 0;
 }
 
-div.keyboardBox p button {
+div.control div.keyboard-box p button {
     margin: 8px;
     width: 80px;
     height: 80px;
     font-size: 40px;
 }
 
-div.keyboardBox p button.pressed {
+div.control div.keyboard-box p button.pressed {
     background-color: var(--control-secondary-light);
 }
 
-.control .mode-switch {
+div.control .mode-switch {
     background-color: var(--v-morelowy-base);
     border: none;
     width: 80px;
@@ -156,17 +151,48 @@ div.keyboardBox p button.pressed {
     opacity: 20%;
 }
 
-.control .mode-switch:hover {
+div.control .mode-switch:hover {
     background-color: var(--v-morelowy-lighten1);
     opacity: 30%;
 }
 
-.control .mode-switch.active {
+div.control .mode-switch.active {
     background-color: var(--v-miętowy-base);
     opacity: 90%;
 }
 
-.control .mode-switch.active:hover {
+div.control .mode-switch.active:hover {
     background-color: var(--v-miętowy-lighten1);
     opacity: 100%;
+}
+
+div.control div.top-wrapper {
+    display: flex;
+    flex-flow: row;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-evenly;
+    width: 80%;
+}
+
+div.control div.mode-switch-container {
+    display: flex;
+    flex-flow: row;
+    justify-content: center;
+    background-color: #eee;
+    border-radius: 25px;
+    padding: 5px;
+    margin: 15px;
+}
+
+div.control div.description {
+    position: absolute;
+    top: 30px;
+    right: 15px;
+}
+
+div.control div.description button {
+    background: none;
+    border: none;
+    border-radius: 100%;
 }
