@@ -22,6 +22,7 @@ const rosStore = useRosStore()
     <div>
         <PositionSteering
             v-if="props.extraConfig.movementStrategy === 'Position'"
+            :ros="rosStore.ws"
         />
         <KeyboardControl
             v-else-if="
