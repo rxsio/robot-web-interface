@@ -3,12 +3,7 @@ import Joystick from './Joystick.vue'
 import { defineProps, onMounted, onBeforeUnmount, ref } from 'vue'
 import { Topic, Message } from 'roslib'
 
-const props = defineProps([
-    'ros',
-    'maxLinearSpeed',
-    'maxAngularSpeed',
-    'shapeCoefficient',
-])
+const props = defineProps(['ros', 'config'])
 
 const elements = ref([
     {
@@ -63,9 +58,12 @@ function joystickMovedCallback(stickData) {
 
 onMounted(() => {
     // Read maximum speed from props
-    if (props.maxLinearSpeed) maxLinearSpeed.value = props.maxLinearSpeed
-    if (props.maxAngularSpeed) maxAngularSpeed.value = props.maxAngularSpeed
-    if (props.shapeCoefficient) shapeCoefficient.value = props.shapeCoefficient
+    if (props.config.maxLinearSpeed)
+        maxLinearSpeed.value = props.config.maxLinearSpeed
+    if (props.config.maxAngularSpeed)
+        maxAngularSpeed.value = props.config.maxAngularSpeed
+    if (props.config.shapeCoefficient)
+        shapeCoefficient.value = props.config.shapeCoefficient
 
     topic.value = new Topic({
         ros: props.ros,

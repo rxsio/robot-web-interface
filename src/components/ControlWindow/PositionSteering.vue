@@ -117,6 +117,8 @@ onBeforeMount(() => {
                 color="var(--control-secondary)"
                 v-model="cartesianMode"
                 inset
+                :disabled="switching"
+                :loading="switching"
                 @change="toggleMode()"
             ></v-switch>
             <v-label>

@@ -3,13 +3,7 @@ import Joystick from './Joystick.vue'
 import { defineProps, onMounted, onBeforeUnmount, ref } from 'vue'
 import { Topic, Message } from 'roslib'
 
-const props = defineProps([
-    'ros',
-    'maxLinearSpeed',
-    'maxAngularSpeed',
-    'maxEffort',
-    'shapeCoefficient',
-])
+const props = defineProps(['ros', 'config'])
 
 const elements = ref([
     {
@@ -76,25 +70,43 @@ function startPublishing() {
         gripperTopic.value.publish(gripperMessage.value)
     }, messageRate)
 }
-function joystickMovedCallbackXY(stickData) {
-    controlCommands.value[0] = parseFloat(stickData.y)
-    controlCommands.value[1] = -parseFloat(stickData.x)
-}
-function joystickMovedCallbackZPitch(stickData) {
-    controlCommands.value[2] = parseFloat(stickData.y)
-    controlCommands.value[4] = parseFloat(stickData.x)
-}
-function joystickMovedCallbackRollClamp(stickData) {
-    controlCommands.value[3] = parseFloat(stickData.x)
-    controlCommands.value[5] = parseFloat(stickData.y)
-}
+
+const joysticks = ref([
+    {
+        horizontalText: '- Move Y -',
+        verticalText: '- Move X -',
+        callback: (stickData) => {
+            controlCommands.value[0] = parseFloat(stickData.y)
+            controlCommands.value[1] = -parseFloat(stickData.x)
+        },
+    },
+    {
+        horizontalText: '- Pitch -',
+        verticalText: '- Move Z -',
+        callback: (stickData) => {
+            controlCommands.value[2] = parseFloat(stickData.y)
+            controlCommands.value[4] = parseFloat(stickData.x)
+        },
+    },
+    {
+        horizontalText: '- Roll -',
+        verticalText: '- Clamp -',
+        callback: (stickData) => {
+            controlCommands.value[3] = parseFloat(stickData.x)
+            controlCommands.value[5] = parseFloat(stickData.y)
+        },
+    },
+])
 
 onMounted(() => {
     // Read maximum speed and effort from props
-    if (props.maxLinearSpeed) maxLinearSpeed.value = props.maxLinearSpeed
-    if (props.maxAngularSpeed) maxAngularSpeed.value = props.maxAngularSpeed
-    if (props.maxEffort) maxEffort.value = props.maxEffort
-    if (props.shapeCoefficient) shapeCoefficient.value = props.shapeCoefficient
+    if (props.config.maxLinearSpeed)
+        maxLinearSpeed.value = props.config.maxLinearSpeed
+    if (props.config.maxAngularSpeed)
+        maxAngularSpeed.value = props.config.maxAngularSpeed
+    if (props.config.maxEffort) maxEffort.value = props.config.maxEffort
+    if (props.config.shapeCoefficient)
+        shapeCoefficient.value = props.config.shapeCoefficient
 
     manipTopic.value = new Topic({
         ros: props.ros,
@@ -133,32 +145,18 @@ onBeforeUnmount(() => {
 <template>
     <div class="control">
         <div class="joystick-wrapper">
-            <div class="joystick-container">
+            <div
+                v-for="(joy, i) in joysticks"
+                :key="i"
+                class="joystick-container"
+            >
                 <joystick
-                    id="manip-1"
+                    :id="'joy-manip-' + i"
                     :size="250"
-                    :callback="joystickMovedCallbackXY"
+                    :callback="joy.callback"
                 />
-                <p class="horizontal-description">- Move Y -</p>
-                <p class="vertical-description">- Move X -</p>
-            </div>
-            <div class="joystick-container">
-                <joystick
-                    id="manip-2"
-                    :size="250"
-                    :callback="joystickMovedCallbackZPitch"
-                />
-                <p class="horizontal-description">- Pitch -</p>
-                <p class="vertical-description">- Move Z -</p>
-            </div>
-            <div class="joystick-container">
-                <joystick
-                    id="manip-3"
-                    :size="250"
-                    :callback="joystickMovedCallbackRollClamp"
-                />
-                <p class="horizontal-description">- Roll -</p>
-                <p class="vertical-description">- Clamp -</p>
+                <p class="horizontal-description">{{ joy.horizontalText }}</p>
+                <p class="vertical-description">{{ joy.verticalText }}</p>
             </div>
         </div>
         <v-list>

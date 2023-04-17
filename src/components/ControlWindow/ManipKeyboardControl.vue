@@ -2,13 +2,7 @@
 import { defineProps, onMounted, onBeforeUnmount, ref } from 'vue'
 import { Topic, Message } from 'roslib'
 
-const props = defineProps([
-    'ros',
-    'maxLinearSpeed',
-    'maxAngularSpeed',
-    'maxEffort',
-    'shapeCoefficient',
-])
+const props = defineProps(['ros', 'config'])
 
 const elements = ref([
     {
@@ -141,10 +135,13 @@ function unfocus() {
 
 onMounted(() => {
     // Read maximum speed and effort from props
-    if (props.maxLinearSpeed) maxLinearSpeed.value = props.maxLinearSpeed
-    if (props.maxAngularSpeed) maxAngularSpeed.value = props.maxAngularSpeed
-    if (props.maxEffort) maxEffort.value = props.maxEffort
-    if (props.shapeCoefficient) shapeCoefficient.value = props.shapeCoefficient
+    if (props.config.maxLinearSpeed)
+        maxLinearSpeed.value = props.config.maxLinearSpeed
+    if (props.config.maxAngularSpeed)
+        maxAngularSpeed.value = props.config.maxAngularSpeed
+    if (props.config.maxEffort) maxEffort.value = props.config.maxEffort
+    if (props.config.shapeCoefficient)
+        shapeCoefficient.value = props.config.shapeCoefficient
 
     // Start listening keyboard signals
     window.addEventListener('keydown', keyDownCallback)

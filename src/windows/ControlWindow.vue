@@ -1,70 +1,47 @@
 <script setup>
-import KeyboardControl from '@/components/ControlWindow/KeyboardControl.vue'
-import ManipKeyboardControl from '@/components/ControlWindow/ManipKeyboardControl.vue'
-import TouchControl from '@/components/ControlWindow/TouchControl.vue'
-import ManipTouchControl from '@/components/ControlWindow/ManipTouchControl.vue'
-import PositionSteering from '@/components/ControlWindow/PositionSteering.vue'
+import elements from '@/components/ControlWindow'
 import { useRosStore } from '@/stores'
-import { defineProps } from 'vue'
+import { defineProps, ref, watch } from 'vue'
 
 const props = defineProps(['extraConfig'])
 
 const rosStore = useRosStore()
-// Modes to add:
-// - rover - car, tank switched in one window - keyboard with inercia
-// - rover - car, tank switched in another window - joystick without inercia (on mobile)
-// - manip - velocity steering, inverse kinematics - keyboard with inercia
-// - manip - velocity steering, inverse kinematics - joystick without inercia (on mobile)
-// - manip - position steering, forward and inverse kinematics in one window - typing values
+
+const component = ref(null)
+const config = ref({})
+
+watch(props, () => {
+    config.value = JSON.parse(JSON.stringify(props.extraConfig))
+
+    const strategy = config.value.movementStrategy
+        ? config.value.movementStrategy.toLowerCase()
+        : null
+    const object = config.value.controlledObject
+        ? config.value.controlledObject.toLowerCase()
+        : null
+    const mode = config.value.controlMode
+        ? config.value.controlMode.toLowerCase()
+        : null
+
+    let element = strategy in elements ? elements[strategy] : {}
+    if (object in element) element = element[object]
+    if (mode in element) element = element[mode]
+
+    if (element._compiled !== undefined) component.value = element
+
+    config.value.movementStrategy = undefined
+    config.value.controlledObject = undefined
+    config.value.controlMode = undefined
+})
 </script>
 
 <template>
     <div>
-        <PositionSteering
-            v-if="props.extraConfig.movementStrategy === 'Position'"
+        <component
+            v-if="component"
+            :is="component"
             :ros="rosStore.ws"
-        />
-        <KeyboardControl
-            v-else-if="
-                props.extraConfig.controlledObject === 'Rover' &&
-                props.extraConfig.controlMode === 'Keyboard'
-            "
-            :ros="rosStore.ws"
-            :maxLinearSpeed="props.extraConfig.maxLinearSpeed"
-            :maxAngularSpeed="props.extraConfig.maxAngularSpeed"
-            :shapeCoefficient="props.extraConfig.shapeCoefficient"
-        />
-        <ManipKeyboardControl
-            v-else-if="
-                props.extraConfig.controlledObject === 'Manipulator' &&
-                props.extraConfig.controlMode === 'Keyboard'
-            "
-            :ros="rosStore.ws"
-            :maxLinearSpeed="props.extraConfig.maxLinearSpeed"
-            :maxAngularSpeed="props.extraConfig.maxAngularSpeed"
-            :shapeCoefficient="props.extraConfig.shapeCoefficient"
-        />
-        <TouchControl
-            v-else-if="
-                props.extraConfig.controlledObject === 'Rover' &&
-                props.extraConfig.controlMode === 'Touch'
-            "
-            :ros="rosStore.ws"
-            :maxLinearSpeed="props.extraConfig.maxLinearSpeed"
-            :maxAngularSpeed="props.extraConfig.maxAngularSpeed"
-            :maxEffort="props.extraConfig.maxEffort"
-            :shapeCoefficient="props.extraConfig.shapeCoefficient"
-        />
-        <ManipTouchControl
-            v-else-if="
-                props.extraConfig.controlledObject === 'Manipulator' &&
-                props.extraConfig.controlMode === 'Touch'
-            "
-            :ros="rosStore.ws"
-            :maxLinearSpeed="props.extraConfig.maxLinearSpeed"
-            :maxAngularSpeed="props.extraConfig.maxAngularSpeed"
-            :maxEffort="props.extraConfig.maxEffort"
-            :shapeCoefficient="props.extraConfig.shapeCoefficient"
+            :config="config"
         />
         <div
             v-else
