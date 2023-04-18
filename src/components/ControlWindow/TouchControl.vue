@@ -2,6 +2,7 @@
 import Joystick from './Joystick.vue'
 import { defineProps, onMounted, onBeforeUnmount, ref } from 'vue'
 import { Topic, Message } from 'roslib'
+import { createController } from './controller'
 
 const props = defineProps(['ros', 'config'])
 
@@ -21,98 +22,89 @@ const elements = ref([
 // Publish steering informations
 const commandInterval = ref(null)
 const topic = ref(null)
-const message = ref(null)
+const messageRate = 100 // [ms]
 const maxLinearSpeed = ref(1)
 const maxAngularSpeed = ref(1.57)
-const messageRate = 100 // [ms]
 const carMode = ref(true)
-const shapeCoefficient = ref(1.0)
-const deadzone = 0.15
+const controllers = ref([])
+
+function startPublishing() {
+    commandInterval.value = setInterval(() => {
+        let message = new Message({
+            linear: {
+                x: 0,
+                y: 0,
+                z: 0,
+            },
+            angular: {
+                x: 0,
+                y: 0,
+                z: 0,
+            },
+        })
+        message.linear.x =
+            controllers.value[0].getResult() *
+            0.01 *
+            elements.value[0].speedPercentage
+        if (carMode.value) {
+            message.angular.z =
+                (message.linear.x / maxLinearSpeed.value) *
+                maxAngularSpeed.value *
+                Math.tan(
+                    (controllers.value[1].getResult() / maxAngularSpeed.value) *
+                        0.01 *
+                        elements.value[1].speedPercentage
+                )
+        } else {
+            message.angular.z =
+                controllers.value[1].getResult() *
+                0.01 *
+                elements.value[1].speedPercentage
+        }
+        topic.value.publish(message)
+    }, messageRate)
+}
 
 function joystickMovedCallback(stickData) {
-    // Take deadzone into account
-    let controlCommands = {
-        drive: parseFloat(stickData.y),
-        turn: -parseFloat(stickData.x),
-    }
-    controlCommands.drive =
-        Math.abs(controlCommands.drive) < deadzone
-            ? 0
-            : (controlCommands.drive -
-                  Math.sign(controlCommands.drive) * deadzone) /
-              (1.0 - deadzone)
-    controlCommands.turn =
-        Math.abs(controlCommands.turn) < deadzone
-            ? 0
-            : (controlCommands.turn -
-                  Math.sign(controlCommands.turn) * deadzone) /
-              (1.0 - deadzone)
-
-    // Non-linearly scale each value depending on the selected mode
-    message.value.linear.x = controlCommands.drive
-    message.value.linear.x *=
-        Math.pow(
-            Math.abs(message.value.linear.x),
-            shapeCoefficient.value - 1.0
-        ) *
-        maxLinearSpeed.value *
-        0.01 *
-        elements.value[0].speedPercentage
-    if (carMode.value) {
-        let angle = controlCommands.turn
-        angle *=
-            Math.pow(Math.abs(angle), shapeCoefficient.value - 1.0) *
-            0.01 *
-            elements.value[1].speedPercentage
-        message.value.angular.z =
-            (message.value.linear.x / maxLinearSpeed.value) *
-            maxAngularSpeed.value *
-            Math.tan(angle)
-    } else {
-        message.value.angular.z = controlCommands.turn
-        message.value.angular.z *=
-            Math.pow(
-                Math.abs(message.value.angular.z),
-                shapeCoefficient.value - 1.0
-            ) *
-            maxAngularSpeed.value *
-            0.01 *
-            elements.value[1].speedPercentage
-    }
+    controllers.value[0].setCommand(parseFloat(stickData.y))
+    controllers.value[1].setCommand(-parseFloat(stickData.x))
 }
 
 onMounted(() => {
-    // Read maximum speed from props
+    // Read configuration from props
     if (props.config.maxLinearSpeed)
         maxLinearSpeed.value = props.config.maxLinearSpeed
     if (props.config.maxAngularSpeed)
         maxAngularSpeed.value = props.config.maxAngularSpeed
-    if (props.config.shapeCoefficient)
-        shapeCoefficient.value = props.config.shapeCoefficient
+    const shapeCoefficient = props.config.shapeCoefficient
+        ? props.config.shapeCoefficient
+        : 1.0
+    const deadzone = props.config.deadzone ? props.config.deadzone : 0.15
+    const inertia = props.config.inertia ? props.config.inertia : 0
 
+    // Start publishing steering informations
     topic.value = new Topic({
         ros: props.ros,
         name: '/cmd_vel',
         messageType: 'geometry_msgs/Twist',
     })
 
-    message.value = new Message({
-        linear: {
-            x: 0,
-            y: 0,
-            z: 0,
-        },
-        angular: {
-            x: 0,
-            y: 0,
-            z: 0,
-        },
-    })
-
-    // Start sending messages to cmd_vel
-    commandInterval.value = setInterval(() => {
-        topic.value.publish(message.value)
-    }, messageRate)
+    // Create controllers instances
+    controllers.value = [
+        createController(
+            maxLinearSpeed.value,
+            shapeCoefficient,
+            deadzone,
+            inertia
+        ),
+        createController(
+            maxAngularSpeed.value,
+            shapeCoefficient,
+            deadzone,
+            inertia
+        ),
+    ]
+    startPublishing()
 })
 onBeforeUnmount(() => {
     clearInterval(commandInterval.value)

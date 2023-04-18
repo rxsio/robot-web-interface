@@ -1,6 +1,7 @@
 <script setup>
 import { defineProps, onMounted, onBeforeUnmount, ref } from 'vue'
 import { Topic, Message } from 'roslib'
+import { createController } from './controller'
 
 const props = defineProps(['ros', 'config'])
 
@@ -41,16 +42,9 @@ const elements = ref([
 const commandInterval = ref(null)
 const manipTopic = ref(null)
 const gripperTopic = ref(null)
-const manipMessage = ref(null)
-const gripperMessage = ref(null)
-const maxLinearSpeed = ref(1.0)
-const maxAngularSpeed = ref(1.0)
-const maxEffort = ref(1.0)
 const messageRate = 100 // [ms]
 const positionMode = ref(true)
-const inertia = 0.9
-const shapeCoefficient = ref(1.0)
-const controlCommands = ref([0, 0, 0, 0, 0, 0])
+const controllers = ref([])
 
 function startPublishing() {
     commandInterval.value = setInterval(() => {
@@ -64,29 +58,41 @@ function startPublishing() {
             newCommands[4] = pressed.value.W - pressed.value.S
             newCommands[5] = pressed.value.Q - pressed.value.E
         }
-
-        // Save movement inercia on user commands level
-        controlCommands.value = controlCommands.value.map((value, index) => {
-            value = inertia * value + (1 - inertia) * newCommands[index]
-            return Math.abs(value) < 0.01 ? 0 : value
+        newCommands.forEach((value, index) => {
+            controllers.value[index].setCommand(value)
         })
 
-        // Non-linearly scale each value depending on the selected mode
-        const values = controlCommands.value.map(
-            (value, index) =>
-                Math.sign(value) *
-                Math.pow(Math.abs(value), shapeCoefficient.value) *
+        let manipMessage = new Message({
+            linear: {
+                x: 0,
+                y: 0,
+                z: 0,
+            },
+            angular: {
+                x: 0,
+                y: 0,
+                z: 0,
+            },
+        })
+        let gripperMessage = new Message({
+            data: 0,
+        })
+
+        ;[
+            manipMessage.linear.x,
+            manipMessage.linear.y,
+            manipMessage.linear.z,
+            manipMessage.angular.x,
+            manipMessage.angular.y,
+            gripperMessage.data,
+        ] = controllers.value.map(
+            (controller, index) =>
+                controller.getResult() *
                 0.01 *
                 elements.value[index].speedPercentage
         )
-        manipMessage.value.linear.x = values[0] * maxLinearSpeed.value
-        manipMessage.value.linear.y = values[1] * maxLinearSpeed.value
-        manipMessage.value.linear.z = values[2] * maxLinearSpeed.value
-        manipMessage.value.angular.x = values[3] * maxAngularSpeed.value
-        manipMessage.value.angular.y = values[4] * maxAngularSpeed.value
-        gripperMessage.value.data = values[5] * maxEffort.value
-        manipTopic.value.publish(manipMessage.value)
-        gripperTopic.value.publish(gripperMessage.value)
+        manipTopic.value.publish(manipMessage)
+        gripperTopic.value.publish(gripperMessage)
     }, messageRate)
 }
 
@@ -138,21 +144,23 @@ function unfocus() {
 }
 
 onMounted(() => {
-    // Read maximum speed and effort from props
-    if (props.config.maxLinearSpeed)
-        maxLinearSpeed.value = props.config.maxLinearSpeed
-    if (props.config.maxAngularSpeed)
-        maxAngularSpeed.value = props.config.maxAngularSpeed
-    if (props.config.maxEffort) maxEffort.value = props.config.maxEffort
-    if (props.config.shapeCoefficient)
-        shapeCoefficient.value = props.config.shapeCoefficient
+    // Read configuration from props
+    const maxLinearSpeed = props.config.maxLinearSpeed
+        ? props.config.maxLinearSpeed
+        : 1.0
+    const maxAngularSpeed = props.config.maxAngularSpeed
+        ? props.config.maxAngularSpeed
+        : 1.0
+    const maxEffort = props.config.maxEffort ? props.config.maxEffort : 1.0
+    const shapeCoefficient = props.config.shapeCoefficient
+        ? props.config.shapeCoefficient
+        : 1.0
+    const deadzone = props.config.deadzone ? props.config.deadzone : 0
+    const inertia = props.config.inertia ? props.config.inertia : 0.9
 
     // Start listening keyboard signals
     window.addEventListener('keydown', keyDownCallback)
     window.addEventListener('keyup', keyUpCallback)
-
-    // Set focus on first slider
-    document.getElementById(elements.value[focusIndex.value].id).focus()
 
     // Set unique IDs
     const randId = String(parseInt(1000000 * Math.random()))
@@ -170,21 +178,18 @@ onMounted(() => {
         name: '/cmd_grip',
         messageType: 'std_msgs/Float64',
     })
-    manipMessage.value = new Message({
-        linear: {
-            x: 0,
-            y: 0,
-            z: 0,
-        },
-        angular: {
-            x: 0,
-            y: 0,
-            z: 0,
-        },
-    })
-    gripperMessage.value = new Message({
-        data: 0,
-    })
+
+    // Create controllers instances
+    controllers.value = [
+        maxLinearSpeed,
+        maxLinearSpeed,
+        maxLinearSpeed,
+        maxAngularSpeed,
+        maxAngularSpeed,
+        maxEffort,
+    ].map((value) =>
+        createController(value, shapeCoefficient, deadzone, inertia)
+    )
     startPublishing()
 })
 onBeforeUnmount(() => {

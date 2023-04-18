@@ -1,6 +1,7 @@
 <script setup>
 import { defineProps, onMounted, onBeforeUnmount, ref } from 'vue'
 import { Topic, Message } from 'roslib'
+import { createController } from './controller'
 
 const props = defineProps(['ros', 'config'])
 
@@ -20,65 +21,49 @@ const elements = ref([
 // Publish steering informations
 const commandInterval = ref(null)
 const topic = ref(null)
-const message = ref(null)
+const messageRate = 100 // [ms]
 const maxLinearSpeed = ref(1)
 const maxAngularSpeed = ref(1.57)
-const messageRate = 100 // [ms]
 const carMode = ref(true)
-const inertia = 0.9
-const shapeCoefficient = ref(1.0)
-const controlCommands = ref({ drive: 0, turn: 0 })
+const controllers = ref([])
 
 function startPublishing() {
     commandInterval.value = setInterval(() => {
-        // Save movement inercia on user commands level
-        controlCommands.value.drive =
-            controlCommands.value.drive * inertia +
-            (1 - inertia) * (pressed.value.W - pressed.value.S)
-        controlCommands.value.turn =
-            controlCommands.value.turn * inertia +
-            (1 - inertia) * (pressed.value.A - pressed.value.D)
+        controllers.value[0].setCommand(pressed.value.W - pressed.value.S)
+        controllers.value[1].setCommand(pressed.value.A - pressed.value.D)
 
-        if (Math.abs(controlCommands.value.drive) < 0.01)
-            controlCommands.value.drive = 0
-        if (Math.abs(controlCommands.value.turn) < 0.01)
-            controlCommands.value.turn = 0
-
-        // Non-linearly scale each value depending on the selected mode
-        message.value.linear.x =
-            Math.sign(controlCommands.value.drive) *
-            Math.pow(
-                Math.abs(controlCommands.value.drive),
-                shapeCoefficient.value
-            ) *
-            maxLinearSpeed.value *
+        let message = new Message({
+            linear: {
+                x: 0,
+                y: 0,
+                z: 0,
+            },
+            angular: {
+                x: 0,
+                y: 0,
+                z: 0,
+            },
+        })
+        message.linear.x =
+            controllers.value[0].getResult() *
             0.01 *
             elements.value[0].speedPercentage
         if (carMode.value) {
-            message.value.angular.z =
-                (message.value.linear.x / maxLinearSpeed.value) *
+            message.angular.z =
+                (message.linear.x / maxLinearSpeed.value) *
                 maxAngularSpeed.value *
                 Math.tan(
-                    Math.sign(controlCommands.value.turn) *
-                        Math.pow(
-                            Math.abs(controlCommands.value.turn),
-                            shapeCoefficient.value
-                        ) *
+                    (controllers.value[1].getResult() / maxAngularSpeed.value) *
                         0.01 *
                         elements.value[1].speedPercentage
                 )
         } else {
-            message.value.angular.z =
-                Math.sign(controlCommands.value.turn) *
-                Math.pow(
-                    Math.abs(controlCommands.value.turn),
-                    shapeCoefficient.value
-                ) *
-                maxAngularSpeed.value *
+            message.angular.z =
+                controllers.value[1].getResult() *
                 0.01 *
                 elements.value[1].speedPercentage
         }
-        topic.value.publish(message.value)
+        topic.value.publish(message)
     }, messageRate)
 }
 
@@ -121,13 +106,16 @@ function unfocus() {
 }
 
 onMounted(() => {
-    // Read maximum speed from props
+    // Read configuration from props
     if (props.config.maxLinearSpeed)
         maxLinearSpeed.value = props.config.maxLinearSpeed
     if (props.config.maxAngularSpeed)
         maxAngularSpeed.value = props.config.maxAngularSpeed
-    if (props.config.shapeCoefficient)
-        shapeCoefficient.value = props.config.shapeCoefficient
+    const shapeCoefficient = props.config.shapeCoefficient
+        ? props.config.shapeCoefficient
+        : 1.0
+    const deadzone = props.config.deadzone ? props.config.deadzone : 0
+    const inertia = props.config.inertia ? props.config.inertia : 0.9
 
     // Start listening keyboard signals
     window.addEventListener('keydown', keyDownCallback)
@@ -144,18 +132,22 @@ onMounted(() => {
         name: '/cmd_vel',
         messageType: 'geometry_msgs/Twist',
     })
-    message.value = new Message({
-        linear: {
-            x: 0,
-            y: 0,
-            z: 0,
-        },
-        angular: {
-            x: 0,
-            y: 0,
-            z: 0,
-        },
-    })
+
+    // Create controllers instances
+    controllers.value = [
+        createController(
+            maxLinearSpeed.value,
+            shapeCoefficient,
+            deadzone,
+            inertia
+        ),
+        createController(
+            maxAngularSpeed.value,
+            shapeCoefficient,
+            deadzone,
+            inertia
+        ),
+    ]
     startPublishing()
 })
 onBeforeUnmount(() => {

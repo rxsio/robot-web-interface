@@ -2,6 +2,7 @@
 import Joystick from './Joystick.vue'
 import { defineProps, onMounted, onBeforeUnmount, ref } from 'vue'
 import { Topic, Message } from 'roslib'
+import { createController } from './controller'
 
 const props = defineProps(['ros', 'config'])
 
@@ -42,40 +43,42 @@ const elements = ref([
 const commandInterval = ref(null)
 const manipTopic = ref(null)
 const gripperTopic = ref(null)
-const manipMessage = ref(null)
-const gripperMessage = ref(null)
-const maxLinearSpeed = ref(1.0)
-const maxAngularSpeed = ref(1.0)
-const maxEffort = ref(1.0)
 const messageRate = 100 // [ms]
-const shapeCoefficient = ref(1.0)
-const controlCommands = ref([0, 0, 0, 0, 0, 0])
-const deadzone = 0.15
+const controllers = ref([])
 
 function startPublishing() {
     commandInterval.value = setInterval(() => {
-        // Take deadzone into account and non-linearly scale each value
-        const values = controlCommands.value
-            .map((value) =>
-                Math.abs(value) < deadzone
-                    ? 0
-                    : (value - Math.sign(value) * deadzone) / (1.0 - deadzone)
-            )
-            .map(
-                (value, index) =>
-                    Math.sign(value) *
-                    Math.pow(Math.abs(value), shapeCoefficient.value) *
-                    0.01 *
-                    elements.value[index].speedPercentage
-            )
-        manipMessage.value.linear.x = values[0] * maxLinearSpeed.value
-        manipMessage.value.linear.y = values[1] * maxLinearSpeed.value
-        manipMessage.value.linear.z = values[2] * maxLinearSpeed.value
-        manipMessage.value.angular.x = values[3] * maxAngularSpeed.value
-        manipMessage.value.angular.y = values[4] * maxAngularSpeed.value
-        gripperMessage.value.data = values[5] * maxEffort.value
-        manipTopic.value.publish(manipMessage.value)
-        gripperTopic.value.publish(gripperMessage.value)
+        let manipMessage = new Message({
+            linear: {
+                x: 0,
+                y: 0,
+                z: 0,
+            },
+            angular: {
+                x: 0,
+                y: 0,
+                z: 0,
+            },
+        })
+        let gripperMessage = new Message({
+            data: 0,
+        })
+
+        ;[
+            manipMessage.linear.x,
+            manipMessage.linear.y,
+            manipMessage.linear.z,
+            manipMessage.angular.x,
+            manipMessage.angular.y,
+            gripperMessage.data,
+        ] = controllers.value.map(
+            (controller, index) =>
+                controller.getResult() *
+                0.01 *
+                elements.value[index].speedPercentage
+        )
+        manipTopic.value.publish(manipMessage)
+        gripperTopic.value.publish(gripperMessage)
     }, messageRate)
 }
 
@@ -84,38 +87,44 @@ const joysticks = ref([
         horizontalText: '- Move Y -',
         verticalText: '- Move X -',
         callback: (stickData) => {
-            controlCommands.value[0] = parseFloat(stickData.y)
-            controlCommands.value[1] = -parseFloat(stickData.x)
+            controllers.value[0].setCommand(parseFloat(stickData.y))
+            controllers.value[1].setCommand(-parseFloat(stickData.x))
         },
     },
     {
         horizontalText: '- Pitch -',
         verticalText: '- Move Z -',
         callback: (stickData) => {
-            controlCommands.value[2] = parseFloat(stickData.y)
-            controlCommands.value[4] = parseFloat(stickData.x)
+            controllers.value[2].setCommand(parseFloat(stickData.y))
+            controllers.value[4].setCommand(parseFloat(stickData.x))
         },
     },
     {
         horizontalText: '- Roll -',
         verticalText: '- Clamp -',
         callback: (stickData) => {
-            controlCommands.value[3] = parseFloat(stickData.x)
-            controlCommands.value[5] = parseFloat(stickData.y)
+            controllers.value[3].setCommand(parseFloat(stickData.x))
+            controllers.value[5].setCommand(parseFloat(stickData.y))
         },
     },
 ])
 
 onMounted(() => {
-    // Read maximum speed and effort from props
-    if (props.config.maxLinearSpeed)
-        maxLinearSpeed.value = props.config.maxLinearSpeed
-    if (props.config.maxAngularSpeed)
-        maxAngularSpeed.value = props.config.maxAngularSpeed
-    if (props.config.maxEffort) maxEffort.value = props.config.maxEffort
-    if (props.config.shapeCoefficient)
-        shapeCoefficient.value = props.config.shapeCoefficient
+    // Read configuration from props
+    const maxLinearSpeed = props.config.maxLinearSpeed
+        ? props.config.maxLinearSpeed
+        : 1.0
+    const maxAngularSpeed = props.config.maxAngularSpeed
+        ? props.config.maxAngularSpeed
+        : 1.0
+    const maxEffort = props.config.maxEffort ? props.config.maxEffort : 1.0
+    const shapeCoefficient = props.config.shapeCoefficient
+        ? props.config.shapeCoefficient
+        : 1.0
+    const deadzone = props.config.deadzone ? props.config.deadzone : 0.15
+    const inertia = props.config.inertia ? props.config.inertia : 0
 
+    // Start publishing steering informations
     manipTopic.value = new Topic({
         ros: props.ros,
         name: '/cmd_manip',
@@ -127,23 +136,17 @@ onMounted(() => {
         messageType: 'std_msgs/Float64',
     })
 
-    manipMessage.value = new Message({
-        linear: {
-            x: 0,
-            y: 0,
-            z: 0,
-        },
-        angular: {
-            x: 0,
-            y: 0,
-            z: 0,
-        },
-    })
-    gripperMessage.value = new Message({
-        data: 0,
-    })
-
-    // Start sending messages to cmd_manip and cmd_grip
+    // Create controllers instances
+    controllers.value = [
+        maxLinearSpeed,
+        maxLinearSpeed,
+        maxLinearSpeed,
+        maxAngularSpeed,
+        maxAngularSpeed,
+        maxEffort,
+    ].map((value) =>
+        createController(value, shapeCoefficient, deadzone, inertia)
+    )
     startPublishing()
 })
 onBeforeUnmount(() => {

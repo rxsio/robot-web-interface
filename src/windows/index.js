@@ -97,6 +97,14 @@ export default {
                 name: 'Shape Coefficient (1.0 - linear)',
                 type: 'number',
             },
+            deadzone: {
+                name: 'Deadzone (0 - 1)',
+                type: 'number',
+            },
+            inertia: {
+                name: 'Inertia (0 - 1)',
+                type: 'number',
+            },
         },
         icon: 'mdi-controller',
     },
