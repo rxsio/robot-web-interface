@@ -64,14 +64,18 @@ function startPublishing() {
             newCommands[4] = pressed.value.W - pressed.value.S
             newCommands[5] = pressed.value.Q - pressed.value.E
         }
-        controlCommands.value.forEach(
-            (value, index) =>
-                (value = inertia * value + (1 - inertia) * newCommands[index])
-        )
+
+        // Save movement inercia on user commands level
+        controlCommands.value = controlCommands.value.map((value, index) => {
+            value = inertia * value + (1 - inertia) * newCommands[index]
+            return Math.abs(value) < 0.01 ? 0 : value
+        })
+
+        // Non-linearly scale each value depending on the selected mode
         const values = controlCommands.value.map(
             (value, index) =>
                 Math.sign(value) *
-                Math.pow(value, shapeCoefficient.value) *
+                Math.pow(Math.abs(value), shapeCoefficient.value) *
                 0.01 *
                 elements.value[index].speedPercentage
         )

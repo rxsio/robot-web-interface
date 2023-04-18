@@ -27,6 +27,7 @@ watch(props, () => {
     if (object in element) element = element[object]
     if (mode in element) element = element[mode]
 
+    // Check if the element is right vue component
     if (element._compiled !== undefined) component.value = element
 
     config.value.movementStrategy = undefined

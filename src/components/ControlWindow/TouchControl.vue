@@ -27,32 +27,57 @@ const maxAngularSpeed = ref(1.57)
 const messageRate = 100 // [ms]
 const carMode = ref(true)
 const shapeCoefficient = ref(1.0)
+const deadzone = 0.15
 
 function joystickMovedCallback(stickData) {
-    // non-linearly scale each value depending on the selected mode
-    message.value.linear.x = parseFloat(stickData.y)
+    // Take deadzone into account
+    let controlCommands = {
+        drive: parseFloat(stickData.y),
+        turn: -parseFloat(stickData.x),
+    }
+    controlCommands.drive =
+        Math.abs(controlCommands.drive) < deadzone
+            ? 0
+            : (controlCommands.drive -
+                  Math.sign(controlCommands.drive) * deadzone) /
+              (1.0 - deadzone)
+    controlCommands.turn =
+        Math.abs(controlCommands.turn) < deadzone
+            ? 0
+            : (controlCommands.turn -
+                  Math.sign(controlCommands.turn) * deadzone) /
+              (1.0 - deadzone)
+
+    // Non-linearly scale each value depending on the selected mode
+    message.value.linear.x = controlCommands.drive
     message.value.linear.x *=
-        Math.pow(message.value.linear.x, shapeCoefficient.value - 1.0) *
+        Math.pow(
+            Math.abs(message.value.linear.x),
+            shapeCoefficient.value - 1.0
+        ) *
         maxLinearSpeed.value *
         0.01 *
         elements.value[0].speedPercentage
     if (carMode.value) {
-        message.value.angular.z = -parseFloat(stickData.x)
-        message.value.angular.z *=
-            Math.pow(message.value.angular.z, shapeCoefficient.value - 1.0) *
-            maxAngularSpeed.value *
-            0.01 *
-            elements.value[1].speedPercentage
-    } else {
-        let angle = -parseFloat(stickData.x)
+        let angle = controlCommands.turn
         angle *=
-            Math.pow(angle, shapeCoefficient.value - 1.0) *
+            Math.pow(Math.abs(angle), shapeCoefficient.value - 1.0) *
             0.01 *
             elements.value[1].speedPercentage
         message.value.angular.z =
             (message.value.linear.x / maxLinearSpeed.value) *
             maxAngularSpeed.value *
             Math.tan(angle)
+    } else {
+        message.value.angular.z = controlCommands.turn
+        message.value.angular.z *=
+            Math.pow(
+                Math.abs(message.value.angular.z),
+                shapeCoefficient.value - 1.0
+            ) *
+            maxAngularSpeed.value *
+            0.01 *
+            elements.value[1].speedPercentage
     }
 }
 

@@ -50,16 +50,24 @@ const maxEffort = ref(1.0)
 const messageRate = 100 // [ms]
 const shapeCoefficient = ref(1.0)
 const controlCommands = ref([0, 0, 0, 0, 0, 0])
+const deadzone = 0.15
 
 function startPublishing() {
     commandInterval.value = setInterval(() => {
-        const values = controlCommands.value.map(
-            (value, index) =>
-                Math.sign(value) *
-                Math.pow(value, shapeCoefficient.value) *
-                0.01 *
-                elements.value[index].speedPercentage
-        )
+        // Take deadzone into account and non-linearly scale each value
+        const values = controlCommands.value
+            .map((value) =>
+                Math.abs(value) < deadzone
+                    ? 0
+                    : (value - Math.sign(value) * deadzone) / (1.0 - deadzone)
+            )
+            .map(
+                (value, index) =>
+                    Math.sign(value) *
+                    Math.pow(Math.abs(value), shapeCoefficient.value) *
+                    0.01 *
+                    elements.value[index].speedPercentage
+            )
         manipMessage.value.linear.x = values[0] * maxLinearSpeed.value
         manipMessage.value.linear.y = values[1] * maxLinearSpeed.value
         manipMessage.value.linear.z = values[2] * maxLinearSpeed.value

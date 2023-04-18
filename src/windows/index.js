@@ -60,6 +60,13 @@ export default {
         typeName: 'Control Window',
         component: ControlWindow,
         configOptions: {
+            movementStrategy: {
+                name: 'Movement Strategy',
+                type: 'select',
+                possibleValues: () => {
+                    return ['Position', 'Velocity']
+                },
+            },
             controlledObject: {
                 name: 'Controlled Object',
                 type: 'select',
@@ -72,13 +79,6 @@ export default {
                 type: 'select',
                 possibleValues: () => {
                     return ['Keyboard', 'Touch']
-                },
-            },
-            movementStrategy: {
-                name: 'Movement Strategy',
-                type: 'select',
-                possibleValues: () => {
-                    return ['Position', 'Velocity']
                 },
             },
             maxLinearSpeed: {

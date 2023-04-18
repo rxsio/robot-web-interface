@@ -31,7 +31,7 @@ const controlCommands = ref({ drive: 0, turn: 0 })
 
 function startPublishing() {
     commandInterval.value = setInterval(() => {
-        // save movement inercia on user commands level
+        // Save movement inercia on user commands level
         controlCommands.value.drive =
             controlCommands.value.drive * inertia +
             (1 - inertia) * (pressed.value.W - pressed.value.S)
@@ -39,33 +39,44 @@ function startPublishing() {
             controlCommands.value.turn * inertia +
             (1 - inertia) * (pressed.value.A - pressed.value.D)
 
-        // non-linearly scale each value depending on the selected mode
+        if (Math.abs(controlCommands.value.drive) < 0.01)
+            controlCommands.value.drive = 0
+        if (Math.abs(controlCommands.value.turn) < 0.01)
+            controlCommands.value.turn = 0
+
+        // Non-linearly scale each value depending on the selected mode
         message.value.linear.x =
             Math.sign(controlCommands.value.drive) *
-            Math.pow(controlCommands.value.drive, shapeCoefficient.value) *
+            Math.pow(
+                Math.abs(controlCommands.value.drive),
+                shapeCoefficient.value
+            ) *
             maxLinearSpeed.value *
             0.01 *
             elements.value[0].speedPercentage
         if (carMode.value) {
-            message.value.angular.z =
-                Math.sign(controlCommands.value.turn) *
-                Math.pow(controlCommands.value.turn, shapeCoefficient.value) *
-                maxAngularSpeed.value *
-                0.01 *
-                elements.value[1].speedPercentage
-        } else {
             message.value.angular.z =
                 (message.value.linear.x / maxLinearSpeed.value) *
                 maxAngularSpeed.value *
                 Math.tan(
                     Math.sign(controlCommands.value.turn) *
                         Math.pow(
-                            controlCommands.value.turn,
+                            Math.abs(controlCommands.value.turn),
                             shapeCoefficient.value
                         ) *
                         0.01 *
                         elements.value[1].speedPercentage
                 )
+        } else {
+            message.value.angular.z =
+                Math.sign(controlCommands.value.turn) *
+                Math.pow(
+                    Math.abs(controlCommands.value.turn),
+                    shapeCoefficient.value
+                ) *
+                maxAngularSpeed.value *
+                0.01 *
+                elements.value[1].speedPercentage
         }
         topic.value.publish(message.value)
     }, messageRate)
