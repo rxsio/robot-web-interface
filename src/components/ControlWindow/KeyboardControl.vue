@@ -53,7 +53,9 @@ function startPublishing() {
                 (message.linear.x / maxLinearSpeed.value) *
                 maxAngularSpeed.value *
                 Math.tan(
-                    (controllers.value[1].getResult() / maxAngularSpeed.value) *
+                    (Math.PI / 4) *
+                        (controllers.value[1].getResult() /
+                            maxAngularSpeed.value) *
                         0.01 *
                         elements.value[1].speedPercentage
                 )

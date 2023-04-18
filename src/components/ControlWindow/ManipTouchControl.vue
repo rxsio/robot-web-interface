@@ -45,9 +45,13 @@ const manipTopic = ref(null)
 const gripperTopic = ref(null)
 const messageRate = 100 // [ms]
 const controllers = ref([])
+const commandBuffer = ref([0, 0, 0, 0, 0, 0])
 
 function startPublishing() {
     commandInterval.value = setInterval(() => {
+        commandBuffer.value.forEach((value, index) => {
+            controllers.value[index].setCommand(value)
+        })
         let manipMessage = new Message({
             linear: {
                 x: 0,
@@ -87,24 +91,24 @@ const joysticks = ref([
         horizontalText: '- Move Y -',
         verticalText: '- Move X -',
         callback: (stickData) => {
-            controllers.value[0].setCommand(parseFloat(stickData.y))
-            controllers.value[1].setCommand(-parseFloat(stickData.x))
+            commandBuffer.value[0] = parseFloat(stickData.y)
+            commandBuffer.value[1] = -parseFloat(stickData.x)
         },
     },
     {
         horizontalText: '- Pitch -',
         verticalText: '- Move Z -',
         callback: (stickData) => {
-            controllers.value[2].setCommand(parseFloat(stickData.y))
-            controllers.value[4].setCommand(parseFloat(stickData.x))
+            commandBuffer.value[2] = parseFloat(stickData.y)
+            commandBuffer.value[4] = parseFloat(stickData.x)
         },
     },
     {
         horizontalText: '- Roll -',
         verticalText: '- Clamp -',
         callback: (stickData) => {
-            controllers.value[3].setCommand(parseFloat(stickData.x))
-            controllers.value[5].setCommand(parseFloat(stickData.y))
+            commandBuffer.value[3] = parseFloat(stickData.x)
+            commandBuffer.value[5] = parseFloat(stickData.y)
         },
     },
 ])

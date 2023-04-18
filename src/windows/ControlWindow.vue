@@ -9,6 +9,7 @@ const rosStore = useRosStore()
 
 const component = ref(null)
 const config = ref({})
+const componentKey = ref(0)
 
 watch(props, () => {
     config.value = JSON.parse(JSON.stringify(props.extraConfig))
@@ -33,6 +34,7 @@ watch(props, () => {
     config.value.movementStrategy = undefined
     config.value.controlledObject = undefined
     config.value.controlMode = undefined
+    componentKey.value++
 })
 </script>
 
@@ -41,6 +43,7 @@ watch(props, () => {
         <component
             v-if="component"
             :is="component"
+            :key="componentKey"
             :ros="rosStore.ws"
             :config="config"
         />

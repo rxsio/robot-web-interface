@@ -27,9 +27,12 @@ const maxLinearSpeed = ref(1)
 const maxAngularSpeed = ref(1.57)
 const carMode = ref(true)
 const controllers = ref([])
+const commandBuffer = ref([0, 0])
 
 function startPublishing() {
     commandInterval.value = setInterval(() => {
+        controllers.value[0].setCommand(commandBuffer.value[0])
+        controllers.value[1].setCommand(commandBuffer.value[1])
         let message = new Message({
             linear: {
                 x: 0,
@@ -51,7 +54,9 @@ function startPublishing() {
                 (message.linear.x / maxLinearSpeed.value) *
                 maxAngularSpeed.value *
                 Math.tan(
-                    (controllers.value[1].getResult() / maxAngularSpeed.value) *
+                    (Math.PI / 4) *
+                        (controllers.value[1].getResult() /
+                            maxAngularSpeed.value) *
                         0.01 *
                         elements.value[1].speedPercentage
                 )
@@ -66,8 +71,8 @@ function startPublishing() {
 }
 
 function joystickMovedCallback(stickData) {
-    controllers.value[0].setCommand(parseFloat(stickData.y))
-    controllers.value[1].setCommand(-parseFloat(stickData.x))
+    commandBuffer.value[0] = parseFloat(stickData.y)
+    commandBuffer.value[1] = -parseFloat(stickData.x)
 }
 
 onMounted(() => {
