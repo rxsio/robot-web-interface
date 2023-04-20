@@ -3,41 +3,11 @@ import Joystick from './Joystick.vue'
 import { defineProps, onMounted, onBeforeUnmount, ref } from 'vue'
 import { Topic, Message } from 'roslib'
 import { createController } from './controller'
+import { manipElements } from './elements'
 
 const props = defineProps(['ros', 'config'])
 
-const elements = ref([
-    {
-        id: 0,
-        text: 'X velocity',
-        speedPercentage: 25,
-    },
-    {
-        id: 1,
-        text: 'Y velocity',
-        speedPercentage: 25,
-    },
-    {
-        id: 2,
-        text: 'Z velocity',
-        speedPercentage: 25,
-    },
-    {
-        id: 3,
-        text: 'Roll velocity',
-        speedPercentage: 25,
-    },
-    {
-        id: 4,
-        text: 'Pitch velocity',
-        speedPercentage: 25,
-    },
-    {
-        id: 5,
-        text: 'Clamp effort',
-        speedPercentage: 25,
-    },
-])
+const elements = ref(manipElements)
 
 // Publish steering informations
 const commandInterval = ref(null)
@@ -47,43 +17,43 @@ const messageRate = 100 // [ms]
 const controllers = ref([])
 const commandBuffer = ref([0, 0, 0, 0, 0, 0])
 
-function startPublishing() {
-    commandInterval.value = setInterval(() => {
-        commandBuffer.value.forEach((value, index) => {
-            controllers.value[index].setCommand(value)
-        })
-        let manipMessage = new Message({
-            linear: {
-                x: 0,
-                y: 0,
-                z: 0,
-            },
-            angular: {
-                x: 0,
-                y: 0,
-                z: 0,
-            },
-        })
-        let gripperMessage = new Message({
-            data: 0,
-        })
+function sendMessage() {
+    commandBuffer.value.forEach((value, index) => {
+        controllers.value[index].setCommand(value)
+    })
 
-        ;[
-            manipMessage.linear.x,
-            manipMessage.linear.y,
-            manipMessage.linear.z,
-            manipMessage.angular.x,
-            manipMessage.angular.y,
-            gripperMessage.data,
-        ] = controllers.value.map(
-            (controller, index) =>
-                controller.getResult() *
-                0.01 *
-                elements.value[index].speedPercentage
-        )
-        manipTopic.value.publish(manipMessage)
-        gripperTopic.value.publish(gripperMessage)
-    }, messageRate)
+    let manipMessage = new Message({
+        linear: {
+            x: 0,
+            y: 0,
+            z: 0,
+        },
+        angular: {
+            x: 0,
+            y: 0,
+            z: 0,
+        },
+    })
+    let gripperMessage = new Message({
+        data: 0,
+    })
+
+    ;[
+        manipMessage.linear.x,
+        manipMessage.linear.y,
+        manipMessage.linear.z,
+        manipMessage.angular.x,
+        manipMessage.angular.y,
+        gripperMessage.data,
+    ] = controllers.value.map(
+        (controller, index) =>
+            controller.getResult() *
+            0.01 *
+            elements.value[index].speedPercentage
+    )
+
+    manipTopic.value.publish(manipMessage)
+    gripperTopic.value.publish(gripperMessage)
 }
 
 const joysticks = ref([
@@ -128,18 +98,6 @@ onMounted(() => {
     const deadzone = props.config.deadzone ? props.config.deadzone : 0.15
     const inertia = props.config.inertia ? props.config.inertia : 0
 
-    // Start publishing steering informations
-    manipTopic.value = new Topic({
-        ros: props.ros,
-        name: '/cmd_manip',
-        messageType: 'geometry_msgs/Twist',
-    })
-    gripperTopic.value = new Topic({
-        ros: props.ros,
-        name: '/cmd_grip',
-        messageType: 'std_msgs/Float64',
-    })
-
     // Create controllers instances
     controllers.value = [
         maxLinearSpeed,
@@ -151,7 +109,21 @@ onMounted(() => {
     ].map((value) =>
         createController(value, shapeCoefficient, deadzone, inertia)
     )
-    startPublishing()
+
+    // Start publishing steering informations
+    manipTopic.value = new Topic({
+        ros: props.ros,
+        name: '/cmd_manip',
+        messageType: 'geometry_msgs/Twist',
+    })
+    gripperTopic.value = new Topic({
+        ros: props.ros,
+        name: '/cmd_grip',
+        messageType: 'std_msgs/Float64',
+    })
+    commandInterval.value = setInterval(() => {
+        sendMessage()
+    }, messageRate)
 })
 onBeforeUnmount(() => {
     clearInterval(commandInterval.value)

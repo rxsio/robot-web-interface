@@ -2,21 +2,11 @@
 import { defineProps, onMounted, onBeforeUnmount, ref } from 'vue'
 import { Topic, Message } from 'roslib'
 import { createController } from './controller'
+import { roverElements } from './elements'
 
 const props = defineProps(['ros', 'config'])
 
-const elements = ref([
-    {
-        id: 'linear_speed',
-        text: 'Linear velocity',
-        speedPercentage: 25,
-    },
-    {
-        id: 'angular_speed',
-        text: 'Angular velocity',
-        speedPercentage: 25,
-    },
-])
+const elements = ref(roverElements)
 
 // Publish steering informations
 const commandInterval = ref(null)
@@ -27,84 +17,73 @@ const maxAngularSpeed = ref(1.57)
 const carMode = ref(true)
 const controllers = ref([])
 
-function startPublishing() {
-    commandInterval.value = setInterval(() => {
-        controllers.value[0].setCommand(pressed.value.W - pressed.value.S)
-        controllers.value[1].setCommand(pressed.value.A - pressed.value.D)
+function sendMessage() {
+    controllers.value[0].setCommand(pressed.value.W - pressed.value.S)
+    controllers.value[1].setCommand(pressed.value.A - pressed.value.D)
 
-        let message = new Message({
-            linear: {
-                x: 0,
-                y: 0,
-                z: 0,
-            },
-            angular: {
-                x: 0,
-                y: 0,
-                z: 0,
-            },
-        })
-        message.linear.x =
-            controllers.value[0].getResult() *
+    let message = new Message({
+        linear: {
+            x: 0,
+            y: 0,
+            z: 0,
+        },
+        angular: {
+            x: 0,
+            y: 0,
+            z: 0,
+        },
+    })
+
+    message.linear.x =
+        controllers.value[0].getResult() *
+        0.01 *
+        elements.value[0].speedPercentage
+    if (carMode.value) {
+        message.angular.z =
+            (message.linear.x / maxLinearSpeed.value) *
+            maxAngularSpeed.value *
+            Math.tan(
+                (Math.PI / 4) *
+                    (controllers.value[1].getResult() / maxAngularSpeed.value) *
+                    0.01 *
+                    elements.value[1].speedPercentage
+            )
+    } else {
+        message.angular.z =
+            controllers.value[1].getResult() *
             0.01 *
-            elements.value[0].speedPercentage
-        if (carMode.value) {
-            message.angular.z =
-                (message.linear.x / maxLinearSpeed.value) *
-                maxAngularSpeed.value *
-                Math.tan(
-                    (Math.PI / 4) *
-                        (controllers.value[1].getResult() /
-                            maxAngularSpeed.value) *
-                        0.01 *
-                        elements.value[1].speedPercentage
-                )
-        } else {
-            message.angular.z =
-                controllers.value[1].getResult() *
-                0.01 *
-                elements.value[1].speedPercentage
-        }
-        topic.value.publish(message)
-    }, messageRate)
+            elements.value[1].speedPercentage
+    }
+
+    topic.value.publish(message)
 }
 
 // Check pressed keys
 const pressed = ref({ W: false, A: false, S: false, D: false })
 
-let keyDownCallback = (event) => {
-    keyListener(event.key.toUpperCase(), true)
-}
-let keyUpCallback = (event) => {
-    keyListener(event.key.toUpperCase(), false)
-}
-function keyListener(key, isPressed) {
-    if (!isWindowFocused.value) return
+const keyDownCallback = (event) => {
+    const key = event.key.toUpperCase()
+    if (pressed.value[key] !== undefined) pressed.value[key] = true
 
-    if (pressed.value[key] !== undefined) pressed.value[key] = isPressed
-
-    if (key === 'TAB' && isPressed) {
-        focusIndex.value = (focusIndex.value + 1) % elements.value.length
+    if (key === 'TAB') {
+        event.preventDefault()
+        focusIndex.value += event.shiftKey ? elements.value.length - 1 : 1
+        focusIndex.value %= elements.value.length
         document.getElementById(elements.value[focusIndex.value].id).focus()
     }
 
-    if (key === 'Z' && isPressed) carMode.value = !carMode.value
+    if (key === 'Z') carMode.value = !carMode.value
+}
+const keyUpCallback = (event) => {
+    const key = event.key.toUpperCase()
+    if (pressed.value[key] !== undefined) pressed.value[key] = false
 }
 
 // Set focus to proper object
-const isWindowFocused = ref(false)
 const focusIndex = ref(0)
 
-function focus() {
-    isWindowFocused.value = true
+function focusSlider() {
     document.getElementById(elements.value[focusIndex.value].id).focus()
-}
-function unfocus() {
-    isWindowFocused.value = false
-    pressed.value.W = false
-    pressed.value.A = false
-    pressed.value.S = false
-    pressed.value.D = false
 }
 
 onMounted(() => {
@@ -119,14 +98,18 @@ onMounted(() => {
     const deadzone = props.config.deadzone ? props.config.deadzone : 0
     const inertia = props.config.inertia ? props.config.inertia : 0.9
 
-    // Start listening keyboard signals
-    window.addEventListener('keydown', keyDownCallback)
-    window.addEventListener('keyup', keyUpCallback)
+    // Create controllers instances
+    controllers.value = [maxLinearSpeed.value, maxAngularSpeed.value].map(
+        (value) => createController(value, shapeCoefficient, deadzone, inertia)
+    )
 
-    // Set unique IDs
-    const randId = String(parseInt(1000000 * Math.random()))
-    for (let i = 0; i < elements.value.length; ++i)
-        elements.value[i].id = randId + i
+    // Start listening keyboard signals
+    document
+        .getElementById('rover-keyboard-control')
+        .addEventListener('keydown', keyDownCallback)
+    document
+        .getElementById('rover-keyboard-control')
+        .addEventListener('keyup', keyUpCallback)
 
     // Start publishing steering informations
     topic.value = new Topic({
@@ -134,36 +117,19 @@ onMounted(() => {
         name: '/cmd_vel',
         messageType: 'geometry_msgs/Twist',
     })
-
-    // Create controllers instances
-    controllers.value = [
-        createController(
-            maxLinearSpeed.value,
-            shapeCoefficient,
-            deadzone,
-            inertia
-        ),
-        createController(
-            maxAngularSpeed.value,
-            shapeCoefficient,
-            deadzone,
-            inertia
-        ),
-    ]
-    startPublishing()
+    commandInterval.value = setInterval(() => {
+        sendMessage()
+    }, messageRate)
 })
 onBeforeUnmount(() => {
     clearInterval(commandInterval.value)
-    window.removeEventListener('keydown', keyDownCallback)
-    window.removeEventListener('keyup', keyUpCallback)
 })
 </script>
 <template>
     <div
+        id="rover-keyboard-control"
         class="control"
-        @click.left="focus()"
-        @focusout="unfocus()"
-        @focusin="focus()"
+        @click.left="focusSlider()"
     >
         <div class="top-wrapper">
             <div class="keyboard-box">

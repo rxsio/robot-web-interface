@@ -2,41 +2,11 @@
 import { defineProps, onMounted, onBeforeUnmount, ref } from 'vue'
 import { Topic, Message } from 'roslib'
 import { createController } from './controller'
+import { manipElements } from './elements'
 
 const props = defineProps(['ros', 'config'])
 
-const elements = ref([
-    {
-        id: 0,
-        text: 'X velocity',
-        speedPercentage: 25,
-    },
-    {
-        id: 1,
-        text: 'Y velocity',
-        speedPercentage: 25,
-    },
-    {
-        id: 2,
-        text: 'Z velocity',
-        speedPercentage: 25,
-    },
-    {
-        id: 3,
-        text: 'Roll velocity',
-        speedPercentage: 25,
-    },
-    {
-        id: 4,
-        text: 'Pitch velocity',
-        speedPercentage: 25,
-    },
-    {
-        id: 5,
-        text: 'Clamp effort',
-        speedPercentage: 25,
-    },
-])
+const elements = ref(manipElements)
 
 // Publish steering informations
 const commandInterval = ref(null)
@@ -46,54 +16,53 @@ const messageRate = 100 // [ms]
 const positionMode = ref(true)
 const controllers = ref([])
 
-function startPublishing() {
-    commandInterval.value = setInterval(() => {
-        let newCommands = [0, 0, 0, 0, 0, 0]
-        if (positionMode.value) {
-            newCommands[0] = pressed.value.W - pressed.value.S
-            newCommands[1] = pressed.value.A - pressed.value.D
-            newCommands[2] = pressed.value.Q - pressed.value.E
-        } else {
-            newCommands[3] = pressed.value.A - pressed.value.D
-            newCommands[4] = pressed.value.W - pressed.value.S
-            newCommands[5] = pressed.value.Q - pressed.value.E
-        }
-        newCommands.forEach((value, index) => {
-            controllers.value[index].setCommand(value)
-        })
+function sendMessage() {
+    let newCommands = [0, 0, 0, 0, 0, 0]
+    if (positionMode.value) {
+        newCommands[0] = pressed.value.W - pressed.value.S
+        newCommands[1] = pressed.value.A - pressed.value.D
+        newCommands[2] = pressed.value.Q - pressed.value.E
+    } else {
+        newCommands[3] = pressed.value.A - pressed.value.D
+        newCommands[4] = pressed.value.W - pressed.value.S
+        newCommands[5] = pressed.value.Q - pressed.value.E
+    }
+    newCommands.forEach((value, index) => {
+        controllers.value[index].setCommand(value)
+    })
 
-        let manipMessage = new Message({
-            linear: {
-                x: 0,
-                y: 0,
-                z: 0,
-            },
-            angular: {
-                x: 0,
-                y: 0,
-                z: 0,
-            },
-        })
-        let gripperMessage = new Message({
-            data: 0,
-        })
+    let manipMessage = new Message({
+        linear: {
+            x: 0,
+            y: 0,
+            z: 0,
+        },
+        angular: {
+            x: 0,
+            y: 0,
+            z: 0,
+        },
+    })
+    let gripperMessage = new Message({
+        data: 0,
+    })
 
-        ;[
-            manipMessage.linear.x,
-            manipMessage.linear.y,
-            manipMessage.linear.z,
-            manipMessage.angular.x,
-            manipMessage.angular.y,
-            gripperMessage.data,
-        ] = controllers.value.map(
-            (controller, index) =>
-                controller.getResult() *
-                0.01 *
-                elements.value[index].speedPercentage
-        )
-        manipTopic.value.publish(manipMessage)
-        gripperTopic.value.publish(gripperMessage)
-    }, messageRate)
+    ;[
+        manipMessage.linear.x,
+        manipMessage.linear.y,
+        manipMessage.linear.z,
+        manipMessage.angular.x,
+        manipMessage.angular.y,
+        gripperMessage.data,
+    ] = controllers.value.map(
+        (controller, index) =>
+            controller.getResult() *
+            0.01 *
+            elements.value[index].speedPercentage
+    )
+
+    manipTopic.value.publish(manipMessage)
+    gripperTopic.value.publish(gripperMessage)
 }
 
 // Check pressed keys
@@ -106,41 +75,29 @@ const pressed = ref({
     D: false,
 })
 
-let keyDownCallback = (event) => {
-    keyListener(event.key.toUpperCase(), true)
-}
-let keyUpCallback = (event) => {
-    keyListener(event.key.toUpperCase(), false)
-}
-function keyListener(key, isPressed) {
-    if (!isWindowFocused.value) return
+const keyDownCallback = (event) => {
+    const key = event.key.toUpperCase()
+    if (pressed.value[key] !== undefined) pressed.value[key] = true
 
-    if (pressed.value[key] !== undefined) pressed.value[key] = isPressed
-
-    if (key === 'TAB' && isPressed) {
-        focusIndex.value = (focusIndex.value + 1) % elements.value.length
+    if (key === 'TAB') {
+        event.preventDefault()
+        focusIndex.value += event.shiftKey ? elements.value.length - 1 : 1
+        focusIndex.value %= elements.value.length
         document.getElementById(elements.value[focusIndex.value].id).focus()
     }
 
-    if (key === 'Z' && isPressed) positionMode.value = !positionMode.value
+    if (key === 'Z') positionMode.value = !positionMode.value
+}
+const keyUpCallback = (event) => {
+    const key = event.key.toUpperCase()
+    if (pressed.value[key] !== undefined) pressed.value[key] = false
 }
 
 // Set focus to proper object
-const isWindowFocused = ref(false)
 const focusIndex = ref(0)
 
-function focus() {
-    isWindowFocused.value = true
+function focusSlider() {
     document.getElementById(elements.value[focusIndex.value].id).focus()
-}
-function unfocus() {
-    isWindowFocused.value = false
-    pressed.value.Q = false
-    pressed.value.E = false
-    pressed.value.W = false
-    pressed.value.A = false
-    pressed.value.S = false
-    pressed.value.D = false
 }
 
 onMounted(() => {
@@ -159,25 +116,12 @@ onMounted(() => {
     const inertia = props.config.inertia ? props.config.inertia : 0.9
 
     // Start listening keyboard signals
-    window.addEventListener('keydown', keyDownCallback)
-    window.addEventListener('keyup', keyUpCallback)
-
-    // Set unique IDs
-    const randId = String(parseInt(1000000 * Math.random()))
-    for (let i = 0; i < elements.value.length; ++i)
-        elements.value[i].id = randId + i
-
-    // Start publishing steering informations
-    manipTopic.value = new Topic({
-        ros: props.ros,
-        name: '/cmd_manip',
-        messageType: 'geometry_msgs/Twist',
-    })
-    gripperTopic.value = new Topic({
-        ros: props.ros,
-        name: '/cmd_grip',
-        messageType: 'std_msgs/Float64',
-    })
+    document
+        .getElementById('manip-keyboard-control')
+        .addEventListener('keydown', keyDownCallback)
+    document
+        .getElementById('manip-keyboard-control')
+        .addEventListener('keyup', keyUpCallback)
 
     // Create controllers instances
     controllers.value = [
@@ -190,20 +134,31 @@ onMounted(() => {
     ].map((value) =>
         createController(value, shapeCoefficient, deadzone, inertia)
     )
-    startPublishing()
+
+    // Start publishing steering informations
+    manipTopic.value = new Topic({
+        ros: props.ros,
+        name: '/cmd_manip',
+        messageType: 'geometry_msgs/Twist',
+    })
+    gripperTopic.value = new Topic({
+        ros: props.ros,
+        name: '/cmd_grip',
+        messageType: 'std_msgs/Float64',
+    })
+    commandInterval.value = setInterval(() => {
+        sendMessage()
+    }, messageRate)
 })
 onBeforeUnmount(() => {
     clearInterval(commandInterval.value)
-    window.removeEventListener('keydown', keyDownCallback)
-    window.removeEventListener('keyup', keyUpCallback)
 })
 </script>
 <template>
     <div
+        id="manip-keyboard-control"
         class="control"
-        @click.left="focus()"
-        @focusout="unfocus()"
-        @focusin="focus()"
+        @click.left="focusSlider()"
     >
         <div class="top-wrapper">
             <div class="keyboard-box">

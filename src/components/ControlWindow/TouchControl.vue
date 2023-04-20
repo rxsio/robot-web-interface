@@ -3,21 +3,11 @@ import Joystick from './Joystick.vue'
 import { defineProps, onMounted, onBeforeUnmount, ref } from 'vue'
 import { Topic, Message } from 'roslib'
 import { createController } from './controller'
+import { roverElements } from './elements'
 
 const props = defineProps(['ros', 'config'])
 
-const elements = ref([
-    {
-        id: 'linear_speed',
-        text: 'Linear speed',
-        speedPercentage: 25,
-    },
-    {
-        id: 'angular_speed',
-        text: 'Angular speed',
-        speedPercentage: 25,
-    },
-])
+const elements = ref(roverElements)
 
 // Publish steering informations
 const commandInterval = ref(null)
@@ -29,45 +19,45 @@ const carMode = ref(true)
 const controllers = ref([])
 const commandBuffer = ref([0, 0])
 
-function startPublishing() {
-    commandInterval.value = setInterval(() => {
-        controllers.value[0].setCommand(commandBuffer.value[0])
-        controllers.value[1].setCommand(commandBuffer.value[1])
-        let message = new Message({
-            linear: {
-                x: 0,
-                y: 0,
-                z: 0,
-            },
-            angular: {
-                x: 0,
-                y: 0,
-                z: 0,
-            },
-        })
-        message.linear.x =
-            controllers.value[0].getResult() *
+function sendMessage() {
+    controllers.value[0].setCommand(commandBuffer.value[0])
+    controllers.value[1].setCommand(commandBuffer.value[1])
+
+    let message = new Message({
+        linear: {
+            x: 0,
+            y: 0,
+            z: 0,
+        },
+        angular: {
+            x: 0,
+            y: 0,
+            z: 0,
+        },
+    })
+
+    message.linear.x =
+        controllers.value[0].getResult() *
+        0.01 *
+        elements.value[0].speedPercentage
+    if (carMode.value) {
+        message.angular.z =
+            (message.linear.x / maxLinearSpeed.value) *
+            maxAngularSpeed.value *
+            Math.tan(
+                (Math.PI / 4) *
+                    (controllers.value[1].getResult() / maxAngularSpeed.value) *
+                    0.01 *
+                    elements.value[1].speedPercentage
+            )
+    } else {
+        message.angular.z =
+            controllers.value[1].getResult() *
             0.01 *
-            elements.value[0].speedPercentage
-        if (carMode.value) {
-            message.angular.z =
-                (message.linear.x / maxLinearSpeed.value) *
-                maxAngularSpeed.value *
-                Math.tan(
-                    (Math.PI / 4) *
-                        (controllers.value[1].getResult() /
-                            maxAngularSpeed.value) *
-                        0.01 *
-                        elements.value[1].speedPercentage
-                )
-        } else {
-            message.angular.z =
-                controllers.value[1].getResult() *
-                0.01 *
-                elements.value[1].speedPercentage
-        }
-        topic.value.publish(message)
-    }, messageRate)
+            elements.value[1].speedPercentage
+    }
+
+    topic.value.publish(message)
 }
 
 function joystickMovedCallback(stickData) {
@@ -87,29 +77,20 @@ onMounted(() => {
     const deadzone = props.config.deadzone ? props.config.deadzone : 0.15
     const inertia = props.config.inertia ? props.config.inertia : 0
 
+    // Create controllers instances
+    controllers.value = [maxLinearSpeed.value, maxAngularSpeed.value].map(
+        (value) => createController(value, shapeCoefficient, deadzone, inertia)
+    )
+
     // Start publishing steering informations
     topic.value = new Topic({
         ros: props.ros,
         name: '/cmd_vel',
         messageType: 'geometry_msgs/Twist',
     })
-
-    // Create controllers instances
-    controllers.value = [
-        createController(
-            maxLinearSpeed.value,
-            shapeCoefficient,
-            deadzone,
-            inertia
-        ),
-        createController(
-            maxAngularSpeed.value,
-            shapeCoefficient,
-            deadzone,
-            inertia
-        ),
-    ]
-    startPublishing()
+    commandInterval.value = setInterval(() => {
+        sendMessage()
+    }, messageRate)
 })
 onBeforeUnmount(() => {
     clearInterval(commandInterval.value)
