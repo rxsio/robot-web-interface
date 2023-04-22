@@ -6,7 +6,7 @@ export const createController = (
     accuracy = 0.01
 ) => {
     return {
-        linerScale: linscale,
+        linearScale: linscale,
         shapeCoefficient: shape,
         deadzone: deadzone,
         inertia: inertia,
@@ -28,7 +28,7 @@ export const createController = (
             return (
                 Math.sign(this.value) *
                 Math.pow(Math.abs(this.value), this.shapeCoefficient) *
-                this.linerScale
+                this.linearScale
             )
         },
     }

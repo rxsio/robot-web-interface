@@ -1,64 +1,25 @@
 <script setup>
 import Joystick from './Joystick.vue'
-import { defineProps, onMounted, onBeforeUnmount, ref } from 'vue'
-import { Topic, Message } from 'roslib'
+import { defineProps, onMounted, ref } from 'vue'
 import { createController } from './controller'
 import { roverElements } from './elements'
+import { useRoverSender } from './messageSender'
 
 const props = defineProps(['ros', 'config'])
 
 const elements = ref(roverElements)
 
 // Publish steering informations
-const commandInterval = ref(null)
-const topic = ref(null)
-const messageRate = 100 // [ms]
-const maxLinearSpeed = ref(1)
-const maxAngularSpeed = ref(1.57)
 const carMode = ref(true)
 const controllers = ref([])
 const commandBuffer = ref([0, 0])
-
-function sendMessage() {
-    controllers.value[0].setCommand(commandBuffer.value[0])
-    controllers.value[1].setCommand(commandBuffer.value[1])
-
-    let message = new Message({
-        linear: {
-            x: 0,
-            y: 0,
-            z: 0,
-        },
-        angular: {
-            x: 0,
-            y: 0,
-            z: 0,
-        },
-    })
-
-    message.linear.x =
-        controllers.value[0].getResult() *
-        0.01 *
-        elements.value[0].speedPercentage
-    if (carMode.value) {
-        message.angular.z =
-            (message.linear.x / maxLinearSpeed.value) *
-            maxAngularSpeed.value *
-            Math.tan(
-                (Math.PI / 4) *
-                    (controllers.value[1].getResult() / maxAngularSpeed.value) *
-                    0.01 *
-                    elements.value[1].speedPercentage
-            )
-    } else {
-        message.angular.z =
-            controllers.value[1].getResult() *
-            0.01 *
-            elements.value[1].speedPercentage
-    }
-
-    topic.value.publish(message)
-}
+useRoverSender(
+    props.ros,
+    elements,
+    controllers,
+    carMode,
+    () => commandBuffer.value
+)
 
 function joystickMovedCallback(stickData) {
     commandBuffer.value[0] = parseFloat(stickData.y)
@@ -67,10 +28,12 @@ function joystickMovedCallback(stickData) {
 
 onMounted(() => {
     // Read configuration from props
-    if (props.config.maxLinearSpeed)
-        maxLinearSpeed.value = props.config.maxLinearSpeed
-    if (props.config.maxAngularSpeed)
-        maxAngularSpeed.value = props.config.maxAngularSpeed
+    const maxLinearSpeed = props.config.maxLinearSpeed
+        ? props.config.maxLinearSpeed
+        : 1.0
+    const maxAngularSpeed = props.config.maxAngularSpeed
+        ? props.config.maxAngularSpeed
+        : 1.57
     const shapeCoefficient = props.config.shapeCoefficient
         ? props.config.shapeCoefficient
         : 1.0
@@ -78,22 +41,9 @@ onMounted(() => {
     const inertia = props.config.inertia ? props.config.inertia : 0
 
     // Create controllers instances
-    controllers.value = [maxLinearSpeed.value, maxAngularSpeed.value].map(
-        (value) => createController(value, shapeCoefficient, deadzone, inertia)
+    controllers.value = [maxLinearSpeed, maxAngularSpeed].map((value) =>
+        createController(value, shapeCoefficient, deadzone, inertia)
     )
-
-    // Start publishing steering informations
-    topic.value = new Topic({
-        ros: props.ros,
-        name: '/cmd_vel',
-        messageType: 'geometry_msgs/Twist',
-    })
-    commandInterval.value = setInterval(() => {
-        sendMessage()
-    }, messageRate)
-})
-onBeforeUnmount(() => {
-    clearInterval(commandInterval.value)
 })
 </script>
 <template>

@@ -1,62 +1,20 @@
 <script setup>
-import { defineProps, onMounted, onBeforeUnmount, ref } from 'vue'
-import { Topic, Message } from 'roslib'
+import { defineProps, onMounted, ref } from 'vue'
 import { createController } from './controller'
 import { roverElements } from './elements'
+import { useRoverSender } from './messageSender'
 
 const props = defineProps(['ros', 'config'])
 
 const elements = ref(roverElements)
 
 // Publish steering informations
-const commandInterval = ref(null)
-const topic = ref(null)
-const messageRate = 100 // [ms]
-const maxLinearSpeed = ref(1)
-const maxAngularSpeed = ref(1.57)
 const carMode = ref(true)
 const controllers = ref([])
-
-function sendMessage() {
-    controllers.value[0].setCommand(pressed.value.W - pressed.value.S)
-    controllers.value[1].setCommand(pressed.value.A - pressed.value.D)
-
-    let message = new Message({
-        linear: {
-            x: 0,
-            y: 0,
-            z: 0,
-        },
-        angular: {
-            x: 0,
-            y: 0,
-            z: 0,
-        },
-    })
-
-    message.linear.x =
-        controllers.value[0].getResult() *
-        0.01 *
-        elements.value[0].speedPercentage
-    if (carMode.value) {
-        message.angular.z =
-            (message.linear.x / maxLinearSpeed.value) *
-            maxAngularSpeed.value *
-            Math.tan(
-                (Math.PI / 4) *
-                    (controllers.value[1].getResult() / maxAngularSpeed.value) *
-                    0.01 *
-                    elements.value[1].speedPercentage
-            )
-    } else {
-        message.angular.z =
-            controllers.value[1].getResult() *
-            0.01 *
-            elements.value[1].speedPercentage
-    }
-
-    topic.value.publish(message)
-}
+useRoverSender(props.ros, elements, controllers, carMode, () => [
+    pressed.value.W - pressed.value.S,
+    pressed.value.A - pressed.value.D,
+])
 
 // Check pressed keys
 const pressed = ref({ W: false, A: false, S: false, D: false })
@@ -88,10 +46,12 @@ function focusSlider() {
 
 onMounted(() => {
     // Read configuration from props
-    if (props.config.maxLinearSpeed)
-        maxLinearSpeed.value = props.config.maxLinearSpeed
-    if (props.config.maxAngularSpeed)
-        maxAngularSpeed.value = props.config.maxAngularSpeed
+    const maxLinearSpeed = props.config.maxLinearSpeed
+        ? props.config.maxLinearSpeed
+        : 1.0
+    const maxAngularSpeed = props.config.maxAngularSpeed
+        ? props.config.maxAngularSpeed
+        : 1.57
     const shapeCoefficient = props.config.shapeCoefficient
         ? props.config.shapeCoefficient
         : 1.0
@@ -99,8 +59,8 @@ onMounted(() => {
     const inertia = props.config.inertia ? props.config.inertia : 0.9
 
     // Create controllers instances
-    controllers.value = [maxLinearSpeed.value, maxAngularSpeed.value].map(
-        (value) => createController(value, shapeCoefficient, deadzone, inertia)
+    controllers.value = [maxLinearSpeed, maxAngularSpeed].map((value) =>
+        createController(value, shapeCoefficient, deadzone, inertia)
     )
 
     // Start listening keyboard signals
@@ -110,19 +70,6 @@ onMounted(() => {
     document
         .getElementById('rover-keyboard-control')
         .addEventListener('keyup', keyUpCallback)
-
-    // Start publishing steering informations
-    topic.value = new Topic({
-        ros: props.ros,
-        name: '/cmd_vel',
-        messageType: 'geometry_msgs/Twist',
-    })
-    commandInterval.value = setInterval(() => {
-        sendMessage()
-    }, messageRate)
-})
-onBeforeUnmount(() => {
-    clearInterval(commandInterval.value)
 })
 </script>
 <template>
