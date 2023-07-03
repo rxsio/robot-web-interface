@@ -1,4 +1,4 @@
-# sirius2-control-panel
+# robot-web-interface
 
 ## Project setup
 
