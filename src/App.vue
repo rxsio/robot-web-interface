@@ -1,5 +1,5 @@
 <script setup>
-//import LoadingScreen from '@/components/LoadingScreen.vue'
+import LoadingScreen from '@/components/LoadingScreen.vue'
 import { onMounted } from 'vue'
 import { useRosStore, useGstreamerStore } from '@/stores'
 const rosStore = useRosStore()
