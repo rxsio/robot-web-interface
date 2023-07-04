@@ -2,7 +2,7 @@ import { defineStore } from 'pinia'
 import { ref } from 'vue'
 
 export const useBatteryLevelStore = defineStore('batteryLevel', () => {
-    const percentage = ref(70)
+    const percentage = ref(80)
     const voltage = ref(20.3)
 
     function setPercentage(newPercentege) {

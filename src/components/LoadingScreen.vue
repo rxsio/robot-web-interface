@@ -46,7 +46,7 @@ const paths = [
 .wrapper {
     width: 100vw;
     height: 100vh;
-    background-color: var(--v-grafitowy-base);
+    background-color: var(--v-secondary-base);
     position: absolute;
     z-index: 1000;
 
@@ -63,7 +63,7 @@ const paths = [
     transform: translate(-50%, -50%);
 
     fill: transparent;
-    stroke: var(--v-miętowy-base);
+    stroke: var(--v-primary-base);
     stroke-width: 5px;
 }
 </style>

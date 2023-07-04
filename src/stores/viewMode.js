@@ -1,6 +1,5 @@
 import { defineStore } from 'pinia'
 import { ref, getCurrentInstance } from 'vue'
-import pwColors from '@/assets/pwColors.json'
 
 export const useViewModeStore = defineStore('viewMode', () => {
     const mode = ref('normal')
@@ -8,13 +7,13 @@ export const useViewModeStore = defineStore('viewMode', () => {
     const $vuetify = getCurrentInstance().proxy.$vuetify
     function editMode() {
         mode.value = 'edit'
-        $vuetify.theme.themes.light.primary = pwColors.słoneczny
-        $vuetify.theme.themes.light.secondary = pwColors.grafitowy
+        $vuetify.theme.themes.light.primary =
+            $vuetify.theme.themes.light.primaryEdit
     }
     function normalMode() {
         mode.value = 'normal'
-        $vuetify.theme.themes.light.primary = pwColors.miętowy
-        $vuetify.theme.themes.light.secondary = pwColors.grafitowy
+        $vuetify.theme.themes.light.primary =
+            $vuetify.theme.themes.light.primaryNormal
     }
 
     const editDrawer = ref(false)

@@ -1,6 +1,6 @@
 import Vue from 'vue'
 import Vuetify from 'vuetify/lib/framework'
-import pwColors from '@/assets/pwColors.json'
+import colors from 'vuetify/lib/util/colors'
 
 Vue.use(Vuetify)
 
@@ -11,14 +11,16 @@ export default new Vuetify({
         },
         themes: {
             light: {
-                primary: pwColors.miętowy,
-                secondary: pwColors.grafitowy,
-                accent: '#82B1FF',
-                error: '#FF5252',
-                info: '#2196F3',
-                success: '#4CAF50',
-                warning: '#FFC107',
-                ...pwColors,
+                primary: colors.teal.lighten1,
+                secondary: colors.blueGrey.darken4,
+                accent: colors.blue.accent1,
+                error: colors.red.accent2,
+                info: colors.blue.base,
+                success: colors.green.base,
+                warning: colors.amber.base,
+
+                primaryNormal: colors.teal.lighten1,
+                primaryEdit: colors.amber.base,
             },
         },
     },
