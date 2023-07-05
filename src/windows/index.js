@@ -50,7 +50,7 @@ export default {
                 type: 'select',
                 possibleValues: () => {
                     const gstreamerStore = useGstreamerStore()
-                    return Object.keys(gstreamerStore.peers)
+                    return Object.keys(gstreamerStore.producers)
                 },
             },
         },

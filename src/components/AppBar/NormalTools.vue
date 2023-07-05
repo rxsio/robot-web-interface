@@ -1,10 +1,11 @@
 <script setup>
 import { defineProps } from 'vue'
-import { useViewModeStore } from '@/stores'
+import { useViewModeStore, useGstreamerStore } from '@/stores'
 
 const props = defineProps(['show'])
 
 const viewModeStore = useViewModeStore()
+const gstreamerStore = useGstreamerStore()
 const { editMode } = viewModeStore
 </script>
 <template>
@@ -22,10 +23,20 @@ const { editMode } = viewModeStore
         <v-fab-transition leave-absolute>
             <v-btn
                 icon
-                color="primary"
+                color="red"
                 v-show="props.show"
             >
-                <v-icon>mdi-cellphone-off</v-icon>
+                <v-icon>mdi-microsoft-xbox-controller-off</v-icon>
+            </v-btn>
+        </v-fab-transition>
+        <v-fab-transition leave-absolute>
+            <v-btn
+                icon
+                :color="gstreamerStore.connected ? 'primary' : 'red'"
+                v-show="props.show"
+            >
+                <v-icon v-if="!gstreamerStore.connected">mdi-video-off</v-icon>
+                <v-icon v-if="gstreamerStore.connected">mdi-video</v-icon>
             </v-btn>
         </v-fab-transition>
         <v-fab-transition leave-absolute>
@@ -34,7 +45,7 @@ const { editMode } = viewModeStore
                 color="red"
                 v-show="props.show"
             >
-                <v-icon>mdi-microsoft-xbox-controller-off</v-icon>
+                <v-icon>mdi-api-off</v-icon>
             </v-btn>
         </v-fab-transition>
         <v-fab-transition leave-absolute>

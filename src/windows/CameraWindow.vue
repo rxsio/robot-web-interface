@@ -7,17 +7,17 @@ import {
     ref,
     watch,
 } from 'vue'
+import { createConsumerSession } from '@/lib/gstwebrtc-api/gstwebrtc-api'
 import { useGstreamerStore } from '@/stores'
 const gstreamerStore = useGstreamerStore()
 const props = defineProps(['windowDimensions', 'extraConfig'])
 
-const peerId = computed(
-    () => gstreamerStore.peers[props.extraConfig.videoSource]
+const producerId = computed(
+    () => gstreamerStore.producers[props.extraConfig.videoSource]
 )
+const session = ref(null)
+const state = ref('Disconnected')
 
-const wsConn = ref(null)
-const peerConnection = ref(null)
-const sessionId = ref(null)
 const videoDim = ref({
     width: null,
     height: null,
@@ -52,111 +52,47 @@ const dimensions = computed(() => {
 const viewer = ref(null)
 
 const connect = () => {
-    if (peerId.value && viewer.value) {
-        if (wsConn.value) wsConn.value.close()
+    console.log(producerId.value)
+    if (producerId.value && viewer.value) {
+        const currSession = createConsumerSession(producerId.value)
+        if (currSession) {
+            session.value = currSession
 
-        wsConn.value = new WebSocket(gstreamerStore.url)
-        wsConn.value.onopen = () => {
-            connectPeer()
-        }
-        wsConn.value.onerror = () => {
-            endSession()
-        }
-        wsConn.value.onclose = () => {
-            endSession()
-        }
-        wsConn.value.onmessage = (event) => {
-            const msg = JSON.parse(event.data)
-
-            switch (msg.type) {
-                case 'registered':
-                    connectPeer()
-                    break
-                case 'sessionStarted':
-                    sessionId.value = msg.sessionId
-                    break
-                case 'error':
-                    endSession()
-                    break
-                case 'endSession':
-                    endSession()
-                    break
-                case 'peer':
-                    // Incoming peer message signals the beginning of a call
-                    if (!peerConnection.value) createCall(msg)
-
-                    if (msg.sdp != null) {
-                        incomingSDP(msg.sdp)
-                    } else if (msg.ice != null) {
-                        incomingICE(msg.ice)
-                    }
-                    break
-            }
-        }
-    }
-}
-
-const connectPeer = () => {
-    wsConn.value.send(
-        JSON.stringify({
-            type: 'startSession',
-            peerId: peerId.value,
-        })
-    )
-}
-
-const incomingICE = (ice) => {
-    peerConnection.value.addIceCandidate(new RTCIceCandidate(ice))
-}
-
-const incomingSDP = (sdp) => {
-    peerConnection.value.setRemoteDescription(sdp).then(remoteDescriptionSet)
-}
-const remoteDescriptionSet = () => {
-    peerConnection.value.createAnswer().then(localDescription)
-}
-const localDescription = (desc) => {
-    peerConnection.value.setLocalDescription(desc).then(() => {
-        wsConn.value.send(
-            JSON.stringify({
-                type: 'peer',
-                sessionId: sessionId.value,
-                sdp: peerConnection.value.localDescription.toJSON(),
+            currSession.addEventListener('error', (event) => {
+                if (session.value === currSession) {
+                    console.error(event.message, event.error)
+                }
             })
-        )
-    })
-}
 
-const createCall = () => {
-    peerConnection.value = new RTCPeerConnection({
-        iceServers: [
-            { urls: 'stun:stun.l.google.com:19302' },
-            {
-                urls: 'turn:turn.homeneural.net:3478?transport=udp',
-                credential: '1qaz2wsx',
-                username: 'test',
-            },
-        ],
-    })
-    peerConnection.value.ontrack = remoteStreamAdded
-}
-const remoteStreamAdded = (event) => {
-    let videoTracks = event.streams[0].getVideoTracks()
-    // let audioTracks = event.streams[0].getAudioTracks()
+            currSession.addEventListener('closed', () => {
+                if (session.value === currSession) {
+                    viewer.value.pause()
+                    viewer.value.srcObject = null
 
-    if (videoTracks.length > 0) {
-        viewer.value.srcObject = event.streams[0]
-        viewer.value.play()
-    } else {
-        endSession()
+                    session.value = null
+                    state.value = 'Disconnected'
+                }
+            })
+
+            currSession.addEventListener('streamsChanged', () => {
+                if (session.value === currSession) {
+                    const streams = currSession.streams
+                    if (streams.length > 0) {
+                        viewer.value.srcObject = streams[0]
+                        viewer.value.play().catch(() => {})
+                        state.value = ''
+                    }
+                }
+            })
+
+            state.value = 'Connecting...'
+            currSession.connect()
+        }
     }
 }
-const endSession = (retry = true) => {
-    if (wsConn.value) wsConn.value.close()
-    wsConn.value = null
-    peerConnection.value = null
 
-    if (retry) setTimeout(1000, () => connect())
+const disconnect = () => {
+    if (session.value) session.value.close()
 }
 
 const streamStarted = () => {
@@ -165,8 +101,9 @@ const streamStarted = () => {
 }
 
 watch(
-    () => [peerId.value, viewer],
-    () => {
+    () => [producerId.value, viewer.value],
+    (oldVal, newVal, onCleanup) => {
+        onCleanup(disconnect)
         connect()
     }
 )
@@ -175,7 +112,7 @@ onMounted(() => {
     connect()
 })
 onBeforeUnmount(() => {
-    endSession(false)
+    disconnect()
 })
 </script>
 <template>
@@ -203,6 +140,19 @@ onBeforeUnmount(() => {
             }"
         >
             {{ props.extraConfig.videoSource }}
+        </span>
+        <span
+            :style="{
+                'text-shadow':
+                    '-2px -2px 0 #000, 2px -2px 0 #000, -2px 2px 0 #000, 2px 2px 0 #000, -3px 0px 0 #000, 0px -3px 0 #000, 3px 0px 0 #000, 0px 3px 0 #000',
+                color: 'white',
+                'font-size': '30px',
+                position: 'absolute',
+                top: '50%',
+                left: '50%',
+            }"
+        >
+            {{ gstreamerStore.connected ? state : 'No server' }}
         </span>
         <video
             preload="none"
