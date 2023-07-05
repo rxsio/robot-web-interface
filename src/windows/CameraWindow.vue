@@ -1,12 +1,5 @@
 <script setup>
-import {
-    computed,
-    defineProps,
-    onBeforeUnmount,
-    onMounted,
-    ref,
-    watch,
-} from 'vue'
+import { computed, defineProps, ref, watch } from 'vue'
 import { createConsumerSession } from '@/lib/gstwebrtc-api/gstwebrtc-api'
 import { useGstreamerStore } from '@/stores'
 const gstreamerStore = useGstreamerStore()
@@ -22,6 +15,8 @@ const videoDim = ref({
     width: null,
     height: null,
 })
+
+const viewer = ref(null)
 
 const dimensions = computed(() => {
     const aspectRatio = videoDim.value.width / videoDim.value.height
@@ -49,10 +44,8 @@ const dimensions = computed(() => {
     }
 })
 
-const viewer = ref(null)
-
 const connect = () => {
-    console.log(producerId.value)
+    console.log('[dbg] connect()', producerId.value)
     if (producerId.value && viewer.value) {
         const currSession = createConsumerSession(producerId.value)
         if (currSession) {
@@ -65,9 +58,12 @@ const connect = () => {
             })
 
             currSession.addEventListener('closed', () => {
+                console.log('[dbg] closed()', session.value._sessionId)
                 if (session.value === currSession) {
-                    viewer.value.pause()
-                    viewer.value.srcObject = null
+                    if (viewer.value) {
+                        viewer.value.pause()
+                        viewer.value.srcObject = null
+                    }
 
                     session.value = null
                     state.value = 'Disconnected'
@@ -76,10 +72,13 @@ const connect = () => {
 
             currSession.addEventListener('streamsChanged', () => {
                 if (session.value === currSession) {
+                    console.log('[dbg] streaming()', session.value._sessionId)
                     const streams = currSession.streams
                     if (streams.length > 0) {
-                        viewer.value.srcObject = streams[0]
-                        viewer.value.play().catch(() => {})
+                        if (viewer.value) {
+                            viewer.value.srcObject = streams[0]
+                            viewer.value.play().catch(() => {})
+                        }
                         state.value = ''
                     }
                 }
@@ -92,7 +91,10 @@ const connect = () => {
 }
 
 const disconnect = () => {
-    if (session.value) session.value.close()
+    console.log('[dbg] disconnect()')
+    if (session.value) {
+        session.value.close()
+    }
 }
 
 const streamStarted = () => {
@@ -107,13 +109,6 @@ watch(
         connect()
     }
 )
-
-onMounted(() => {
-    connect()
-})
-onBeforeUnmount(() => {
-    disconnect()
-})
 </script>
 <template>
     <div

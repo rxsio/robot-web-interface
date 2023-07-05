@@ -1,5 +1,6 @@
 <script setup>
 import { defineProps, computed, ref } from 'vue'
+import Vue from 'vue'
 import { useLayoutStore } from '@/stores'
 import windows from '@/windows'
 import WindowBorder from './WindowBorder.vue'
@@ -34,7 +35,7 @@ const remove = () => {
         .indexOf(props.id)
     layoutStore.layout.shape.splice(index, 1)
 
-    delete layoutStore.layout.windows[props.id]
+    Vue.delete(layoutStore.layout.windows, props.id)
 }
 
 const showConfigDialog = ref(false)

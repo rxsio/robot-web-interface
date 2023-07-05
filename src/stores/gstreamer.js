@@ -1,5 +1,5 @@
 import { defineStore } from 'pinia'
-import { computed, ref } from 'vue'
+import Vue, { computed, ref } from 'vue'
 import {
     startGstreamerConnection,
     registerConnectionListener,
@@ -7,7 +7,7 @@ import {
 } from '@/lib/gstwebrtc-api'
 
 export const useGstreamerStore = defineStore('gstreamer', () => {
-    const address = 'localhost'
+    const address = window.location.hostname
     const port = 8443
     const url = computed(() => new URL(`ws://${address}:${port}`).toString())
 
@@ -28,8 +28,8 @@ export const useGstreamerStore = defineStore('gstreamer', () => {
         producerAdded: (producer) => {
             console.log('[GST]', 'Added producer', producer)
             let name = ''
-            if (!!producer.meta && !!producer.meta['display-name']) {
-                name = producer.meta['display-name']
+            if (!!producer.meta && !!producer.meta['name']) {
+                name = producer.meta['name']
                 producers.value = {
                     ...producers.value,
                     [name]: producer.id,
@@ -46,8 +46,7 @@ export const useGstreamerStore = defineStore('gstreamer', () => {
                     ) &&
                     producers.value[name] == producer.id
                 ) {
-                    delete producers.value[name]
-                    producers.value = { ...producers.value }
+                    Vue.delete(producers.value, name)
                 }
             }
         },

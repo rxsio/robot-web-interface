@@ -27,6 +27,7 @@ const isEditMode = computed(() => viewModeStore.mode === 'edit')
                 :style="{ 'user-select': isEditMode ? 'none' : 'text' }"
             >
                 <GridLayout
+                    :key="`${layoutStore.panel} ${layoutStore.screen}`"
                     :layout.sync="layoutStore.layout.shape"
                     :col-num="12"
                     :row-height="100"
