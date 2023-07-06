@@ -2,91 +2,38 @@ import { defineStore } from 'pinia'
 import { ref, computed, getCurrentInstance } from 'vue'
 import panelViewConfig from '@/assets/panelViewConfig.json'
 
+const generateDefaultConfig = () =>
+    Array.from({ length: 3 }, () =>
+        Object.fromEntries(
+            panelViewConfig.map(({ name }) => [
+                name,
+                {
+                    shape: [],
+                    windows: {},
+                    nextId: 0,
+                },
+            ])
+        )
+    )
+
 export const useLayoutStore = defineStore('layout', () => {
-    const allLayouts = ref([
-        {
-            overview: {
-                shape: [
-                    { i: 'aaa', x: 0, y: 0, w: 2, h: 2 },
-                    { i: 'bbb', x: 3, y: 0, w: 3, h: 2 },
-                    { i: 'ccc', x: 6, y: 0, w: 3, h: 2 },
-                    { i: 'ddd', x: 0, y: 0, w: 2, h: 2 },
-                ],
-                windows: {
-                    aaa: {
-                        type: 'testWindowA',
-                        name: 'AAA',
-                        extraConfig: { test: '123' },
-                    },
-                    bbb: {
-                        type: 'cameraWindow',
-                        name: 'Kamera 1',
-                        extraConfig: {
-                            videoSource: 'testing',
-                        },
-                    },
-                    ccc: {
-                        type: 'cameraWindow',
-                        name: 'Kamera 2',
-                        extraConfig: {
-                            videoSource: 'testing2',
-                        },
-                    },
-                    ddd: {
-                        type: 'testWindow',
-                        name: 'Kamera Dół',
-                        extraConfig: {},
-                    },
-                },
-                nextId: 0,
-            },
-            steering: {
-                shape: [],
-                windows: {},
-                nextId: 0,
-            },
-            manipulator: {
-                shape: [],
-                windows: {},
-                nextId: 0,
-            },
-            drilling: {
-                shape: [],
-                windows: {},
-                nextId: 0,
-            },
-            science: {
-                shape: [],
-                windows: {},
-                nextId: 0,
-            },
-            terminal: {
-                shape: [],
-                windows: {},
-                nextId: 0,
-            },
-        },
-        Object.fromEntries(
-            panelViewConfig.map(({ name }) => [
-                name,
-                {
-                    shape: [],
-                    windows: {},
-                    nextId: 0,
-                },
-            ])
-        ),
-        Object.fromEntries(
-            panelViewConfig.map(({ name }) => [
-                name,
-                {
-                    shape: [],
-                    windows: {},
-                    nextId: 0,
-                },
-            ])
-        ),
-    ])
+    const getConfig = () => {
+        const currentLayoutJSON = localStorage.getItem('layout')
+        if (!currentLayoutJSON) return generateDefaultConfig()
+        else return JSON.parse(currentLayoutJSON)
+    }
+
+    const allLayouts = ref(getConfig())
+
+    function resetAll() {
+        allLayouts.value = generateDefaultConfig()
+    }
+    function save() {
+        localStorage.setItem('layout', JSON.stringify(allLayouts.value))
+    }
+    function reload() {
+        allLayouts.value = getConfig()
+    }
 
     const panel = computed(() => {
         const $route = getCurrentInstance().proxy.$route
@@ -109,5 +56,8 @@ export const useLayoutStore = defineStore('layout', () => {
         allLayouts,
         layout,
         nextWindowId,
+        resetAll,
+        save,
+        reload,
     }
 })

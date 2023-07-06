@@ -1,61 +1,73 @@
 <script setup>
 import { defineProps } from 'vue'
 import { useViewModeStore, useGstreamerStore } from '@/stores'
+import IconButtonList from './IconButtonList.vue'
 
 const props = defineProps(['show'])
 
 const viewModeStore = useViewModeStore()
 const gstreamerStore = useGstreamerStore()
 const { editMode } = viewModeStore
+
+const buttons = [
+    {
+        type: 'icon',
+        icon: 'mdi-application-edit',
+        color: 'primary',
+        tooltip: 'Edit layout',
+        onClick: editMode,
+    },
+    {
+        type: 'icon',
+        icon: 'mdi-controller-off',
+        color: 'red',
+        tooltip: 'Controller disconnected',
+        onClick: () => {},
+    },
+    gstreamerStore.connected
+        ? {
+              type: 'icon',
+              icon: 'mdi-video',
+              color: 'primary',
+              tooltip: 'Video server connected',
+              onClick: () => {},
+          }
+        : {
+              type: 'icon',
+              icon: 'mdi-video-off',
+              color: 'red',
+              tooltip: 'Video server disconnected',
+              onClick: () => {},
+          },
+    {
+        type: 'icon',
+        icon: 'mdi-robot-off',
+        color: 'red',
+        tooltip: 'Robot disconnected',
+        onClick: () => {},
+    },
+    {
+        type: 'icon',
+        icon: 'mdi-alert',
+        color: 'primary',
+        tooltip: 'No alerts',
+        onClick: () => {},
+    },
+]
+
+/*
+
+    <div>
+                color="red"
+                <v-icon></v-icon>
+
+                color="primary"
+                <v-icon></v-icon>
+    */
 </script>
 <template>
-    <div>
-        <v-fab-transition leave-absolute>
-            <v-btn
-                icon
-                color="primary"
-                @click.stop="editMode()"
-                v-show="props.show"
-            >
-                <v-icon>mdi-application-edit</v-icon>
-            </v-btn>
-        </v-fab-transition>
-        <v-fab-transition leave-absolute>
-            <v-btn
-                icon
-                color="red"
-                v-show="props.show"
-            >
-                <v-icon>mdi-microsoft-xbox-controller-off</v-icon>
-            </v-btn>
-        </v-fab-transition>
-        <v-fab-transition leave-absolute>
-            <v-btn
-                icon
-                :color="gstreamerStore.connected ? 'primary' : 'red'"
-                v-show="props.show"
-            >
-                <v-icon v-if="!gstreamerStore.connected">mdi-video-off</v-icon>
-                <v-icon v-if="gstreamerStore.connected">mdi-video</v-icon>
-            </v-btn>
-        </v-fab-transition>
-        <v-fab-transition leave-absolute>
-            <v-btn
-                icon
-                color="red"
-                v-show="props.show"
-            >
-                <v-icon>mdi-api-off</v-icon>
-            </v-btn>
-        </v-fab-transition>
-        <v-fab-transition leave-absolute>
-            <v-btn
-                icon
-                color="primary"
-                v-show="props.show"
-            >
-                <v-icon>mdi-alert</v-icon>
-            </v-btn>
-        </v-fab-transition>
-    </div>
+    <IconButtonList
+        :show="props.show"
+        :buttons="buttons"
+    />
 </template>

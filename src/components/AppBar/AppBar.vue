@@ -54,7 +54,10 @@ const menuIcon = computed(() =>
             />
         </v-toolbar-title>
         <v-spacer />
-        <GearSelector />
+        <GearSelector
+            :show="viewModeStore.mode === 'normal'"
+            style="margin-right: 8px"
+        />
         <NormalTools
             key="normalTools"
             :show="viewModeStore.mode === 'normal'"
