@@ -12,13 +12,6 @@ const { editMode } = viewModeStore
 const buttons = computed(() => [
     {
         type: 'icon',
-        icon: 'mdi-application-edit',
-        color: 'primary',
-        tooltip: 'Edit layout',
-        onClick: editMode,
-    },
-    {
-        type: 'icon',
         icon: 'mdi-controller-off',
         color: 'red',
         tooltip: 'Controller disconnected',
@@ -46,6 +39,15 @@ const buttons = computed(() => [
         tooltip: 'Robot disconnected',
         onClick: () => {},
     },
+    { type: 'divider' },
+    {
+        type: 'icon',
+        icon: 'mdi-application-edit-outline',
+        color: 'primary',
+        tooltip: 'Edit layout',
+        onClick: editMode,
+    },
+    { type: 'divider' },
     {
         type: 'icon',
         icon: 'mdi-alert',

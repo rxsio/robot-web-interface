@@ -18,6 +18,28 @@ const discardAndClose = () => {
     layoutStore.reload()
 }
 
+const exportLayout = () => {
+    console.log(JSON.stringify(layoutStore.allLayouts))
+
+    const a = document.createElement('a')
+    const file = new Blob([JSON.stringify(layoutStore.allLayouts)], {
+        type: 'text/json',
+    })
+    a.href = URL.createObjectURL(file)
+    a.download = 'robotControlInterfaceLayout.json'
+    a.click()
+    a.remove()
+}
+const importLayout = (event) => {
+    ;(async () => {
+        if (event.target?.files?.[0]) {
+            layoutStore.allLayouts = JSON.parse(
+                await event.target.files[0].text()
+            )
+        }
+    })()
+}
+
 const buttons = [
     {
         type: 'icon',
@@ -47,6 +69,21 @@ const buttons = [
         color: 'primary',
         tooltip: 'Add window',
         onClick: viewModeStore.toggleEditDrawer,
+    },
+    { type: 'divider' },
+    {
+        type: 'icon',
+        icon: 'mdi-application-export',
+        color: 'primary',
+        tooltip: 'Export layout',
+        onClick: exportLayout,
+    },
+    {
+        type: 'fileUpload',
+        icon: 'mdi-application-import',
+        color: 'primary',
+        tooltip: 'Import layout',
+        onClick: importLayout,
     },
 ]
 </script>

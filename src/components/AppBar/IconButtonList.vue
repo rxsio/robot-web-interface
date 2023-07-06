@@ -49,6 +49,33 @@ watch(props, () => {
                 </template>
                 <span>{{ button.tooltip }}</span>
             </v-tooltip>
+            <v-tooltip
+                bottom
+                v-if="button.type === 'fileUpload'"
+            >
+                <template v-slot:activator="{ on, attrs }">
+                    <v-fab-transition leave-absolute>
+                        <v-btn
+                            icon
+                            :color="button.color"
+                            v-show="props.show"
+                            v-bind="attrs"
+                            v-on="on"
+                        >
+                            <label>
+                                <v-icon>{{ button.icon }}</v-icon>
+                                <input
+                                    type="file"
+                                    hidden
+                                    accept=".json"
+                                    @change="button.onClick"
+                                />
+                            </label>
+                        </v-btn>
+                    </v-fab-transition>
+                </template>
+                <span>{{ button.tooltip }}</span>
+            </v-tooltip>
         </div>
     </div>
 </template>
