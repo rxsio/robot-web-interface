@@ -1,6 +1,9 @@
 <script setup>
 import { computed, defineProps, ref, watch } from 'vue'
-import { createConsumerSession } from '@/lib/gstwebrtc-api/gstwebrtc-api'
+import {
+    createConsumerSession,
+    SessionState,
+} from '@/lib/gstwebrtc-api/gstwebrtc-api'
 import { useGstreamerStore } from '@/stores'
 const gstreamerStore = useGstreamerStore()
 const props = defineProps(['windowDimensions', 'extraConfig'])
@@ -9,7 +12,7 @@ const producerId = computed(
     () => gstreamerStore.producers[props.extraConfig.videoSource]
 )
 const session = ref(null)
-const state = ref('Disconnected')
+const state = ref(SessionState.closed)
 
 const videoDim = ref({
     width: null,
@@ -66,7 +69,7 @@ const connect = () => {
                     }
 
                     session.value = null
-                    state.value = 'Disconnected'
+                    state.value = SessionState.closed
                 }
             })
 
@@ -79,12 +82,12 @@ const connect = () => {
                             viewer.value.srcObject = streams[0]
                             viewer.value.play().catch(() => {})
                         }
-                        state.value = ''
+                        state.value = SessionState.streaming
                     }
                 }
             })
 
-            state.value = 'Connecting...'
+            state.value = SessionState.connecting
             currSession.connect()
         }
     }
@@ -109,6 +112,18 @@ watch(
         connect()
     }
 )
+
+const statusIcon = computed(() => {
+    if (!gstreamerStore.connected) return 'mdi-power-plug-off'
+    else
+        return (
+            {
+                [SessionState.closed]: 'mdi-video-off',
+                [SessionState.connecting]: 'mdi-loading',
+                [SessionState.streaming]: 'none',
+            }[state.value] || 'mdi-help'
+        )
+})
 </script>
 <template>
     <div
@@ -123,32 +138,13 @@ watch(
             position: 'relative',
         }"
     >
-        <span
-            :style="{
-                'text-shadow':
-                    '-2px -2px 0 #000, 2px -2px 0 #000, -2px 2px 0 #000, 2px 2px 0 #000, -3px 0px 0 #000, 0px -3px 0 #000, 3px 0px 0 #000, 0px 3px 0 #000',
-                color: 'white',
-                'font-size': '30px',
-                position: 'absolute',
-                top: '10px',
-                left: '10px',
-            }"
+        <v-icon
+            color="primary"
+            class="status-icon"
+            v-if="statusIcon !== 'none'"
         >
-            {{ props.extraConfig.videoSource }}
-        </span>
-        <span
-            :style="{
-                'text-shadow':
-                    '-2px -2px 0 #000, 2px -2px 0 #000, -2px 2px 0 #000, 2px 2px 0 #000, -3px 0px 0 #000, 0px -3px 0 #000, 3px 0px 0 #000, 0px 3px 0 #000',
-                color: 'white',
-                'font-size': '30px',
-                position: 'absolute',
-                top: '50%',
-                left: '50%',
-            }"
-        >
-            {{ gstreamerStore.connected ? state : 'No server' }}
-        </span>
+            {{ statusIcon }}
+        </v-icon>
         <video
             preload="none"
             ref="viewer"
@@ -161,3 +157,22 @@ watch(
         />
     </div>
 </template>
+<style scoped>
+.video-name {
+    text-shadow: -2px -2px 0 #000, 2px -2px 0 #000, -2px 2px 0 #000,
+        2px 2px 0 #000, -3px 0px 0 #000, 0px -3px 0 #000, 3px 0px 0 #000,
+        0px 3px 0 #000;
+    color: white;
+    font-size: 30px;
+    position: absolute;
+    top: 10px;
+    left: 10px;
+}
+.status-icon {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 100px;
+}
+</style>

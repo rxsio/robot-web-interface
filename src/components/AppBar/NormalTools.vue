@@ -1,5 +1,5 @@
 <script setup>
-import { defineProps } from 'vue'
+import { computed, defineProps } from 'vue'
 import { useViewModeStore, useGstreamerStore } from '@/stores'
 import IconButtonList from './IconButtonList.vue'
 
@@ -9,7 +9,7 @@ const viewModeStore = useViewModeStore()
 const gstreamerStore = useGstreamerStore()
 const { editMode } = viewModeStore
 
-const buttons = [
+const buttons = computed(() => [
     {
         type: 'icon',
         icon: 'mdi-application-edit',
@@ -53,17 +53,7 @@ const buttons = [
         tooltip: 'No alerts',
         onClick: () => {},
     },
-]
-
-/*
-
-    <div>
-                color="red"
-                <v-icon></v-icon>
-
-                color="primary"
-                <v-icon></v-icon>
-    */
+])
 </script>
 <template>
     <IconButtonList
