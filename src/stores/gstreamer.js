@@ -9,7 +9,7 @@ import {
 export const useGstreamerStore = defineStore('gstreamer', () => {
     const address = window.location.hostname
     const port = 8443
-    const url = computed(() => new URL(`ws://${address}:${port}`).toString())
+    const url = computed(() => new URL(`wss://${address}:${port}`).toString())
 
     const connected = ref(false)
     const producers = ref({})

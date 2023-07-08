@@ -5,8 +5,8 @@ import { useRosStore, useGstreamerStore } from '@/stores'
 const rosStore = useRosStore()
 const gstreamerStore = useGstreamerStore()
 onMounted(() => {
-    rosStore.connect()
     gstreamerStore.connect()
+    rosStore.connect()
 })
 </script>
 <template>
