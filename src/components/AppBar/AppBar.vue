@@ -7,7 +7,8 @@ import FIROSmallLogo from '@/assets/FIROSmallLogo'
 import { useForceNavDrawerStore, useViewModeStore } from '@/stores'
 import NormalTools from './NormalTools.vue'
 import EditTools from './EditTools.vue'
-import GearSelector from './GearSelector.vue'
+import ManualSteering from './Streering/ManualSteering.vue'
+import AutonomousSteering from './Streering/AutonomousSteering.vue'
 
 const forceNavDrawerStore = useForceNavDrawerStore()
 const viewModeStore = useViewModeStore()
@@ -54,10 +55,8 @@ const menuIcon = computed(() =>
             />
         </v-toolbar-title>
         <v-spacer />
-        <GearSelector
-            :show="viewModeStore.mode === 'normal'"
-            style="margin-right: 8px"
-        />
+        <AutonomousSteering :show="viewModeStore.mode === 'normal'" />
+        <ManualSteering :show="viewModeStore.mode === 'normal'" />
         <NormalTools
             key="normalTools"
             :show="viewModeStore.mode === 'normal'"

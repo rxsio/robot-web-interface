@@ -64,14 +64,13 @@ const encryptedPage = computed(
             </v-card-text>
             <v-card-actions>
                 <div class="actions">
-                    <a :href="encryptedPage">
-                        <v-btn
-                            text
-                            color="primary"
-                        >
-                            Go to encrypted page
-                        </v-btn>
-                    </a>
+                    <v-btn
+                        text
+                        color="primary"
+                        :href="encryptedPage"
+                    >
+                        Go to encrypted page
+                    </v-btn>
                     <a
                         href="/rxsioCA.pem"
                         download="rxsioCA.pem"
