@@ -10,13 +10,7 @@ const gstreamerStore = useGstreamerStore()
 const { editMode } = viewModeStore
 
 const buttons = computed(() => [
-    {
-        type: 'icon',
-        icon: 'mdi-controller-off',
-        color: 'red',
-        tooltip: 'Controller disconnected',
-        onClick: () => {},
-    },
+    { type: 'inputList' },
     gstreamerStore.connected
         ? {
               type: 'icon',

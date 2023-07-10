@@ -1,5 +1,6 @@
 <script setup>
 import { defineProps, ref, watch } from 'vue'
+import InputListPopupButton from './InputListPopupButton.vue'
 
 const props = defineProps(['show', 'buttons'])
 
@@ -76,6 +77,10 @@ watch(props, () => {
                 </template>
                 <span>{{ button.tooltip }}</span>
             </v-tooltip>
+            <InputListPopupButton
+                v-if="button.type === 'inputList'"
+                :show="props.show"
+            />
         </div>
     </div>
 </template>

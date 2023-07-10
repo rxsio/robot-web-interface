@@ -54,6 +54,7 @@ const manipSpeed = ref(1)
         :close-on-content-click="false"
         :nudge-left="100"
         :nudge-bottom="8"
+        content-class="menu-content"
     >
         <template v-slot:activator="{ on, attrs }">
             <SteeringPopupButton
@@ -150,6 +151,9 @@ const manipSpeed = ref(1)
     </v-menu>
 </template>
 <style scoped>
+.menu-content {
+    border-radius: 16px;
+}
 .overlay {
     padding: 8px;
     display: flex;
