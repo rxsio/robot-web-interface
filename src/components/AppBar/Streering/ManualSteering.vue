@@ -1,50 +1,17 @@
 <script setup>
-import { computed, defineProps, ref } from 'vue'
+import { computed, defineProps } from 'vue'
+import { useControllerStore, useSteeringStore } from '@/stores'
 import SteeringPopupButton from './SteeringPopupButton.vue'
-import SteeringButtonGroup from './SteeringButtonGroup.vue'
+import ManualSteeringContentGamepad from './ManualSteeringContentGamepad.vue'
+import ManualSteeringContentKeyboard from './ManualSteeringContentKeyboard.vue'
 
 const props = defineProps(['show'])
+const controllerStore = useControllerStore()
+const steeringStore = useSteeringStore()
 
-const speeds = [1, 2, 3]
-const speedIcons = {
-    1: 'mdi-numeric-1',
-    2: 'mdi-numeric-2',
-    3: 'mdi-numeric-3',
-}
-
-const drivingModes = ['normal', 'car', 'tank']
-const manipModes = ['forward', 'inverse', 'inverseCylinder']
-
-const modeIcons = {
-    normal: 'mdi-arrow-decision',
-    car: 'mdi-car-side',
-    tank: 'mdi-tank',
-
-    forward: 'mdi-robot-industrial',
-    inverse: 'mdi-axis-arrow',
-    inverseCylinder: 'mdi-axis-z-rotate-clockwise',
-}
-const modeTooltips = {
-    normal: 'Normal mode',
-    car: 'Car mode',
-    tank: 'Tank mode',
-
-    forward: 'Forward kinematics',
-    inverse: 'Inverse kinematics',
-    inverseCylinder: 'Inverse kinematics cylindrical',
-}
-
-const currentIcon = computed(() => modeIcons[mode.value])
-const currentSpeed = computed(() => {
-    if (drivingModes.includes(mode.value)) return drivingSpeed.value
-    if (manipModes.includes(mode.value)) return manipSpeed.value
-    return 0
-})
-
-const mode = ref('normal')
-const enabled = ref(false)
-const drivingSpeed = ref(1)
-const manipSpeed = ref(1)
+const currentIcon = computed(
+    () => steeringStore.modeIcons[steeringStore.currentMode]
+)
 </script>
 <template>
     <v-menu
@@ -59,7 +26,7 @@ const manipSpeed = ref(1)
         <template v-slot:activator="{ on, attrs }">
             <SteeringPopupButton
                 :show="props.show"
-                :enabled="enabled"
+                :enabled="steeringStore.enabled"
                 :attrs="attrs"
                 :on="on"
             >
@@ -67,7 +34,7 @@ const manipSpeed = ref(1)
                     large
                     :style="{ margin: '-8px' }"
                 >
-                    {{ speedIcons[currentSpeed] }}
+                    {{ steeringStore.gearIcons[steeringStore.currentGear] }}
                 </v-icon>
                 <v-icon>{{ currentIcon }}</v-icon>
                 <v-icon>mdi-car-shift-pattern</v-icon>
@@ -78,74 +45,33 @@ const manipSpeed = ref(1)
                 color="primary"
                 class="text--secondary"
                 rounded
-                :disabled="enabled"
-                @click="enabled = true"
+                :disabled="steeringStore.enabled"
+                @click.stop="steeringStore.takeOverControl"
             >
+                <v-icon left>
+                    {{
+                        controllerStore.connected
+                            ? 'mdi-controller'
+                            : 'mdi-keyboard'
+                    }}
+                </v-icon>
                 Take over control
             </v-btn>
-
+            <ManualSteeringContentGamepad
+                :show="steeringStore.enabled && controllerStore.connected"
+            />
+            <ManualSteeringContentKeyboard
+                :show="steeringStore.enabled && !controllerStore.connected"
+            />
             <v-expand-transition>
-                <div
-                    class="modes"
-                    v-show="enabled"
+                <v-btn
+                    color="red"
+                    rounded
+                    v-show="steeringStore.enabled"
+                    @click="steeringStore.giveUpControl()"
                 >
-                    <div class="column">
-                        <SteeringButtonGroup
-                            v-model="mode"
-                            :values="drivingModes"
-                            :icons="modeIcons"
-                            :tooltips="modeTooltips"
-                        />
-                        <SteeringButtonGroup
-                            v-model="drivingSpeed"
-                            :values="speeds"
-                            :icons="speedIcons"
-                        />
-
-                        <div>
-                            <span class="text-caption">Max speed</span>
-                            <v-slider
-                                hideDetails
-                                thumb-label
-                                max="100"
-                                min="0"
-                            ></v-slider>
-                            <span class="text-caption">Smoothness</span>
-                            <v-slider
-                                hideDetails
-                                thumb-label
-                                max="100"
-                                min="0"
-                            ></v-slider>
-                        </div>
-                    </div>
-
-                    <v-divider vertical />
-
-                    <div class="column">
-                        <SteeringButtonGroup
-                            v-model="mode"
-                            :values="manipModes"
-                            :icons="modeIcons"
-                            :tooltips="modeTooltips"
-                        />
-                        <SteeringButtonGroup
-                            v-model="manipSpeed"
-                            :values="speeds"
-                            :icons="speedIcons"
-                        />
-
-                        <div>
-                            <span class="text-caption">Max speed</span>
-                            <v-slider
-                                hideDetails
-                                thumb-label
-                                max="100"
-                                min="0"
-                            ></v-slider>
-                        </div>
-                    </div>
-                </div>
+                    Give up control
+                </v-btn>
             </v-expand-transition>
         </v-card>
     </v-menu>
@@ -161,18 +87,5 @@ const manipSpeed = ref(1)
     gap: 8px;
     border-radius: 16px;
     width: 319px;
-}
-.modes {
-    display: flex;
-    flex-direction: row;
-    gap: 8px;
-}
-.column {
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-}
-.selected {
-    background-color: var(--v-primary-lighten1) !important;
 }
 </style>

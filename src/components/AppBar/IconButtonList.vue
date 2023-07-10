@@ -39,7 +39,7 @@ watch(props, () => {
                         <v-btn
                             icon
                             :color="button.color"
-                            @click.stop="button.onClick()"
+                            @click="button.onClick()"
                             v-show="props.show"
                             v-bind="attrs"
                             v-on="on"

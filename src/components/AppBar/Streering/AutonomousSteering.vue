@@ -1,18 +1,14 @@
 <script setup>
 import { defineProps, ref } from 'vue'
+import { useSteeringStore } from '@/stores'
 import SteeringPopupButton from './SteeringPopupButton.vue'
 import SteeringButtonGroup from './SteeringButtonGroup.vue'
 
 const props = defineProps(['show'])
 
-const speeds = [1, 2, 3]
-const speedIcons = {
-    1: 'mdi-numeric-1',
-    2: 'mdi-numeric-2',
-    3: 'mdi-numeric-3',
-}
+const steeringStore = useSteeringStore()
 
-const speed = ref(2)
+const gear = ref(2)
 const enabled = ref(false)
 </script>
 <template>
@@ -36,7 +32,7 @@ const enabled = ref(false)
                     large
                     :style="{ margin: '-8px' }"
                 >
-                    {{ speedIcons[speed] }}
+                    {{ steeringStore.gearIcons[gear] }}
                 </v-icon>
                 <v-icon>mdi-map-marker-path</v-icon>
             </SteeringPopupButton>
@@ -59,12 +55,12 @@ const enabled = ref(false)
                 >
                     <SteeringButtonGroup
                         :style="{ margin: 'auto', 'margin-bottom': '8px' }"
-                        v-model="speed"
-                        :values="speeds"
-                        :icons="speedIcons"
+                        v-model="gear"
+                        :values="steeringStore.gears"
+                        :icons="steeringStore.gearIcons"
                     />
 
-                    <div class="text-caption">Max speed</div>
+                    <div class="text-caption">Max gear</div>
                     <v-slider
                         hideDetails
                         thumb-label

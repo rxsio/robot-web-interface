@@ -1,9 +1,10 @@
 <script setup>
 import { defineProps, computed, ref } from 'vue'
+import { useControllerStore } from '@/stores'
 
 const props = defineProps(['show'])
 
-const connected = ref(false)
+const controllerStore = useControllerStore()
 const currentSource = ref('Inverse kinematics')
 
 const controllers = ref([
@@ -29,7 +30,9 @@ const sourceIcons = {
 }
 
 const controlCount = computed(() => controllers.value.length)
-const currentColor = computed(() => (connected.value ? 'primary' : 'red'))
+const currentColor = computed(() =>
+    controllerStore.connected ? 'primary' : 'red'
+)
 const sections = computed(() => [
     { name: 'Controllers', values: controllers.value },
     { name: 'Other sources', values: otherSources.value },
@@ -65,7 +68,7 @@ const sections = computed(() => [
                         </template>
                         <v-icon>
                             {{
-                                connected
+                                controllerStore.connected
                                     ? 'mdi-controller'
                                     : 'mdi-controller-off'
                             }}
@@ -76,7 +79,7 @@ const sections = computed(() => [
         </template>
         <v-card class="overlay">
             <div
-                v-if="!connected"
+                v-if="!controllerStore.connected"
                 class="title"
             >
                 <span class="text-subtitle-1 red--text">
@@ -157,7 +160,7 @@ const sections = computed(() => [
 }
 .buttons {
     display: flex;
-    justify-content: start;
+    justify-content: flex-start;
     flex-wrap: wrap;
 }
 .control-button {

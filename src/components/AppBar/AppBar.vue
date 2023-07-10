@@ -27,7 +27,7 @@ const menuIcon = computed(() =>
     >
         <v-app-bar-nav-icon
             color="primary"
-            @click.stop="toggleDrawer()"
+            @click="toggleDrawer()"
             :disabled="$vuetify.breakpoint.mdAndUp"
         >
             <v-icon>
