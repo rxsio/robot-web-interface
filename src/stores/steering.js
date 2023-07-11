@@ -10,8 +10,16 @@ export const useSteeringStore = defineStore('steering', () => {
     const drivingGear = ref(1)
     const manipGear = ref(1)
     const keyboardGear = ref(1)
+    const keyboardPressedKeys = ref({
+        forwards: false,
+        backwards: false,
+        right: false,
+        left: false,
+    })
 
     const clickListener = ref(null)
+    const keyDownListener = ref(null)
+    const keyUpListener = ref(null)
     const keyboardTransmitter = ref(null)
 
     const gears = [1, 2, 3]
@@ -83,15 +91,106 @@ export const useSteeringStore = defineStore('steering', () => {
     }
 
     function transmitKeyboardStatus() {
+        const keys = keyboardPressedKeys.value
+        let x = 0.0,
+            y = 0.0
+
+        if (keys.forwards && !keys.backwards) x = 1.0
+        if (keys.backwards && !keys.forwards) x = -1.0
+
+        if (keys.right && !keys.left) y = 1.0
+        if (keys.left && !keys.right) y = -1.0
+
+        console.log(x, y)
+
         keyboardTransmitter.value = requestAnimationFrame(
             transmitKeyboardStatus
         )
+    }
+
+    function onKeyDown(event) {
+        if (currentMode.value === 'keyboard' && enabled.value) {
+            switch (event.key) {
+                case 'w':
+                    keyboardPressedKeys.value.forwards = true
+                    break
+                case 'a':
+                    keyboardPressedKeys.value.left = true
+                    break
+                case 's':
+                    keyboardPressedKeys.value.backwards = true
+                    break
+                case 'd':
+                    keyboardPressedKeys.value.right = true
+                    break
+                case ',':
+                    if (keyboardGear.value > 1) keyboardGear.value--
+                    break
+                case '.':
+                    if (keyboardGear.value < 3) keyboardGear.value++
+                    break
+            }
+        }
+    }
+    function onKeyUp(event) {
+        if (
+            currentMode.value === 'keyboard' &&
+            event.key === ' ' &&
+            event.ctrlKey
+        ) {
+            keyboardPressedKeys.value = {
+                forwards: false,
+                backwards: false,
+                right: false,
+                left: false,
+            }
+            if (enabled.value) {
+                giveUpControl()
+            } else {
+                takeOverControl()
+            }
+        }
+        if (currentMode.value === 'keyboard' && enabled.value) {
+            switch (event.key) {
+                case 'w':
+                    keyboardPressedKeys.value.forwards = false
+                    break
+                case 'a':
+                    keyboardPressedKeys.value.left = false
+                    break
+                case 's':
+                    keyboardPressedKeys.value.backwards = false
+                    break
+                case 'd':
+                    keyboardPressedKeys.value.right = false
+                    break
+            }
+        }
+    }
+
+    function start() {
+        keyboardPressedKeys.value = {
+            forwards: false,
+            backwards: false,
+            right: false,
+            left: false,
+        }
+        keyDownListener.value = document.addEventListener('keydown', onKeyDown)
+        keyUpListener.value = document.addEventListener('keyup', onKeyUp)
     }
 
     function stop() {
         if (keyboardTransmitter.value) {
             cancelAnimationFrame(keyboardTransmitter.value)
             keyboardTransmitter.value = null
+        }
+        if (keyDownListener.value) {
+            document.removeEventListener('keydown', keyDownListener.value)
+            keyDownListener.value = null
+        }
+        if (keyUpListener.value) {
+            document.removeEventListener('keyup', keyUpListener.value)
+            keyUpListener.value = null
         }
     }
 
@@ -111,6 +210,7 @@ export const useSteeringStore = defineStore('steering', () => {
 
         takeOverControl,
         giveUpControl,
+        start,
         stop,
     }
 })

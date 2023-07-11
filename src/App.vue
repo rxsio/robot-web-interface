@@ -43,6 +43,7 @@ onMounted(() => {
             gstreamerStore.connect()
             //rosStore.connect()
             controllerStore.start()
+            steeringStore.start()
         }
     })
 })
