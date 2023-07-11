@@ -3,11 +3,10 @@ import { computed, ref, watchEffect } from 'vue'
 import { Ros } from 'roslib'
 
 export const useRosStore = defineStore('ros', () => {
-    // set 'sirius.local' for release or your Linux/WSL adress for develop
-    const address = ref('192.168.72.112')
+    const address = ref(window.location.hostname)
     const port = ref(8081)
     const url = computed(() =>
-        new URL(`ws://${address.value}:${port.value}`).toString()
+        new URL(`wss://${address.value}:${port.value}`).toString()
     )
     function setAddress(newAddress) {
         address.value = newAddress

@@ -21,20 +21,23 @@ const steeringStore = useSteeringStore()
             />
 
             <div style="align-self: stretch">
-                <span class="text-caption">Max speed</span>
+                <span class="text-caption">Max linear speed</span>
                 <v-slider
-                    max-width
+                    v-model="steeringStore.keyboardConfig.linear"
                     hideDetails
                     thumb-label
-                    max="100"
-                    min="0"
+                    :min="0"
+                    :max="1"
+                    :step="0.01"
                 ></v-slider>
-                <span class="text-caption">Smoothness</span>
+                <span class="text-caption">Max angular speed</span>
                 <v-slider
+                    v-model="steeringStore.keyboardConfig.angular"
                     hideDetails
                     thumb-label
-                    max="100"
-                    min="0"
+                    :min="0"
+                    :max="1"
+                    :step="0.01"
                 ></v-slider>
             </div>
         </div>

@@ -1,9 +1,12 @@
 import { defineStore } from 'pinia'
 import { computed, ref } from 'vue'
 import { useControllerStore } from './controller'
+import { useRosStore } from './ros'
+import ROSLIB from 'roslib'
 
 export const useSteeringStore = defineStore('steering', () => {
     const controllerStore = useControllerStore()
+    const rosStore = useRosStore()
 
     const enabled = ref(false)
     const controllerMode = ref('normal')
@@ -16,6 +19,7 @@ export const useSteeringStore = defineStore('steering', () => {
         right: false,
         left: false,
     })
+    const keyboardCmdVel = ref(null)
 
     const clickListener = ref(null)
     const keyDownListener = ref(null)
@@ -28,6 +32,14 @@ export const useSteeringStore = defineStore('steering', () => {
         2: 'mdi-numeric-2',
         3: 'mdi-numeric-3',
     }
+    const keyboardGearConfig = ref([
+        { linear: 0.1, angular: 0.1 },
+        { linear: 0.5, angular: 0.5 },
+        { linear: 1.0, angular: 1.0 },
+    ])
+    const keyboardConfig = computed(
+        () => keyboardGearConfig.value[keyboardGear.value - 1]
+    )
 
     const drivingModes = ['normal', 'car', 'tank']
     const manipModes = ['forward', 'inverse', 'inverseCylinder']
@@ -68,6 +80,13 @@ export const useSteeringStore = defineStore('steering', () => {
                     giveUpControl()
                 })
             }
+
+            keyboardCmdVel.value = new ROSLIB.Topic({
+                ros: rosStore.ws,
+                name: '/cmd_vel',
+                messageType: 'geometry_msgs/Twist',
+            })
+
             if (keyboardTransmitter.value) {
                 cancelAnimationFrame(keyboardTransmitter.value)
                 keyboardTransmitter.value = null
@@ -88,6 +107,7 @@ export const useSteeringStore = defineStore('steering', () => {
             cancelAnimationFrame(keyboardTransmitter.value)
             keyboardTransmitter.value = null
         }
+        keyboardCmdVel.value = null
     }
 
     function transmitKeyboardStatus() {
@@ -98,10 +118,25 @@ export const useSteeringStore = defineStore('steering', () => {
         if (keys.forwards && !keys.backwards) x = 1.0
         if (keys.backwards && !keys.forwards) x = -1.0
 
-        if (keys.right && !keys.left) y = 1.0
-        if (keys.left && !keys.right) y = -1.0
+        if (keys.right && !keys.left) y = -1.0
+        if (keys.left && !keys.right) y = 1.0
 
-        console.log(x, y)
+        x *= keyboardConfig.value.linear
+        y *= keyboardConfig.value.angular
+
+        let twist = new ROSLIB.Message({
+            linear: {
+                x: x,
+                y: 0,
+                z: 0,
+            },
+            angular: {
+                x: 0,
+                y: 0,
+                z: y,
+            },
+        })
+        keyboardCmdVel.value.publish(twist)
 
         keyboardTransmitter.value = requestAnimationFrame(
             transmitKeyboardStatus
@@ -207,6 +242,8 @@ export const useSteeringStore = defineStore('steering', () => {
         manipModes,
         gearIcons,
         modeIcons,
+
+        keyboardConfig,
 
         takeOverControl,
         giveUpControl,

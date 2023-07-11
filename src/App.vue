@@ -4,12 +4,13 @@ import { RouterView } from 'vue-router'
 import {
     useControllerStore,
     useGstreamerStore,
+    useRosStore,
     useSteeringStore,
 } from '@/stores'
 import LoadingScreen from '@/components/LoadingScreen.vue'
 import EncryptionErrorScreen from '@/components/EncryptionErrorScreen.vue'
 
-//const rosStore = useRosStore()
+const rosStore = useRosStore()
 const gstreamerStore = useGstreamerStore()
 const controllerStore = useControllerStore()
 const steeringStore = useSteeringStore()
@@ -41,7 +42,7 @@ onMounted(() => {
     networkTest().then((passed) => {
         if (passed) {
             gstreamerStore.connect()
-            //rosStore.connect()
+            rosStore.connect()
             controllerStore.start()
             steeringStore.start()
         }
