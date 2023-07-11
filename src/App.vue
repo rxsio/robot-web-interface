@@ -1,12 +1,18 @@
 <script setup>
-import { onMounted, ref } from 'vue'
+import { onMounted, onUnmounted, ref } from 'vue'
 import { RouterView } from 'vue-router'
-import { useGstreamerStore } from '@/stores'
+import {
+    useControllerStore,
+    useGstreamerStore,
+    useSteeringStore,
+} from '@/stores'
 import LoadingScreen from '@/components/LoadingScreen.vue'
 import EncryptionErrorScreen from '@/components/EncryptionErrorScreen.vue'
 
 //const rosStore = useRosStore()
 const gstreamerStore = useGstreamerStore()
+const controllerStore = useControllerStore()
+const steeringStore = useSteeringStore()
 
 const isReady = ref(null)
 
@@ -36,8 +42,14 @@ onMounted(() => {
         if (passed) {
             gstreamerStore.connect()
             //rosStore.connect()
+            controllerStore.start()
         }
     })
+})
+
+onUnmounted(() => {
+    controllerStore.stop()
+    steeringStore.stop()
 })
 </script>
 <template>

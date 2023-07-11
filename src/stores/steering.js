@@ -12,6 +12,7 @@ export const useSteeringStore = defineStore('steering', () => {
     const keyboardGear = ref(1)
 
     const clickListener = ref(null)
+    const keyboardTransmitter = ref(null)
 
     const gears = [1, 2, 3]
     const gearIcons = {
@@ -59,14 +60,38 @@ export const useSteeringStore = defineStore('steering', () => {
                     giveUpControl()
                 })
             }
+            if (keyboardTransmitter.value) {
+                cancelAnimationFrame(keyboardTransmitter.value)
+                keyboardTransmitter.value = null
+            }
+            keyboardTransmitter.value = requestAnimationFrame(
+                transmitKeyboardStatus
+            )
         }
     }
 
     function giveUpControl() {
         enabled.value = false
         if (clickListener.value) {
-            document.removeEventListener(clickListener.value)
+            document.removeEventListener('click', clickListener.value)
             clickListener.value = null
+        }
+        if (keyboardTransmitter.value) {
+            cancelAnimationFrame(keyboardTransmitter.value)
+            keyboardTransmitter.value = null
+        }
+    }
+
+    function transmitKeyboardStatus() {
+        keyboardTransmitter.value = requestAnimationFrame(
+            transmitKeyboardStatus
+        )
+    }
+
+    function stop() {
+        if (keyboardTransmitter.value) {
+            cancelAnimationFrame(keyboardTransmitter.value)
+            keyboardTransmitter.value = null
         }
     }
 
@@ -86,5 +111,6 @@ export const useSteeringStore = defineStore('steering', () => {
 
         takeOverControl,
         giveUpControl,
+        stop,
     }
 })
