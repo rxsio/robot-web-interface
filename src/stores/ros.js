@@ -1,5 +1,5 @@
 import { defineStore } from 'pinia'
-import { computed, ref, watchEffect } from 'vue'
+import { computed, ref } from 'vue'
 import { Ros } from 'roslib'
 
 export const useRosStore = defineStore('ros', () => {
@@ -15,43 +15,59 @@ export const useRosStore = defineStore('ros', () => {
         port.value = newPort
     }
 
-    const ws = ref(null)
+    const ros = ref(null)
+    const connected = ref(false)
     const reconnectTimeout = ref(null)
+    const connectionTimeout = ref(null)
 
     function connect() {
         if (reconnectTimeout.value) clearTimeout(reconnectTimeout.value)
+        if (connectionTimeout.value) clearTimeout(connectionTimeout.value)
         reconnectTimeout.value = null
+        connectionTimeout.value = null
 
         if (
-            ws.value &&
-            ws.value.readyState !== WebSocket.CLOSED &&
-            ws.value.readyState !== WebSocket.CLOSING
+            ros.value &&
+            ros.value.socket &&
+            ros.value.socket.readyState !== WebSocket.CLOSED &&
+            ros.value.socket.readyState !== WebSocket.CLOSING
         ) {
-            if (ws.value.socket.url === url.value) return
-            else ws.value.close()
+            if (ros.value.socket.url === url.value) return
+            else ros.value.close()
         }
 
         console.log('[ROS]', 'connecting...', url.value)
 
-        const newWs = new Ros({
+        const newRos = new Ros({
             url: url.value,
         })
+        connectionTimeout.value = setTimeout(() => {
+            newRos.close()
+        }, 2000)
 
-        newWs.on('connection', () => {
-            console.log('[ROS]', 'connected!', newWs.socket.url)
+        newRos.on('connection', () => {
+            console.log('[ROS]', 'connected!', newRos.socket.url)
+
+            connected.value = ros.value.isConnected
+
+            clearTimeout(connectionTimeout.value)
         })
-        newWs.on('error', () => {
-            console.log('[ROS]', 'error :(', newWs.socket.url)
+        newRos.on('error', () => {
+            console.log('[ROS]', 'error :(', newRos.socket.url)
+
+            connected.value = ros.value.isConnected
 
             scheduleReconnect()
         })
-        newWs.on('close', () => {
-            console.log('[ROS]', 'closed', newWs.socket.url)
+        newRos.on('close', () => {
+            console.log('[ROS]', 'closed', newRos.socket.url)
+
+            connected.value = ros.value.isConnected
 
             scheduleReconnect()
         })
 
-        ws.value = newWs
+        ros.value = newRos
     }
 
     function scheduleReconnect() {
@@ -59,13 +75,10 @@ export const useRosStore = defineStore('ros', () => {
             reconnectTimeout.value = setTimeout(() => connect(), 3000)
     }
 
-    watchEffect(() => {
-        connect()
-    })
-
     return {
-        ws,
+        ros,
         url,
+        connected,
         connect,
 
         setPort,

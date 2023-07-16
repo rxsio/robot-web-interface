@@ -63,6 +63,14 @@ export default class ComChannel extends EventTarget {
         this._channelId = ''
         this._consumerSessions = {}
 
+        this._connectionTimeout = window.setTimeout(() => {
+            this.close()
+        }, 2000)
+
+        this._ws.onopen = () => {
+            window.clearTimeout(this._connectionTimeout)
+        }
+
         this._ws.onerror = (event) => {
             this.dispatchEvent(
                 new ErrorEvent('error', {

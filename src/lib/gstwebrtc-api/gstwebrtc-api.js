@@ -299,7 +299,7 @@ function connectChannel() {
 
     apiState.channel.addEventListener('error', (event) => {
         if (event.target === apiState.channel) {
-            console.error(event.message, event.error)
+            //console.error(event.message, event.error)
         }
     })
 

@@ -1,9 +1,12 @@
 import { defineStore } from 'pinia'
 import { computed, ref } from 'vue'
 import { useSteeringStore } from './steering'
+import { useRosStore } from './ros'
+import ROSLIB from 'roslib'
 
 export const useControllerStore = defineStore('controller', () => {
     const steeringStore = useSteeringStore()
+    const rosStore = useRosStore()
 
     const connected = computed(() => !!controller.value)
 
@@ -12,6 +15,8 @@ export const useControllerStore = defineStore('controller', () => {
     const connectListener = ref(null)
     const disconnectListener = ref(null)
     const statusTransmitter = ref(null)
+
+    const joyTopic = ref(null)
 
     function findController() {
         steeringStore.giveUpControl()
@@ -23,6 +28,11 @@ export const useControllerStore = defineStore('controller', () => {
         const gamepads = navigator.getGamepads()
         for (const gamepad of gamepads) {
             if (gamepad && gamepad.connected) {
+                joyTopic.value = new ROSLIB.Topic({
+                    ros: rosStore.ros,
+                    name: '/joy_0',
+                    messageType: 'sensor_msgs/Joy',
+                })
                 statusTransmitter.value = requestAnimationFrame(transmitStatus)
                 controller.value = gamepad
                 return
@@ -68,6 +78,18 @@ export const useControllerStore = defineStore('controller', () => {
     }
 
     function transmitStatus() {
+        joyTopic.value.publish(
+            new ROSLIB.Message({
+                header: {
+                    seq: 1,
+                    stamp: 0,
+                    frame_id: 'test_joy',
+                },
+                axes: controller.value.axes,
+                buttons: controller.value.buttons.map((btn) => btn.value),
+            })
+        )
+
         statusTransmitter.value = requestAnimationFrame(transmitStatus)
     }
 

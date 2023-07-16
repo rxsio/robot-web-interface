@@ -42,6 +42,7 @@ onMounted(() => {
     networkTest().then((passed) => {
         if (passed) {
             gstreamerStore.connect()
+            gstreamerStore
             rosStore.connect()
             controllerStore.start()
             steeringStore.start()

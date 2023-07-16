@@ -1,12 +1,13 @@
 <script setup>
 import { computed, defineProps } from 'vue'
-import { useViewModeStore, useGstreamerStore } from '@/stores'
+import { useViewModeStore, useGstreamerStore, useRosStore } from '@/stores'
 import IconButtonList from './IconButtonList.vue'
 
 const props = defineProps(['show'])
 
 const viewModeStore = useViewModeStore()
 const gstreamerStore = useGstreamerStore()
+const rosStore = useRosStore()
 const { editMode } = viewModeStore
 
 const buttons = computed(() => [
@@ -26,13 +27,21 @@ const buttons = computed(() => [
               tooltip: 'Video server disconnected',
               onClick: () => {},
           },
-    {
-        type: 'icon',
-        icon: 'mdi-robot-off',
-        color: 'red',
-        tooltip: 'Robot disconnected',
-        onClick: () => {},
-    },
+    rosStore.connected
+        ? {
+              type: 'icon',
+              icon: 'mdi-robot',
+              color: 'primary',
+              tooltip: 'Robot connected',
+              onClick: () => {},
+          }
+        : {
+              type: 'icon',
+              icon: 'mdi-robot-off',
+              color: 'red',
+              tooltip: 'Robot disconnected',
+              onClick: () => {},
+          },
     { type: 'divider' },
     {
         type: 'icon',
