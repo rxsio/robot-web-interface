@@ -1,5 +1,5 @@
 import { defineStore } from 'pinia'
-import { computed, ref } from 'vue'
+import { computed, ref, watch } from 'vue'
 import { useSteeringStore } from './steering'
 import { useRosStore } from './ros'
 import ROSLIB from 'roslib'
@@ -18,6 +18,19 @@ export const useControllerStore = defineStore('controller', () => {
 
     const joyTopic = ref(null)
 
+    watch(
+        () => rosStore.ros,
+        () => {
+            if (rosStore.ros) {
+                findController()
+            } else {
+                cancelAnimationFrame(statusTransmitter.value)
+                statusTransmitter.value = null
+                joyTopic.value = null
+            }
+        }
+    )
+
     function findController() {
         steeringStore.giveUpControl()
         if (statusTransmitter.value) {
@@ -28,17 +41,36 @@ export const useControllerStore = defineStore('controller', () => {
         const gamepads = navigator.getGamepads()
         for (const gamepad of gamepads) {
             if (gamepad && gamepad.connected) {
-                joyTopic.value = new ROSLIB.Topic({
-                    ros: rosStore.ros,
-                    name: '/joy_0',
-                    messageType: 'sensor_msgs/Joy',
-                })
-                statusTransmitter.value = requestAnimationFrame(transmitStatus)
+                if (rosStore.ros) {
+                    joyTopic.value = new ROSLIB.Topic({
+                        ros: rosStore.ros,
+                        name: '/joy_0',
+                        messageType: 'sensor_msgs/Joy',
+                    })
+                    statusTransmitter.value =
+                        requestAnimationFrame(transmitStatus)
+                }
                 controller.value = gamepad
                 return
             }
         }
         controller.value = null
+    }
+
+    function transmitStatus() {
+        joyTopic.value.publish(
+            new ROSLIB.Message({
+                header: {
+                    seq: 1,
+                    stamp: 0,
+                    frame_id: 'test_joy',
+                },
+                axes: controller.value.axes,
+                buttons: controller.value.buttons.map((btn) => btn.value),
+            })
+        )
+
+        statusTransmitter.value = requestAnimationFrame(transmitStatus)
     }
 
     function start() {
@@ -75,22 +107,6 @@ export const useControllerStore = defineStore('controller', () => {
             cancelAnimationFrame(statusTransmitter.value)
             statusTransmitter.value = null
         }
-    }
-
-    function transmitStatus() {
-        joyTopic.value.publish(
-            new ROSLIB.Message({
-                header: {
-                    seq: 1,
-                    stamp: 0,
-                    frame_id: 'test_joy',
-                },
-                axes: controller.value.axes,
-                buttons: controller.value.buttons.map((btn) => btn.value),
-            })
-        )
-
-        statusTransmitter.value = requestAnimationFrame(transmitStatus)
     }
 
     return {
