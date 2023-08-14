@@ -1,8 +1,10 @@
 import { defineStore } from 'pinia'
 import { computed, ref, watch } from 'vue'
+import ROSLIB from 'roslib'
+import { callService } from '@/misc/roslibExtensions'
+
 import { useSteeringStore } from './steering'
 import { useRosStore } from './ros'
-import ROSLIB from 'roslib'
 
 export const useControllerStore = defineStore('controller', () => {
     const steeringStore = useSteeringStore()
@@ -31,7 +33,7 @@ export const useControllerStore = defineStore('controller', () => {
         }
     )
 
-    function findController() {
+    const findController = async () => {
         steeringStore.giveUpControl()
         if (statusTransmitter.value) {
             cancelAnimationFrame(statusTransmitter.value)
@@ -41,20 +43,53 @@ export const useControllerStore = defineStore('controller', () => {
         const gamepads = navigator.getGamepads()
         for (const gamepad of gamepads) {
             if (gamepad && gamepad.connected) {
-                if (rosStore.ros) {
-                    joyTopic.value = new ROSLIB.Topic({
-                        ros: rosStore.ros,
-                        name: '/joy_0',
-                        messageType: 'sensor_msgs/Joy',
-                    })
-                    statusTransmitter.value =
-                        requestAnimationFrame(transmitStatus)
-                }
                 controller.value = gamepad
+                if (rosStore.ros) {
+                    await startTransmitting()
+                }
                 return
             }
         }
         controller.value = null
+    }
+
+    const getNewJoystickName = async () => {
+        const joysticks = (
+            await callService({
+                name: '/joy_multiplexer/list_joy',
+                serviceType: 'joystick_control/ListJoy',
+                request: {},
+            })
+        ).topic_names
+
+        let nextId = 0
+        for (const joystick of joysticks) {
+            const match = joystick.match(/interface_joy_(\d+)/)
+
+            if (match && match[1]) {
+                nextId = Math.max(nextId, parseInt(match[1]) + 1)
+            }
+        }
+        return `/interface_joy_${nextId}`
+    }
+
+    const startTransmitting = async () => {
+        const name = await getNewJoystickName()
+        console.log('Connecting joy to topic:', name)
+
+        await callService({
+            name: '/joy_multiplexer/add_joy',
+            serviceType: 'joystick_control/AddJoy',
+            request: { topic_name: name },
+        })
+
+        joyTopic.value = new ROSLIB.Topic({
+            ros: rosStore.ros,
+            name: name,
+            messageType: 'sensor_msgs/Joy',
+        })
+        console.log(joyTopic.value.name)
+        statusTransmitter.value = requestAnimationFrame(transmitStatus)
     }
 
     function transmitStatus() {
