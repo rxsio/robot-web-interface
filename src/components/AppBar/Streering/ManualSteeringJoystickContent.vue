@@ -37,7 +37,7 @@ const modeTooltips = {
                 />
 
                 <div>
-                    <span class="text-caption">Max gear</span>
+                    <span class="text-caption">Max speed</span>
                     <v-slider
                         hideDetails
                         thumb-label
@@ -70,7 +70,7 @@ const modeTooltips = {
                 />
 
                 <div>
-                    <span class="text-caption">Max gear</span>
+                    <span class="text-caption">Max speed</span>
                     <v-slider
                         hideDetails
                         thumb-label

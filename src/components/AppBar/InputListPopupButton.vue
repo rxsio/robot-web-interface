@@ -1,10 +1,10 @@
 <script setup>
 import { defineProps, computed, ref } from 'vue'
-import { useControllerStore } from '@/stores'
+import { useJoystickStore } from '@/stores'
 
 const props = defineProps(['show'])
 
-const controllerStore = useControllerStore()
+const joystickStore = useJoystickStore()
 const currentSource = ref('Inverse kinematics')
 
 const controllers = ref([
@@ -31,7 +31,7 @@ const sourceIcons = {
 
 const controlCount = computed(() => controllers.value.length)
 const currentColor = computed(() =>
-    controllerStore.connected ? 'primary' : 'red'
+    joystickStore.connected ? 'primary' : 'red'
 )
 const sections = computed(() => [
     { name: 'Controllers', values: controllers.value },
@@ -68,7 +68,7 @@ const sections = computed(() => [
                         </template>
                         <v-icon>
                             {{
-                                controllerStore.connected
+                                joystickStore.connected
                                     ? 'mdi-controller'
                                     : 'mdi-controller-off'
                             }}
@@ -79,7 +79,7 @@ const sections = computed(() => [
         </template>
         <v-card class="overlay">
             <div
-                v-if="!controllerStore.connected"
+                v-if="!joystickStore.connected"
                 class="title"
             >
                 <span class="text-subtitle-1 red--text">

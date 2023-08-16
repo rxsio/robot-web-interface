@@ -2,7 +2,7 @@
 import { onMounted, onUnmounted, ref } from 'vue'
 import { RouterView } from 'vue-router'
 import {
-    useControllerStore,
+    useJoystickStore,
     useGstreamerStore,
     useRosStore,
     useSteeringStore,
@@ -12,7 +12,7 @@ import EncryptionErrorScreen from '@/components/EncryptionErrorScreen.vue'
 
 const rosStore = useRosStore()
 const gstreamerStore = useGstreamerStore()
-const controllerStore = useControllerStore()
+const joystickStore = useJoystickStore()
 const steeringStore = useSteeringStore()
 
 const isReady = ref(null)
@@ -44,14 +44,14 @@ onMounted(() => {
             gstreamerStore.connect()
             //gstreamerStore
             rosStore.connect()
-            controllerStore.start()
+            joystickStore.start()
             steeringStore.start()
         }
     })
 })
 
 onUnmounted(() => {
-    controllerStore.stop()
+    joystickStore.stop()
     steeringStore.stop()
 })
 </script>

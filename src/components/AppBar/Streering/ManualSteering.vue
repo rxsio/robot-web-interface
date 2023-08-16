@@ -1,12 +1,12 @@
 <script setup>
 import { computed, defineProps } from 'vue'
-import { useControllerStore, useSteeringStore } from '@/stores'
+import { useJoystickStore, useSteeringStore } from '@/stores'
 import SteeringPopupButton from './SteeringPopupButton.vue'
 import ManualSteeringContentGamepad from './ManualSteeringContentGamepad.vue'
 import ManualSteeringContentKeyboard from './ManualSteeringContentKeyboard.vue'
 
 const props = defineProps(['show'])
-const controllerStore = useControllerStore()
+const joystickStore = useJoystickStore()
 const steeringStore = useSteeringStore()
 
 const currentIcon = computed(
@@ -50,7 +50,7 @@ const currentIcon = computed(
             >
                 <v-icon left>
                     {{
-                        controllerStore.connected
+                        joystickStore.connected
                             ? 'mdi-controller'
                             : 'mdi-keyboard'
                     }}
@@ -58,10 +58,10 @@ const currentIcon = computed(
                 Take over control
             </v-btn>
             <ManualSteeringContentGamepad
-                :show="steeringStore.enabled && controllerStore.connected"
+                :show="steeringStore.enabled && joystickStore.connected"
             />
             <ManualSteeringContentKeyboard
-                :show="steeringStore.enabled && !controllerStore.connected"
+                :show="steeringStore.enabled && !joystickStore.connected"
             />
             <v-expand-transition>
                 <v-btn

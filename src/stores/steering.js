@@ -1,16 +1,16 @@
 import { defineStore } from 'pinia'
 import { computed, ref } from 'vue'
-import { useControllerStore } from './controller'
+import { useJoystickStore } from './joystick'
 import { useRosStore } from './ros'
 import { useKeyboardSteeringStore } from './keyboardSteering'
 
 export const useSteeringStore = defineStore('steering', () => {
-    const controllerStore = useControllerStore()
+    const joystickStore = useJoystickStore()
     const rosStore = useRosStore()
     const keyboardSteeringStore = useKeyboardSteeringStore()
 
     const enabled = ref(false)
-    const controllerMode = ref('normal')
+    const joystickMode = ref('normal')
     const drivingGear = ref(1)
     const manipGear = ref(1)
 
@@ -45,10 +45,10 @@ export const useSteeringStore = defineStore('steering', () => {
 
     const currentMode = computed({
         get() {
-            return controllerStore.connected ? controllerMode.value : 'keyboard'
+            return joystickStore.connected ? joystickMode.value : 'keyboard'
         },
         set(newValue) {
-            if (controllerStore.connected) controllerMode.value = newValue
+            if (joystickStore.connected) joystickMode.value = newValue
         },
     })
 

@@ -10,13 +10,13 @@ import {
 import { useSteeringStore } from './steering'
 import { useRosStore } from './ros'
 
-export const useControllerStore = defineStore('controller', () => {
+export const useJoystickStore = defineStore('joystick', () => {
     const steeringStore = useSteeringStore()
     const rosStore = useRosStore()
 
-    const connected = computed(() => !!controller.value)
+    const connected = computed(() => !!joystick.value)
 
-    const controller = ref(null)
+    const joystick = ref(null)
 
     const connectListener = ref(null)
     const disconnectListener = ref(null)
@@ -24,14 +24,14 @@ export const useControllerStore = defineStore('controller', () => {
 
     const joyTopic = ref(null)
 
-    onRosConnected(() => findController())
+    onRosConnected(() => findJoystick())
     onRosDisconnected(() => {
         cancelAnimationFrame(statusTransmitter.value)
         statusTransmitter.value = null
         joyTopic.value = null
     })
 
-    const findController = async () => {
+    const findJoystick = async () => {
         steeringStore.giveUpControl()
         if (statusTransmitter.value) {
             cancelAnimationFrame(statusTransmitter.value)
@@ -41,14 +41,14 @@ export const useControllerStore = defineStore('controller', () => {
         const gamepads = navigator.getGamepads()
         for (const gamepad of gamepads) {
             if (gamepad && gamepad.connected) {
-                controller.value = gamepad
+                joystick.value = gamepad
                 if (rosStore.ros) {
                     await startTransmitting()
                 }
                 return
             }
         }
-        controller.value = null
+        joystick.value = null
     }
 
     const getNewJoystickName = async () => {
@@ -97,8 +97,8 @@ export const useControllerStore = defineStore('controller', () => {
                     stamp: 0,
                     frame_id: 'test_joy',
                 },
-                axes: controller.value.axes,
-                buttons: controller.value.buttons.map((btn) => btn.value),
+                axes: joystick.value.axes,
+                buttons: joystick.value.buttons.map((btn) => btn.value),
             })
         )
 
@@ -109,13 +109,13 @@ export const useControllerStore = defineStore('controller', () => {
         connectListener.value = window.addEventListener(
             'gamepadconnected',
             () => {
-                findController()
+                findJoystick()
             }
         )
         disconnectListener.value = window.addEventListener(
             'gamepaddisconnected',
             () => {
-                findController()
+                findJoystick()
             }
         )
     }
@@ -143,7 +143,7 @@ export const useControllerStore = defineStore('controller', () => {
 
     return {
         connected,
-        controller,
+        joystick,
 
         start,
         stop,
