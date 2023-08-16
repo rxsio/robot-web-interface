@@ -43,7 +43,7 @@ export const useRosStore = defineStore('ros', () => {
         })
         connectionTimeout.value = setTimeout(() => {
             newRos.close()
-        }, 2000)
+        }, 4000)
 
         newRos.on('connection', () => {
             console.log('[ROS]', 'connected!', newRos.socket.url)
@@ -72,7 +72,7 @@ export const useRosStore = defineStore('ros', () => {
 
     function scheduleReconnect() {
         if (!reconnectTimeout.value)
-            reconnectTimeout.value = setTimeout(() => connect(), 3000)
+            reconnectTimeout.value = setTimeout(() => connect(), 1000)
     }
 
     return {

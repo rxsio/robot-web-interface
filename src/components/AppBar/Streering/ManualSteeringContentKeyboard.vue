@@ -1,11 +1,12 @@
 <script setup>
 import { defineProps } from 'vue'
 import SteeringButtonGroup from './SteeringButtonGroup.vue'
-import { useSteeringStore } from '@/stores'
+import { useSteeringStore, useKeyboardSteeringStore } from '@/stores'
 
 const props = defineProps(['show'])
 
 const steeringStore = useSteeringStore()
+const keyboardSteeringStore = useKeyboardSteeringStore()
 </script>
 <template>
     <v-expand-transition>
@@ -15,7 +16,7 @@ const steeringStore = useSteeringStore()
             @click.stop="() => {}"
         >
             <SteeringButtonGroup
-                v-model="steeringStore.keyboardGear"
+                v-model="keyboardSteeringStore.gear"
                 :values="steeringStore.gears"
                 :icons="steeringStore.gearIcons"
             />
@@ -23,7 +24,7 @@ const steeringStore = useSteeringStore()
             <div style="align-self: stretch">
                 <span class="text-caption">Max linear speed</span>
                 <v-slider
-                    v-model="steeringStore.keyboardConfig.linear"
+                    v-model="keyboardSteeringStore.config.linear"
                     hideDetails
                     thumb-label
                     :min="0"
@@ -32,7 +33,7 @@ const steeringStore = useSteeringStore()
                 ></v-slider>
                 <span class="text-caption">Max angular speed</span>
                 <v-slider
-                    v-model="steeringStore.keyboardConfig.angular"
+                    v-model="keyboardSteeringStore.config.angular"
                     hideDetails
                     thumb-label
                     :min="0"

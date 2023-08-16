@@ -1,7 +1,11 @@
 import { defineStore } from 'pinia'
-import { computed, ref, watch } from 'vue'
+import { computed, ref } from 'vue'
 import ROSLIB from 'roslib'
-import { callService } from '@/misc/roslibExtensions'
+import {
+    callService,
+    onRosConnected,
+    onRosDisconnected,
+} from '@/misc/roslibExtensions'
 
 import { useSteeringStore } from './steering'
 import { useRosStore } from './ros'
@@ -20,18 +24,12 @@ export const useControllerStore = defineStore('controller', () => {
 
     const joyTopic = ref(null)
 
-    watch(
-        () => rosStore.ros,
-        () => {
-            if (rosStore.ros) {
-                findController()
-            } else {
-                cancelAnimationFrame(statusTransmitter.value)
-                statusTransmitter.value = null
-                joyTopic.value = null
-            }
-        }
-    )
+    onRosConnected(() => findController())
+    onRosDisconnected(() => {
+        cancelAnimationFrame(statusTransmitter.value)
+        statusTransmitter.value = null
+        joyTopic.value = null
+    })
 
     const findController = async () => {
         steeringStore.giveUpControl()
@@ -55,11 +53,11 @@ export const useControllerStore = defineStore('controller', () => {
 
     const getNewJoystickName = async () => {
         const joysticks = (
-            await callService({
-                name: '/joy_multiplexer/list_joy',
-                serviceType: 'joystick_control/ListJoy',
-                request: {},
-            })
+            await callService(
+                '/joy_multiplexer/list_joy',
+                'joystick_control/ListJoy',
+                {}
+            )
         ).topic_names
 
         let nextId = 0
@@ -77,18 +75,17 @@ export const useControllerStore = defineStore('controller', () => {
         const name = await getNewJoystickName()
         console.log('Connecting joy to topic:', name)
 
-        await callService({
-            name: '/joy_multiplexer/add_joy',
-            serviceType: 'joystick_control/AddJoy',
-            request: { topic_name: name },
-        })
+        await callService(
+            '/joy_multiplexer/add_joy',
+            'joystick_control/AddJoy',
+            { topic_name: name }
+        )
 
         joyTopic.value = new ROSLIB.Topic({
             ros: rosStore.ros,
             name: name,
             messageType: 'sensor_msgs/Joy',
         })
-        console.log(joyTopic.value.name)
         statusTransmitter.value = requestAnimationFrame(transmitStatus)
     }
 
