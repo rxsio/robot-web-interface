@@ -1,11 +1,12 @@
 <script setup>
 import { defineProps } from 'vue'
 import SteeringButtonGroup from './SteeringButtonGroup.vue'
-import { useSteeringStore } from '@/stores'
+import { useJoystickSteeringStore, useSteeringStore } from '@/stores'
 
 const props = defineProps(['show'])
 
 const steeringStore = useSteeringStore()
+const joystickSteeringStore = useJoystickSteeringStore()
 
 const modeTooltips = {
     normal: 'Normal mode',
@@ -26,12 +27,12 @@ const modeTooltips = {
             <div class="column">
                 <SteeringButtonGroup
                     v-model="steeringStore.currentMode"
-                    :values="steeringStore.drivingModes"
+                    :values="joystickSteeringStore.drivingModes"
                     :icons="steeringStore.modeIcons"
                     :tooltips="modeTooltips"
                 />
                 <SteeringButtonGroup
-                    v-model="steeringStore.drivingGear"
+                    v-model="steeringStore.currentGear"
                     :values="steeringStore.gears"
                     :icons="steeringStore.gearIcons"
                 />
@@ -59,7 +60,7 @@ const modeTooltips = {
             <div class="column">
                 <SteeringButtonGroup
                     v-model="steeringStore.currentMode"
-                    :values="steeringStore.manipModes"
+                    :values="joystickSteeringStore.manipModes"
                     :icons="steeringStore.modeIcons"
                     :tooltips="modeTooltips"
                 />

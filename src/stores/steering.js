@@ -1,18 +1,15 @@
 import { defineStore } from 'pinia'
-import { computed, ref } from 'vue'
+import { computed } from 'vue'
 import { useJoystickStore } from './joystick'
 import { useRosStore } from './ros'
 import { useKeyboardSteeringStore } from './keyboardSteering'
+import { useJoystickSteeringStore } from './joystickSteering'
 
 export const useSteeringStore = defineStore('steering', () => {
     const joystickStore = useJoystickStore()
     const rosStore = useRosStore()
     const keyboardSteeringStore = useKeyboardSteeringStore()
-
-    const enabled = ref(false)
-    const joystickMode = ref('normal')
-    const drivingGear = ref(1)
-    const manipGear = ref(1)
+    const joystickSteeringStore = useJoystickSteeringStore()
 
     const gears = [1, 2, 3]
     const gearIcons = {
@@ -20,9 +17,6 @@ export const useSteeringStore = defineStore('steering', () => {
         2: 'mdi-numeric-2',
         3: 'mdi-numeric-3',
     }
-
-    const drivingModes = ['normal', 'car', 'tank']
-    const manipModes = ['forward', 'inverse', 'inverseCylinder']
 
     const modeIcons = {
         normal: 'mdi-arrow-decision',
@@ -36,34 +30,64 @@ export const useSteeringStore = defineStore('steering', () => {
         keyboard: 'mdi-keyboard',
     }
 
-    const currentGear = computed(() => {
-        if (drivingModes.includes(currentMode.value)) return drivingGear.value
-        if (manipModes.includes(currentMode.value)) return manipGear.value
-        if (currentMode.value === 'keyboard') return keyboardSteeringStore.gear
+    const currentInput = computed(() => {
+        if (joystickStore.connected) return 'joystick'
+        else return 'keyboard'
+    })
+
+    const enabled = computed(() => {
+        if (currentInput.value === 'joystick')
+            return joystickSteeringStore.enabled
+        if (currentInput.value === 'keyboard')
+            return keyboardSteeringStore.enabled
         return 0
+    })
+
+    const currentGear = computed({
+        get() {
+            if (currentInput.value === 'joystick')
+                return joystickSteeringStore.currentGear
+            if (currentInput.value === 'keyboard')
+                return keyboardSteeringStore.gear
+            return 0
+        },
+        set(newValue) {
+            if (currentInput.value === 'joystick')
+                joystickSteeringStore.setGear(newValue)
+            if (currentInput.value === 'keyboard')
+                keyboardSteeringStore.gear = newValue
+        },
     })
 
     const currentMode = computed({
         get() {
-            return joystickStore.connected ? joystickMode.value : 'keyboard'
+            if (currentInput.value === 'joystick')
+                return joystickSteeringStore.currentMode
+            if (currentInput.value === 'keyboard') return 'keyboard'
+            return 'none'
         },
         set(newValue) {
-            if (joystickStore.connected) joystickMode.value = newValue
+            if (currentInput.value === 'joystick')
+                joystickSteeringStore.setMode(newValue)
         },
     })
 
     function takeOverControl() {
         if (!rosStore.ros) return
 
-        enabled.value = true
-        if (currentMode.value === 'keyboard') {
+        if (currentInput.value === 'joystick') {
+            joystickSteeringStore.takeOverControl()
+        }
+        if (currentInput.value === 'keyboard') {
             keyboardSteeringStore.takeOverControl()
         }
     }
 
     function giveUpControl() {
-        enabled.value = false
-        if (currentMode.value === 'keyboard') {
+        if (currentInput.value === 'joystick') {
+            joystickSteeringStore.giveUpControl()
+        }
+        if (currentInput.value === 'keyboard') {
             keyboardSteeringStore.giveUpControl()
         }
     }
@@ -73,19 +97,16 @@ export const useSteeringStore = defineStore('steering', () => {
     }
 
     function stop() {
-        keyboardSteeringStore.start()
+        keyboardSteeringStore.stop()
+        joystickSteeringStore.stop()
     }
 
     return {
         currentMode,
         enabled,
-        drivingGear,
-        manipGear,
         currentGear,
 
         gears,
-        drivingModes,
-        manipModes,
         gearIcons,
         modeIcons,
 

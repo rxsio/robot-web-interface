@@ -2,8 +2,8 @@
 import { computed, defineProps } from 'vue'
 import { useJoystickStore, useSteeringStore } from '@/stores'
 import SteeringPopupButton from './SteeringPopupButton.vue'
-import ManualSteeringContentGamepad from './ManualSteeringContentGamepad.vue'
-import ManualSteeringContentKeyboard from './ManualSteeringContentKeyboard.vue'
+import ManualSteeringJoystickContent from './ManualSteeringJoystickContent.vue'
+import ManualSteeringKeyboardContent from './ManualSteeringKeyboardContent.vue'
 
 const props = defineProps(['show'])
 const joystickStore = useJoystickStore()
@@ -57,10 +57,10 @@ const currentIcon = computed(
                 </v-icon>
                 Take over control
             </v-btn>
-            <ManualSteeringContentGamepad
+            <ManualSteeringJoystickContent
                 :show="steeringStore.enabled && joystickStore.connected"
             />
-            <ManualSteeringContentKeyboard
+            <ManualSteeringKeyboardContent
                 :show="steeringStore.enabled && !joystickStore.connected"
             />
             <v-expand-transition>

@@ -27,6 +27,54 @@ export const callService = (serviceName, serviceType, request) =>
         )
     })
 
+export const parseDynamicReconfigureConfig = (config) => {
+    const result = {}
+    for (const category of ['bools', 'ints', 'strs', 'doubles']) {
+        for (const { name, value } of config[category]) {
+            result[name] = value
+        }
+    }
+    return result
+}
+
+export const setDynamicReconfigureParameters = async (serviceName, request) => {
+    const config = { bools: [], ints: [], strs: [], doubles: [], groups: [] }
+
+    for (const [name, value] of Object.entries(request)) {
+        switch (typeof value) {
+            case 'string':
+                config.strs.push({ name, value })
+                break
+            case 'boolean':
+                config.bools.push({ name, value })
+                break
+            case 'number':
+                if (Number.isInteger(value)) {
+                    config.ints.push({ name, value })
+                } else {
+                    config.doubles.push({ name, value })
+                }
+                break
+        }
+    }
+
+    return await callService(serviceName, 'dynamic_reconfigure/Reconfigure', {
+        config,
+    })
+}
+
+export const getDynamicReconfigureParameters = async (serviceName) => {
+    const response = await callService(
+        serviceName,
+        'dynamic_reconfigure/Reconfigure',
+        {
+            config: {},
+        }
+    )
+
+    return parseDynamicReconfigureConfig(response.config)
+}
+
 export const onRosConnected = (callback) => {
     const rosStore = useRosStore()
     watch(

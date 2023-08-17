@@ -44,7 +44,7 @@ export const useGstreamerStore = defineStore('gstreamer', () => {
                         producers.value,
                         name
                     ) &&
-                    producers.value[name] == producer.id
+                    producers.value[name] === producer.id
                 ) {
                     Vue.delete(producers.value, name)
                 }

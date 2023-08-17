@@ -8,6 +8,8 @@ export const useKeyboardSteeringStore = defineStore('keyboardSteering', () => {
     const rosStore = useRosStore()
     const steeringStore = useSteeringStore()
 
+    const enabled = ref(false)
+
     const gear = ref(1)
     const pressedKeys = ref({
         forwards: false,
@@ -33,6 +35,8 @@ export const useKeyboardSteeringStore = defineStore('keyboardSteering', () => {
     function takeOverControl() {
         if (!rosStore.ros) return
 
+        enabled.value = true
+
         if (!clickListener.value) {
             clickListener.value = document.addEventListener('click', () => {
                 steeringStore.giveUpControl()
@@ -53,6 +57,8 @@ export const useKeyboardSteeringStore = defineStore('keyboardSteering', () => {
     }
 
     function giveUpControl() {
+        enabled.value = false
+
         if (clickListener.value) {
             document.removeEventListener('click', clickListener.value)
             clickListener.value = null
@@ -184,6 +190,7 @@ export const useKeyboardSteeringStore = defineStore('keyboardSteering', () => {
     return {
         gear,
         config,
+        enabled,
 
         takeOverControl,
         giveUpControl,

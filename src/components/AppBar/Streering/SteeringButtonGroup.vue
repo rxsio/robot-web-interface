@@ -14,7 +14,7 @@ const setCurrentValue = (index) => {
         :value="props.values.indexOf(props.value)"
         @change="setCurrentValue"
         active-class="selected"
-        :mandatory="!!props.values[props.value]"
+        :mandatory="props.values.includes(props.value)"
     >
         <template v-for="val in props.values">
             <v-tooltip
