@@ -32,7 +32,7 @@ const modeTooltips = {
                     :tooltips="modeTooltips"
                 />
                 <SteeringButtonGroup
-                    v-model="steeringStore.currentGear"
+                    v-model="joystickSteeringStore.drivingGear"
                     :values="steeringStore.gears"
                     :icons="steeringStore.gearIcons"
                 />
@@ -40,6 +40,7 @@ const modeTooltips = {
                 <div>
                     <span class="text-caption">Max speed</span>
                     <v-slider
+                        v-model="joystickSteeringStore.drivingGearMaxSpeed"
                         hideDetails
                         thumb-label
                         max="100"
@@ -65,7 +66,7 @@ const modeTooltips = {
                     :tooltips="modeTooltips"
                 />
                 <SteeringButtonGroup
-                    v-model="steeringStore.manipGear"
+                    v-model="joystickSteeringStore.manipGear"
                     :values="steeringStore.gears"
                     :icons="steeringStore.gearIcons"
                 />

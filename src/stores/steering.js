@@ -43,20 +43,11 @@ export const useSteeringStore = defineStore('steering', () => {
         return 0
     })
 
-    const currentGear = computed({
-        get() {
-            if (currentInput.value === 'joystick')
-                return joystickSteeringStore.currentGear
-            if (currentInput.value === 'keyboard')
-                return keyboardSteeringStore.gear
-            return 0
-        },
-        set(newValue) {
-            if (currentInput.value === 'joystick')
-                joystickSteeringStore.setGear(newValue)
-            if (currentInput.value === 'keyboard')
-                keyboardSteeringStore.gear = newValue
-        },
+    const currentGear = computed(() => {
+        if (currentInput.value === 'joystick')
+            return joystickSteeringStore.currentGear
+        if (currentInput.value === 'keyboard') return keyboardSteeringStore.gear
+        return 0
     })
 
     const currentMode = computed({
@@ -68,7 +59,7 @@ export const useSteeringStore = defineStore('steering', () => {
         },
         set(newValue) {
             if (currentInput.value === 'joystick')
-                joystickSteeringStore.setMode(newValue)
+                joystickSteeringStore.currentMode = newValue
         },
     })
 

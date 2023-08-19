@@ -7,11 +7,9 @@ import { useJoystickStore } from './joystick'
 import ROSLIB from 'roslib'
 import {
     callService,
-    getDynamicReconfigureParameters,
     onRosConnected,
     onRosDisconnected,
-    parseDynamicReconfigureConfig,
-    setDynamicReconfigureParameters,
+    useDynamicReconfigure,
     useTopicSubscriber,
 } from '@/misc/roslibExtensions'
 
@@ -24,6 +22,7 @@ export const useJoystickSteeringStore = defineStore('joystickSteering', () => {
 
     const joyTopic = ref(null)
 
+    // control mode config
     const multiplexerOutputs = {
         driving: 'joy_diff_drive',
         manipulator: 'joy_manipulator',
@@ -31,19 +30,12 @@ export const useJoystickSteeringStore = defineStore('joystickSteering', () => {
     const drivingModes = ['normal', 'car', 'tank']
     const manipModes = ['forward', 'inverse', 'inverseCylinder']
 
+    // control node state
     const multiplexerStatus = ref({
         joyTopicName: '__none',
         outputTopicName: '__none',
     })
-    const drivingConfig = ref({
-        mode: 'normal',
-        gear: 1,
-        gearMaxSpeeds: {
-            1: 0.1,
-            2: 0.5,
-            3: 1.0,
-        },
-    })
+    const drivingConfig = useDynamicReconfigure('joy_diff_drive')
     const manipConfig = ref({
         mode: 'forward',
         gear: 1,
@@ -56,19 +48,62 @@ export const useJoystickSteeringStore = defineStore('joystickSteering', () => {
         return false
     })
 
-    const currentMode = computed(() => {
-        if (
-            multiplexerStatus.value.outputTopicName ==
-            multiplexerOutputs.driving
-        )
-            return drivingConfig.value.mode
-        if (
-            multiplexerStatus.value.outputTopicName ==
-            multiplexerOutputs.manipulator
-        )
-            return manipConfig.value.mode
+    const drivingGear = computed({
+        get() {
+            return drivingConfig.value.gear || 0
+        },
+        set(newGear) {
+            drivingConfig.value.gear = newGear
+        },
+    })
+    const drivingGearMaxSpeed = computed({
+        get() {
+            let configName = `gear_${drivingGear.value}_max_speed`
+            if (drivingGear.value) return drivingConfig.value[configName]
+            else return 0
+        },
+        set(newGearMaxSpeed) {
+            let configName = `gear_${drivingGear.value}_max_speed`
+            if (drivingGear.value)
+                drivingConfig.value[configName] = newGearMaxSpeed
+        },
+    })
+    const manipGear = computed(() => manipConfig.value.gear)
+    const currentMode = computed({
+        get() {
+            if (
+                multiplexerStatus.value.outputTopicName ==
+                multiplexerOutputs.driving
+            )
+                return drivingModes[drivingConfig.value.mode]
+            if (
+                multiplexerStatus.value.outputTopicName ==
+                multiplexerOutputs.manipulator
+            )
+                return manipConfig.value.mode
 
-        return '__none'
+            return '__none'
+        },
+        set(newMode) {
+            ;(async () => {
+                if (drivingModes.includes(newMode)) {
+                    await callService(
+                        '/joy_multiplexer/select_output',
+                        'joystick_control/SendTopic',
+                        { topic: { name: multiplexerOutputs.driving } }
+                    )
+                    drivingConfig.value.mode = drivingModes.indexOf(newMode)
+                }
+
+                if (manipModes.includes(newMode)) {
+                    await callService(
+                        '/joy_multiplexer/select_output',
+                        'joystick_control/SendTopic',
+                        { topic: { name: multiplexerOutputs.manipulator } }
+                    )
+                }
+            })()
+        },
     })
     const currentGear = computed(() => {
         if (
@@ -85,6 +120,7 @@ export const useJoystickSteeringStore = defineStore('joystickSteering', () => {
         return 0
     })
 
+    // topic listeners to detect node state updates
     useTopicSubscriber(
         '/joy_multiplexer/selected_joy',
         'joystick_control/Topic',
@@ -97,32 +133,9 @@ export const useJoystickSteeringStore = defineStore('joystickSteering', () => {
         (newOutputTopic) =>
             (multiplexerStatus.value.outputTopicName = newOutputTopic.name)
     )
-    useTopicSubscriber(
-        '/joy_diff_drive/parameter_updates',
-        'dynamic_reconfigure/Config',
-        (newConfig) => {
-            parseDrivingConfig(parseDynamicReconfigureConfig(newConfig))
-        }
-    )
-
-    const parseDrivingConfig = (newConfig) => {
-        drivingConfig.value = {
-            mode: drivingModes[newConfig.mode],
-            gear: newConfig.gear,
-            gearMaxSpeeds: {
-                1: newConfig.gear_1_max_speed,
-                2: newConfig.gear_2_max_speed,
-                3: newConfig.gear_3_max_speed,
-            },
-        }
-    }
 
     onRosConnected(async () => {
-        parseDrivingConfig(
-            await getDynamicReconfigureParameters(
-                '/joy_diff_drive/set_parameters'
-            )
-        )
+        // get initial node state, without waiting for an update
         multiplexerStatus.value.joyTopicName = (
             await callService(
                 '/joy_multiplexer/get_selected_joy',
@@ -137,6 +150,8 @@ export const useJoystickSteeringStore = defineStore('joystickSteering', () => {
                 {}
             )
         ).topic.name
+
+        // start transmitting if a joystick has been connected before
         if (joystickStore.connected) await startTransmitting()
     })
     onRosDisconnected(() => {
@@ -151,6 +166,7 @@ export const useJoystickSteeringStore = defineStore('joystickSteering', () => {
         }
     )
 
+    // joystick state transmission
     const getNewJoystickName = async () => {
         const joysticks = (
             await callService(
@@ -213,40 +229,6 @@ export const useJoystickSteeringStore = defineStore('joystickSteering', () => {
         statusTransmitter.value = requestAnimationFrame(transmitStatus)
     }
 
-    const setMode = async (newMode) => {
-        if (drivingModes.includes(newMode)) {
-            await callService(
-                '/joy_multiplexer/select_output',
-                'joystick_control/SendTopic',
-                { topic: { name: multiplexerOutputs.driving } }
-            )
-            await setDynamicReconfigureParameters(
-                '/joy_diff_drive/set_parameters',
-                { mode: drivingModes.indexOf(newMode) }
-            )
-        }
-
-        if (manipModes.includes(newMode)) {
-            await callService(
-                '/joy_multiplexer/select_output',
-                'joystick_control/SendTopic',
-                { topic: { name: multiplexerOutputs.manipulator } }
-            )
-        }
-    }
-    const setGear = async (newGear) => {
-        if (
-            multiplexerStatus.value.outputTopicName ==
-            multiplexerOutputs.driving
-        )
-            await setDynamicReconfigureParameters(
-                '/joy_diff_drive/set_parameters',
-                { gear: newGear }
-            )
-
-        if (manipModes.includes(currentMode.value)) return
-    }
-
     const takeOverControl = async () => {
         await callService(
             '/joy_multiplexer/select_joy',
@@ -278,12 +260,13 @@ export const useJoystickSteeringStore = defineStore('joystickSteering', () => {
     }
 
     return {
+        enabled,
         currentMode,
         currentGear,
-        enabled,
+        drivingGear,
+        drivingGearMaxSpeed,
+        manipGear,
 
-        setMode,
-        setGear,
         takeOverControl,
         giveUpControl,
 

@@ -1,6 +1,6 @@
 import ROSLIB from 'roslib'
 import { useRosStore } from '@/stores/ros'
-import { computed, watch } from 'vue'
+import { computed, ref, watch } from 'vue'
 
 export const callService = (serviceName, serviceType, request) =>
     new Promise((resolve, reject) => {
@@ -28,34 +28,47 @@ export const callService = (serviceName, serviceType, request) =>
     })
 
 export const parseDynamicReconfigureConfig = (config) => {
-    const result = {}
+    const result = {},
+        dataTypes = {}
     for (const category of ['bools', 'ints', 'strs', 'doubles']) {
         for (const { name, value } of config[category]) {
             result[name] = value
+            dataTypes[name] = category
         }
     }
-    return result
+    return [result, dataTypes]
 }
 
-export const setDynamicReconfigureParameters = async (serviceName, request) => {
+export const setDynamicReconfigureParameters = async (
+    serviceName,
+    request,
+    dataTypes
+) => {
     const config = { bools: [], ints: [], strs: [], doubles: [], groups: [] }
 
     for (const [name, value] of Object.entries(request)) {
-        switch (typeof value) {
-            case 'string':
-                config.strs.push({ name, value })
-                break
-            case 'boolean':
-                config.bools.push({ name, value })
-                break
-            case 'number':
-                if (Number.isInteger(value)) {
-                    config.ints.push({ name, value })
-                } else {
-                    config.doubles.push({ name, value })
-                }
-                break
+        let type = ''
+        if (Object.prototype.hasOwnProperty.call(dataTypes, name)) {
+            type = dataTypes[name]
+        } else {
+            switch (typeof value) {
+                case 'string':
+                    type = 'strs'
+                    break
+                case 'boolean':
+                    type = 'bools'
+                    break
+                case 'number':
+                    if (Number.isInteger(value)) {
+                        type = 'ints'
+                    } else {
+                        type = 'doubles'
+                    }
+                    break
+            }
         }
+
+        config[type].push({ name, value })
     }
 
     return await callService(serviceName, 'dynamic_reconfigure/Reconfigure', {
@@ -73,6 +86,49 @@ export const getDynamicReconfigureParameters = async (serviceName) => {
     )
 
     return parseDynamicReconfigureConfig(response.config)
+}
+
+export const useDynamicReconfigure = (nodeName) => {
+    const rosCache = ref({})
+    const mainCache = ref({})
+    const dataTypes = ref({})
+
+    useTopicSubscriber(
+        `${nodeName}/parameter_updates`,
+        'dynamic_reconfigure/Config',
+        (newConfig) => {
+            rosCache.value = parseDynamicReconfigureConfig(newConfig)[0]
+        }
+    )
+
+    onRosConnected(async () => {
+        const [params, types] = await getDynamicReconfigureParameters(
+            `${nodeName}/set_parameters`
+        )
+        rosCache.value = params
+        dataTypes.value = types
+    })
+
+    watch(rosCache, (newValue) => {
+        mainCache.value = { ...newValue }
+    })
+
+    watch(
+        mainCache,
+        (newValue) => {
+            if (JSON.stringify(newValue) === JSON.stringify(rosCache.value))
+                return
+
+            setDynamicReconfigureParameters(
+                `${nodeName}/set_parameters`,
+                newValue,
+                dataTypes.value
+            )
+        },
+        { deep: true }
+    )
+
+    return mainCache
 }
 
 export const onRosConnected = (callback) => {
