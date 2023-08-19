@@ -2,11 +2,13 @@
 import { defineProps } from 'vue'
 import SteeringButtonGroup from './SteeringButtonGroup.vue'
 import { useJoystickSteeringStore, useSteeringStore } from '@/stores'
+import { useJoyDiffDrive } from '@/stores/nodes'
 
 const props = defineProps(['show'])
 
 const steeringStore = useSteeringStore()
 const joystickSteeringStore = useJoystickSteeringStore()
+const joyDiffDrive = useJoyDiffDrive()
 
 const modeTooltips = {
     normal: 'Normal mode',
@@ -27,12 +29,12 @@ const modeTooltips = {
             <div class="column">
                 <SteeringButtonGroup
                     v-model="steeringStore.currentMode"
-                    :values="joystickSteeringStore.drivingModes"
+                    :values="joyDiffDrive.modes"
                     :icons="steeringStore.modeIcons"
                     :tooltips="modeTooltips"
                 />
                 <SteeringButtonGroup
-                    v-model="joystickSteeringStore.drivingGear"
+                    v-model="joyDiffDrive.gear"
                     :values="steeringStore.gears"
                     :icons="steeringStore.gearIcons"
                 />
@@ -40,7 +42,7 @@ const modeTooltips = {
                 <div>
                     <span class="text-caption">Max speed</span>
                     <v-slider
-                        v-model="joystickSteeringStore.drivingGearMaxSpeed"
+                        v-model="joyDiffDrive.maxGearSpeed"
                         hideDetails
                         thumb-label
                         max="100"
