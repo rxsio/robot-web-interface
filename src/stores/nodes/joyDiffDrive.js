@@ -3,9 +3,10 @@ import { computed } from 'vue'
 import { useDynamicReconfigure } from '@/misc/roslibExtensions'
 
 export const useJoyDiffDrive = defineStore('joyDiffDrive', () => {
+    const nodeName = 'joy_diff_drive'
     const modes = ['normal', 'car', 'tank']
 
-    const nodeConfig = useDynamicReconfigure('joy_diff_drive')
+    const nodeConfig = useDynamicReconfigure(nodeName)
 
     const connected = computed(() => Object.keys(nodeConfig.value).length !== 0)
 
@@ -42,6 +43,7 @@ export const useJoyDiffDrive = defineStore('joyDiffDrive', () => {
     })
 
     return {
+        nodeName,
         connected,
 
         mode,

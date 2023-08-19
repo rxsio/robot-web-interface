@@ -5,10 +5,14 @@ import {
     useTopicSubscriber,
 } from '@/misc/roslibExtensions'
 import { computed, ref } from 'vue'
+import { useJoyDiffDrive } from './joyDiffDrive'
 
 export const useJoyMultiplexer = defineStore('joyMultiplexer', () => {
+    const joyDiffDrive = useJoyDiffDrive()
+
+    const nodeName = 'joy_multiplexer'
     const outputTopics = {
-        driving: 'joy_diff_drive',
+        driving: joyDiffDrive.nodeName,
         manipulator: 'joy_manipulator',
     }
 
@@ -21,7 +25,7 @@ export const useJoyMultiplexer = defineStore('joyMultiplexer', () => {
         },
         set(newTopic) {
             callService(
-                '/joy_multiplexer/select_joy',
+                `/${nodeName}/select_joy`,
                 'joystick_control/SendTopic',
                 { topic: { name: newTopic } }
             )
@@ -33,7 +37,7 @@ export const useJoyMultiplexer = defineStore('joyMultiplexer', () => {
         },
         set(newTopic) {
             callService(
-                '/joy_multiplexer/select_output',
+                `/${nodeName}/select_output`,
                 'joystick_control/SendTopic',
                 { topic: { name: newTopic } }
             )
@@ -43,14 +47,14 @@ export const useJoyMultiplexer = defineStore('joyMultiplexer', () => {
     onRosConnected(async () => {
         _joyTopic.value = (
             await callService(
-                '/joy_multiplexer/get_selected_joy',
+                `/${nodeName}/get_selected_joy`,
                 'joystick_control/GetTopic',
                 {}
             )
         ).topic.name
         _outputTopic.value = (
             await callService(
-                '/joy_multiplexer/get_selected_output',
+                `/${nodeName}/get_selected_output`,
                 'joystick_control/GetTopic',
                 {}
             )
@@ -58,14 +62,14 @@ export const useJoyMultiplexer = defineStore('joyMultiplexer', () => {
     })
 
     useTopicSubscriber(
-        '/joy_multiplexer/selected_joy',
+        `/${nodeName}/selected_joy`,
         'joystick_control/Topic',
         (newJoystickTopic) => {
             _joyTopic.value = newJoystickTopic.name
         }
     )
     useTopicSubscriber(
-        '/joy_multiplexer/selected_output',
+        `/${nodeName}/selected_output`,
         'joystick_control/Topic',
         (newOutputTopic) => {
             _outputTopic.value = newOutputTopic.name
