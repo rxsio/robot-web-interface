@@ -6,14 +6,16 @@ import {
 } from '@/misc/roslibExtensions'
 import { computed, ref } from 'vue'
 import { useJoyDiffDrive } from './joyDiffDrive'
+import { useJoy5dofManipulator } from './joy5dofManipulator'
 
 export const useJoyMultiplexer = defineStore('joyMultiplexer', () => {
     const joyDiffDrive = useJoyDiffDrive()
+    const joy5dofManipulator = useJoy5dofManipulator()
 
     const nodeName = 'joy_multiplexer'
     const outputTopics = {
         driving: joyDiffDrive.nodeName,
-        manipulator: 'joy_manipulator',
+        manipulator: joy5dofManipulator.nodeName,
     }
 
     const _joyTopic = ref('__none')

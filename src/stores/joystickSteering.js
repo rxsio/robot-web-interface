@@ -1,7 +1,11 @@
 import { defineStore } from 'pinia'
 import { computed, ref, watch } from 'vue'
 import { useSteeringStore, useRosStore, useJoystickStore } from './'
-import { useJoyDiffDrive, useJoyMultiplexer } from './nodes'
+import {
+    useJoy5dofManipulator,
+    useJoyDiffDrive,
+    useJoyMultiplexer,
+} from './nodes'
 
 import ROSLIB from 'roslib'
 import {
@@ -15,20 +19,12 @@ export const useJoystickSteeringStore = defineStore('joystickSteering', () => {
     const rosStore = useRosStore()
     const joystickStore = useJoystickStore()
     const joyDiffDrive = useJoyDiffDrive()
+    const joy5dofManipulator = useJoy5dofManipulator()
     const joyMultiplexer = useJoyMultiplexer()
 
     const statusTransmitter = ref(null)
 
     const joyTopic = ref(null)
-
-    // control mode config
-    const manipModes = ['forward', 'inverse', 'inverseCylinder']
-
-    // control node state
-    const manipConfig = ref({
-        mode: 'forward',
-        gear: 1,
-    })
 
     const enabled = computed(() => {
         if (joyTopic.value)
@@ -37,7 +33,6 @@ export const useJoystickSteeringStore = defineStore('joystickSteering', () => {
         return false
     })
 
-    const manipGear = computed(() => manipConfig.value.gear)
     const currentMode = computed({
         get() {
             if (
@@ -49,7 +44,7 @@ export const useJoystickSteeringStore = defineStore('joystickSteering', () => {
                 joyMultiplexer.outputTopic ===
                 joyMultiplexer.outputTopics.manipulator
             )
-                return manipConfig.value.mode
+                return joy5dofManipulator.mode
 
             return '__none'
         },
@@ -59,7 +54,7 @@ export const useJoystickSteeringStore = defineStore('joystickSteering', () => {
                 joyDiffDrive.mode = newMode
             }
 
-            if (manipModes.includes(newMode)) {
+            if (joy5dofManipulator.modes.includes(newMode)) {
                 joyMultiplexer.outputTopic =
                     joyMultiplexer.outputTopics.manipulator
             }
@@ -72,7 +67,7 @@ export const useJoystickSteeringStore = defineStore('joystickSteering', () => {
             joyMultiplexer.outputTopic ===
             joyMultiplexer.outputTopics.manipulator
         )
-            return manipConfig.value.gear
+            return joy5dofManipulator.gear
 
         return 0
     })
@@ -190,12 +185,9 @@ export const useJoystickSteeringStore = defineStore('joystickSteering', () => {
         enabled,
         currentMode,
         currentGear,
-        manipGear,
 
         takeOverControl,
         giveUpControl,
-
-        manipModes,
 
         stop,
     }
