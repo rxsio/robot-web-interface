@@ -114,7 +114,7 @@ export const useJoystickSteeringStore = defineStore('joystickSteering', () => {
 
         steeringStore.giveUpControl()
         if (statusTransmitter.value) {
-            cancelAnimationFrame(statusTransmitter.value)
+            clearInterval(statusTransmitter.value)
             statusTransmitter.value = null
         }
 
@@ -132,7 +132,7 @@ export const useJoystickSteeringStore = defineStore('joystickSteering', () => {
             name: name,
             messageType: 'sensor_msgs/Joy',
         })
-        statusTransmitter.value = requestAnimationFrame(transmitStatus)
+        statusTransmitter.value = setInterval(transmitStatus, 1000 / 20)
     }
 
     function transmitStatus() {
@@ -147,8 +147,6 @@ export const useJoystickSteeringStore = defineStore('joystickSteering', () => {
                 buttons: joystickStore.joystick.buttons.map((btn) => btn.value),
             })
         )
-
-        statusTransmitter.value = requestAnimationFrame(transmitStatus)
     }
 
     const takeOverControl = async () => {
@@ -168,7 +166,7 @@ export const useJoystickSteeringStore = defineStore('joystickSteering', () => {
 
     function stop() {
         if (statusTransmitter.value) {
-            cancelAnimationFrame(statusTransmitter.value)
+            clearInterval(statusTransmitter.value)
             statusTransmitter.value = null
         }
         if (joyTopic.value) {
