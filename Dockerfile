@@ -1,8 +1,10 @@
 FROM node:18
 
-COPY package*.json /robot-web-interface
-COPY server /robot-web-interface/server
-COPY dist /robot-web-interface/dist
+
+WORKDIR /robot-web-interface
+
+COPY server ./server/
+COPY dist ./dist/
 
 WORKDIR /robot-web-interface/server
 RUN npm ci
