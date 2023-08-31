@@ -8,9 +8,22 @@ on:
 jobs:
   deploy:
     runs-on: ubuntu-latest
+    env:
+      PLATFORM: linux/amd64, linux/arm64
+      MAIN_IMAGE: ghcr.io/${{ github.repository_owner }}/rover-soft:stable
+
     steps:
-      - uses: actions/checkout@v3
-      - uses: actions/setup-node@v3
+      # github.repository_owner can contain uppercase chars, 
+      # but docker repository address must be all lowercase
+      - name: Lowercase image name
+        run: |
+          echo "MAIN_IMAGE=${MAIN_IMAGE,,}" >>${GITHUB_ENV}
+
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Setup node
+        uses: actions/setup-node@v3
         with:
           node-version: 18
 
@@ -19,6 +32,12 @@ jobs:
       
       - name: Build
         run: npm run build
+      
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v2
+        
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v2
 
       - name: Login to GitHub Container Registry
         uses: docker/login-action@v2
