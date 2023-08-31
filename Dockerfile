@@ -9,4 +9,4 @@ RUN npm ci
 
 EXPOSE 80
 EXPOSE 443
-CMD ["node", "run", "start"]
+CMD ["npm", "run", "start"]
