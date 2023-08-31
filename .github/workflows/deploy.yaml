@@ -9,7 +9,6 @@ jobs:
   deploy:
     runs-on: ubuntu-latest
     env:
-      PLATFORM: linux/amd64, linux/arm64
       MAIN_IMAGE: ghcr.io/${{ github.repository_owner }}/rover-soft:stable
 
     steps:
@@ -33,12 +32,6 @@ jobs:
       - name: Build
         run: npm run build
       
-      - name: Set up QEMU
-        uses: docker/setup-qemu-action@v2
-        
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v2
-
       - name: Login to GitHub Container Registry
         uses: docker/login-action@v2
         with:
@@ -49,9 +42,7 @@ jobs:
       - name: Build and Push image
         uses: docker/build-push-action@v3
         with:
+          context: .
           file: Dockerfile
           push: true
           tags: ${{ env.MAIN_IMAGE }}
-          platforms: ${{ env.PLATFORM }}
-          cache-from: ${{ env.MAIN_IMAGE }}
-          build-args: BUILDKIT_INLINE_CACHE=1
