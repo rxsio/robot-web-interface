@@ -9,7 +9,7 @@ jobs:
   deploy:
     runs-on: ubuntu-latest
     env:
-      MAIN_IMAGE: ghcr.io/${{ github.repository_owner }}/rover-soft:stable
+      MAIN_IMAGE: ghcr.io/${{ github.repository_owner }}/robot-web-interface:stable
 
     steps:
       # github.repository_owner can contain uppercase chars, 
