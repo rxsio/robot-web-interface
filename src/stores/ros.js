@@ -4,6 +4,7 @@ import { Ros } from 'roslib'
 
 export const useRosStore = defineStore('ros', () => {
     const address = ref(window.location.hostname)
+    //const address = ref('firo2.local')
     const port = ref(8081)
     const url = computed(() =>
         new URL(`wss://${address.value}:${port.value}`).toString()

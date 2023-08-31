@@ -110,7 +110,7 @@ export const useJoystickSteeringStore = defineStore('joystickSteering', () => {
     }
 
     const startTransmitting = async () => {
-        if (!rosStore.ros || !joystickStore.joystick) return
+        if (!rosStore.ros || !joystickStore.connected) return
 
         steeringStore.giveUpControl()
         if (statusTransmitter.value) {
@@ -143,8 +143,8 @@ export const useJoystickSteeringStore = defineStore('joystickSteering', () => {
                     stamp: 0,
                     frame_id: 'test_joy',
                 },
-                axes: joystickStore.joystick.axes,
-                buttons: joystickStore.joystick.buttons.map((btn) => btn.value),
+                axes: joystickStore.getAxes(),
+                buttons: joystickStore.getButtons(),
             })
         )
     }
