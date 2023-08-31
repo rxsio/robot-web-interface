@@ -134,9 +134,9 @@ export const useDynamicReconfigure = (nodeName) => {
 export const onRosConnected = (callback) => {
     const rosStore = useRosStore()
     watch(
-        () => rosStore.ros,
+        () => rosStore.connected,
         () => {
-            if (rosStore.ros) {
+            if (rosStore.connected) {
                 callback()
             }
         }
@@ -146,9 +146,9 @@ export const onRosConnected = (callback) => {
 export const onRosDisconnected = (callback) => {
     const rosStore = useRosStore()
     watch(
-        () => rosStore.ros,
+        () => rosStore.connected,
         () => {
-            if (!rosStore.ros) {
+            if (!rosStore.connected) {
                 callback()
             }
         }

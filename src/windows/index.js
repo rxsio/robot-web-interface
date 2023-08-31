@@ -1,9 +1,31 @@
 import TestWindow from './TestWindow.vue'
 import CameraWindow from './CameraWindow.vue'
 import ControlWindow from './ControlWindow.vue'
+import ThreeDMapWindow from './ThreeDMapWindow.vue'
 import { useGstreamerStore } from '@/stores'
 
 export default {
+    cameraWindow: {
+        typeName: 'Camera Window',
+        component: CameraWindow,
+        configOptions: {
+            videoSource: {
+                name: 'Video Source',
+                type: 'select',
+                possibleValues: () => {
+                    const gstreamerStore = useGstreamerStore()
+                    return Object.keys(gstreamerStore.producers)
+                },
+            },
+        },
+        icon: 'mdi-camera',
+    },
+    ThreeDMapWindow: {
+        typeName: '3D Map Window',
+        component: ThreeDMapWindow,
+        configOptions: {},
+        icon: 'mdi-cube-outline',
+    },
     testWindow: {
         typeName: 'Test Window',
         component: TestWindow,
@@ -37,21 +59,6 @@ export default {
             bbbb: {
                 name: 'BBBBBB',
                 type: 'boolean',
-            },
-        },
-        icon: 'mdi-camera',
-    },
-    cameraWindow: {
-        typeName: 'Camera Window',
-        component: CameraWindow,
-        configOptions: {
-            videoSource: {
-                name: 'Video Source',
-                type: 'select',
-                possibleValues: () => {
-                    const gstreamerStore = useGstreamerStore()
-                    return Object.keys(gstreamerStore.producers)
-                },
             },
         },
         icon: 'mdi-camera',
