@@ -1,29 +1,22 @@
+import { useTopicSubscriber } from '@/misc/roslibExtensions'
 import { defineStore } from 'pinia'
 import { ref } from 'vue'
 
 export const useBatteryLevelStore = defineStore('batteryLevel', () => {
-    const percentage = ref(80)
-    const voltage = ref(20.3)
+    const percentage = ref(0)
+    const voltage = ref(0)
 
-    function setPercentage(newPercentege) {
-        percentage.value = newPercentege
-    }
-    function setVoltage(newVoltage) {
-        voltage.value = newVoltage
-    }
-    function increaseBattery() {
-        percentage.value += 20
-    }
-    function decreaseBattery() {
-        percentage.value -= 15
-    }
+    useTopicSubscriber(
+        '/power_status',
+        'canbus_modules/PowerStatus',
+        (status) => {
+            percentage.value = status.battery_percentage
+            voltage.value = status.battery_voltage
+        }
+    )
 
     return {
         percentage,
         voltage,
-        setPercentage,
-        setVoltage,
-        increaseBattery,
-        decreaseBattery,
     }
 })

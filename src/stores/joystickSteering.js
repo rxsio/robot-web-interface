@@ -130,7 +130,7 @@ export const useJoystickSteeringStore = defineStore('joystickSteering', () => {
         joyTopic.value = new ROSLIB.Topic({
             ros: rosStore.ros,
             name: name,
-            messageType: 'sensor_msgs/Joy',
+            messageType: 'joystick_control/Gamepad',
         })
         statusTransmitter.value = setInterval(transmitStatus, 1000 / 20)
     }
