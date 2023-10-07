@@ -17,6 +17,7 @@ Vue.config.productionTip = false
 
 const app = new Vue({
     router,
+    // @ts-ignore
     vuetify,
     pinia,
     render: (h) => h(App),
