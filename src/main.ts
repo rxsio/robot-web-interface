@@ -5,17 +5,16 @@ import vuetify from '@/plugins/vuetify'
 import 'roboto-fontface/css/roboto/roboto-fontface.css'
 import '@mdi/font/css/materialdesignicons.css'
 
-import { createPinia, PiniaVuePlugin } from 'pinia'
-
-Vue.use(PiniaVuePlugin)
-const pinia = createPinia()
-
+import { createPinia, Pinia, PiniaVuePlugin } from 'pinia'
 import App from '@/App.vue'
 import '@/styles/overrides.scss'
 
+Vue.use(PiniaVuePlugin)
+const pinia: Pinia = createPinia()
+
 Vue.config.productionTip = false
 
-const app = new Vue({
+const app: Vue = new Vue({
     router,
     // @ts-ignore
     vuetify,

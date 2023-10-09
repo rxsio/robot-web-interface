@@ -1,9 +1,9 @@
-<script setup>
+<script setup lang="ts">
 import { onMounted, onUnmounted, ref } from 'vue'
 import { RouterView } from 'vue-router'
 import {
-    useJoystickStore,
     useGstreamerStore,
+    useJoystickStore,
     useRosStore,
     useSteeringStore,
 } from '@/stores'
@@ -15,14 +15,17 @@ const gstreamerStore = useGstreamerStore()
 const joystickStore = useJoystickStore()
 const steeringStore = useSteeringStore()
 
-const isReady = ref(null)
+const isReady = ref<boolean | null>(null)
 
-const networkTest = async () => {
-    const protocol = window.location.protocol
-    const address = window.location.host
-    const href = window.location.href
+const networkTest = async (): Promise<boolean> => {
+    const protocol: string = window.location.protocol
+    const address: string = window.location.host
+    const href: string = window.location.href
 
-    if (protocol === 'https:' || window.webpackHotUpdaterobot_web_interface) {
+    if (
+        protocol === 'https:' ||
+        'webpackHotUpdaterobot_web_interface' in window
+    ) {
         isReady.value = true
         return true
     }
@@ -42,7 +45,6 @@ onMounted(() => {
     networkTest().then((passed) => {
         if (passed) {
             gstreamerStore.connect()
-            //gstreamerStore
             rosStore.connect()
             joystickStore.start()
             steeringStore.start()
