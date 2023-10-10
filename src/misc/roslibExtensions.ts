@@ -1,8 +1,21 @@
 import ROSLIB from 'roslib'
 import { useRosStore } from '@/stores/ros'
 import { computed, ref, watch } from 'vue'
+import {
+    CATEGORIES,
+    DynamicReconfigureCategories,
+    DynamicReconfigureConfig,
+    DynamicReconfigureDataTypes,
+    DynamicReconfigureEmptyConfig,
+    DynamicReconfigureMessage,
+    DynamicReconfigureValues,
+} from '@/misc/roslibTypes'
 
-export const callService = (serviceName, serviceType, request) =>
+export const callService = <TServiceRequest, TServiceResponse = any>(
+    serviceName: string,
+    serviceType: string,
+    request: TServiceRequest
+): Promise<TServiceResponse> =>
     new Promise((resolve, reject) => {
         const rosStore = useRosStore()
 
@@ -10,7 +23,11 @@ export const callService = (serviceName, serviceType, request) =>
             reject(new Error('Not connected to ros'))
             return
         }
-        const service = new ROSLIB.Service({
+
+        const service = new ROSLIB.Service<
+            ROSLIB.ServiceRequest,
+            TServiceResponse
+        >({
             ros: rosStore.ros,
             name: serviceName,
             serviceType,
@@ -27,27 +44,40 @@ export const callService = (serviceName, serviceType, request) =>
         )
     })
 
-export const parseDynamicReconfigureConfig = (config) => {
-    const result = {},
-        dataTypes = {}
-    for (const category of ['bools', 'ints', 'strs', 'doubles']) {
-        for (const { name, value } of config[category]) {
+export const parseDynamicReconfigureConfig = (
+    config: DynamicReconfigureMessage
+): [DynamicReconfigureValues, DynamicReconfigureDataTypes] => {
+    const result: DynamicReconfigureValues = {}
+    const dataTypes: DynamicReconfigureDataTypes = {}
+
+    for (const category in CATEGORIES) {
+        for (const { name, value } of config[
+            category as DynamicReconfigureCategories
+        ]) {
             result[name] = value
-            dataTypes[name] = category
+            dataTypes[name] = category as DynamicReconfigureCategories
         }
     }
+
     return [result, dataTypes]
 }
 
 export const setDynamicReconfigureParameters = async (
-    serviceName,
-    request,
-    dataTypes
-) => {
-    const config = { bools: [], ints: [], strs: [], doubles: [], groups: [] }
+    serviceName: string,
+    request: DynamicReconfigureValues,
+    dataTypes: DynamicReconfigureDataTypes
+): Promise<DynamicReconfigureConfig> => {
+    const config: DynamicReconfigureMessage = {
+        bools: [],
+        ints: [],
+        strs: [],
+        doubles: [],
+        groups: [],
+    }
 
     for (const [name, value] of Object.entries(request)) {
         let type = ''
+
         if (Object.prototype.hasOwnProperty.call(dataTypes, name)) {
             type = dataTypes[name]
         } else {
@@ -68,36 +98,42 @@ export const setDynamicReconfigureParameters = async (
             }
         }
 
-        config[type].push({ name, value })
+        config[type as DynamicReconfigureCategories].push({ name, value })
     }
 
-    return await callService(serviceName, 'dynamic_reconfigure/Reconfigure', {
+    return await callService<
+        DynamicReconfigureConfig,
+        DynamicReconfigureConfig
+    >(serviceName, 'dynamic_reconfigure/Reconfigure', {
         config,
     })
 }
 
-export const getDynamicReconfigureParameters = async (serviceName) => {
-    const response = await callService(
-        serviceName,
-        'dynamic_reconfigure/Reconfigure',
-        {
-            config: {},
-        }
-    )
+export const getDynamicReconfigureParameters = async (
+    serviceName: string
+): Promise<[DynamicReconfigureValues, DynamicReconfigureDataTypes]> => {
+    const response = await callService<
+        DynamicReconfigureEmptyConfig,
+        DynamicReconfigureConfig
+    >(serviceName, 'dynamic_reconfigure/Reconfigure', {
+        config: {},
+    })
 
     return parseDynamicReconfigureConfig(response.config)
 }
 
-export const useDynamicReconfigure = (nodeName) => {
-    const rosCache = ref({})
-    const mainCache = ref({})
-    const dataTypes = ref({})
+export const useDynamicReconfigure = (nodeName: string) => {
+    const rosCache = ref<DynamicReconfigureValues>({})
+    const mainCache = ref<DynamicReconfigureValues>({})
+    const dataTypes = ref<DynamicReconfigureDataTypes>({})
 
     useTopicSubscriber(
         `${nodeName}/parameter_updates`,
         'dynamic_reconfigure/Config',
         (newConfig) => {
-            rosCache.value = parseDynamicReconfigureConfig(newConfig)[0]
+            rosCache.value = parseDynamicReconfigureConfig(
+                newConfig as DynamicReconfigureMessage
+            )[0]
         }
     )
 
@@ -116,9 +152,11 @@ export const useDynamicReconfigure = (nodeName) => {
     watch(
         mainCache,
         (newValue) => {
-            if (JSON.stringify(newValue) === JSON.stringify(rosCache.value))
+            if (JSON.stringify(newValue) === JSON.stringify(rosCache.value)) {
                 return
+            }
 
+            /* @TODO: Check if await is necessary */
             setDynamicReconfigureParameters(
                 `${nodeName}/set_parameters`,
                 newValue,
@@ -131,8 +169,9 @@ export const useDynamicReconfigure = (nodeName) => {
     return mainCache
 }
 
-export const onRosConnected = (callback) => {
+export const onRosConnected = (callback: () => void) => {
     const rosStore = useRosStore()
+
     watch(
         () => rosStore.connected,
         () => {
@@ -143,8 +182,9 @@ export const onRosConnected = (callback) => {
     )
 }
 
-export const onRosDisconnected = (callback) => {
+export const onRosDisconnected = (callback: () => void) => {
     const rosStore = useRosStore()
+
     watch(
         () => rosStore.connected,
         () => {
@@ -155,9 +195,10 @@ export const onRosDisconnected = (callback) => {
     )
 }
 
-export const useTopic = (topicName, messageType) => {
+export const useTopic = (topicName: string, messageType: string) => {
     const rosStore = useRosStore()
-    const topic = computed(() => {
+
+    return computed(() => {
         if (rosStore.ros) {
             return new ROSLIB.Topic({
                 ros: rosStore.ros,
@@ -168,17 +209,21 @@ export const useTopic = (topicName, messageType) => {
             return null
         }
     })
-
-    return topic
 }
 
-export const useTopicSubscriber = (topicName, messageType, callback) => {
+export const useTopicSubscriber = (
+    topicName: string,
+    messageType: string,
+    callback: (message: ROSLIB.Message) => void
+) => {
     const topic = useTopic(topicName, messageType)
 
     watch(topic, (newTopic, oldTopic) => {
-        if (oldTopic) oldTopic.unsubscribe()
-        if (newTopic) newTopic.subscribe(callback)
+        if (oldTopic) {
+            oldTopic.unsubscribe()
+        }
+        if (newTopic) {
+            newTopic.subscribe(callback)
+        }
     })
-
-    return topic
 }
