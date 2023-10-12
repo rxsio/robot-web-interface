@@ -37,12 +37,6 @@ async def network_test():
     return "Test passed"
 
 
-# @app.get("/")
-# async def index():
-#     index_path = os.path.join(distribution_directory, "index.html")
-#     return FileResponse(index_path)
-
-
 app.mount("/", SPAStaticFiles(directory=distribution_directory, html=True),
           name="static")
 
