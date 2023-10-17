@@ -2,12 +2,12 @@ import { defineStore } from 'pinia'
 import { ref } from 'vue'
 
 export const useForceNavDrawerStore = defineStore('forceNavDrawer', () => {
-    const opened = ref(false)
+    const opened = ref<boolean>(false)
 
     function toggle() {
         opened.value = !opened.value
     }
-    function set(newValue) {
+    function set(newValue: boolean) {
         opened.value = newValue
     }
 
