@@ -2,10 +2,10 @@ import { defineStore } from 'pinia'
 import { computed, ref } from 'vue'
 
 export const useJoystickStore = defineStore('joystick', () => {
-    const joystick = ref(null)
+    const joystick = ref<Gamepad | null>(null)
 
-    const connectListener = ref(null)
-    const disconnectListener = ref(null)
+    const connectListener = ref<(() => void) | null>(null)
+    const disconnectListener = ref<(() => void) | null>(null)
 
     const connected = computed(() => !!joystick.value)
 
@@ -21,18 +21,16 @@ export const useJoystickStore = defineStore('joystick', () => {
     }
 
     function start() {
-        connectListener.value = window.addEventListener(
-            'gamepadconnected',
-            () => {
-                findJoystick()
-            }
-        )
-        disconnectListener.value = window.addEventListener(
-            'gamepaddisconnected',
-            () => {
-                findJoystick()
-            }
-        )
+        connectListener.value = () => {
+            findJoystick()
+        }
+
+        disconnectListener.value = () => {
+            findJoystick()
+        }
+
+        window.addEventListener('gamepadconnected', connectListener.value)
+        window.addEventListener('gamepaddisconnected', disconnectListener.value)
     }
 
     function stop() {
@@ -52,7 +50,7 @@ export const useJoystickStore = defineStore('joystick', () => {
         }
     }
 
-    const gamepadIds = {
+    const gamepadIds: { [id: string]: string } = {
         '045e-02ea-Microsoft X-Box One S pad': 'xboxOneS',
     }
 
@@ -60,6 +58,11 @@ export const useJoystickStore = defineStore('joystick', () => {
 
     const getAxes = () => {
         const joystick = getJoystick()
+
+        if (!joystick) {
+            return
+        }
+
         if (joystick.mapping === 'standard') {
             return joystick.axes
         } else {
@@ -76,6 +79,11 @@ export const useJoystickStore = defineStore('joystick', () => {
 
     const getButtons = () => {
         const joystick = getJoystick()
+
+        if (!joystick) {
+            return
+        }
+
         if (joystick.mapping === 'standard') {
             return joystick.buttons.map((btn) => btn.value)
         } else {
