@@ -6,16 +6,23 @@ import {
     registerProducersListener,
 } from '@/lib/gstwebrtc-api'
 
+export interface IProducer {
+    id: string
+    meta: { [x: string]: string }
+}
+
 export const useGstreamerStore = defineStore('gstreamer', () => {
     const address = window.location.hostname
     const port = 8443
-    const url = computed(() => new URL(`wss://${address}:${port}`).toString())
+    const url = computed<string>(() =>
+        new URL(`wss://${address}:${port}`).toString()
+    )
 
-    const connected = ref(false)
-    const producers = ref({})
+    const connected = ref<boolean>(false)
+    const producers = ref<{ [key: string]: string }>({})
 
     const connectionListener = {
-        connected: (clientId) => {
+        connected: (clientId: string) => {
             console.log('[GST]', 'Connected! with id', clientId)
             connected.value = true
         },
@@ -25,7 +32,7 @@ export const useGstreamerStore = defineStore('gstreamer', () => {
         },
     }
     const producerListener = {
-        producerAdded: (producer) => {
+        producerAdded: (producer: IProducer) => {
             console.log('[GST]', 'Added producer', producer)
             let name = ''
             if (!!producer.meta && !!producer.meta['name']) {
@@ -36,9 +43,9 @@ export const useGstreamerStore = defineStore('gstreamer', () => {
                 }
             }
         },
-        producerRemoved: (producer) => {
+        producerRemoved: (producer: IProducer) => {
             console.log('[GST]', 'Removed producer', producer)
-            for (let name in producers.value) {
+            for (const name in producers.value) {
                 if (
                     Object.prototype.hasOwnProperty.call(
                         producers.value,
