@@ -1,22 +1,27 @@
 import { defineStore } from 'pinia'
 import { ref, getCurrentInstance } from 'vue'
 
-export const useViewModeStore = defineStore('viewMode', () => {
-    const mode = ref('normal')
+export enum EViewMode {
+    Normal = 'normal',
+    Edit = 'edit',
+}
 
-    const $vuetify = getCurrentInstance().proxy.$vuetify
+export const useViewModeStore = defineStore('viewMode', () => {
+    const mode = ref<EViewMode>(EViewMode.Normal)
+
+    const $vuetify = getCurrentInstance()!.proxy.$vuetify
     function editMode() {
-        mode.value = 'edit'
+        mode.value = EViewMode.Edit
         $vuetify.theme.themes.light.primary =
             $vuetify.theme.themes.light.primaryEdit
     }
     function normalMode() {
-        mode.value = 'normal'
+        mode.value = EViewMode.Normal
         $vuetify.theme.themes.light.primary =
             $vuetify.theme.themes.light.primaryNormal
     }
 
-    const editDrawer = ref(false)
+    const editDrawer = ref<boolean>(false)
     function toggleEditDrawer() {
         editDrawer.value = !editDrawer.value
     }
