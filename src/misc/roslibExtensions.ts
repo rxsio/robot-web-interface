@@ -127,13 +127,11 @@ export const useDynamicReconfigure = (nodeName: string) => {
     const mainCache = ref<DynamicReconfigureValues>({})
     const dataTypes = ref<DynamicReconfigureDataTypes>({})
 
-    useTopicSubscriber(
+    useTopicSubscriber<DynamicReconfigureMessage>(
         `${nodeName}/parameter_updates`,
         'dynamic_reconfigure/Config',
         (newConfig) => {
-            rosCache.value = parseDynamicReconfigureConfig(
-                newConfig as DynamicReconfigureMessage
-            )[0]
+            rosCache.value = parseDynamicReconfigureConfig(newConfig)[0]
         }
     )
 
@@ -195,12 +193,15 @@ export const onRosDisconnected = (callback: () => void) => {
     )
 }
 
-export const useTopic = (topicName: string, messageType: string) => {
+export const useTopic = <TMessage = ROSLIB.Message>(
+    topicName: string,
+    messageType: string
+) => {
     const rosStore = useRosStore()
 
     return computed(() => {
         if (rosStore.ros) {
-            return new ROSLIB.Topic({
+            return new ROSLIB.Topic<TMessage>({
                 ros: rosStore.ros,
                 name: topicName,
                 messageType,
@@ -211,12 +212,12 @@ export const useTopic = (topicName: string, messageType: string) => {
     })
 }
 
-export const useTopicSubscriber = (
+export const useTopicSubscriber = <TMessage = ROSLIB.Message>(
     topicName: string,
     messageType: string,
-    callback: (message: ROSLIB.Message) => void
+    callback: (message: TMessage) => void
 ) => {
-    const topic = useTopic(topicName, messageType)
+    const topic = useTopic<TMessage>(topicName, messageType)
 
     watch(topic, (newTopic, oldTopic) => {
         if (oldTopic) {
