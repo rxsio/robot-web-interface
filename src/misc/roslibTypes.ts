@@ -8,25 +8,27 @@ export const CATEGORIES = [
 
 export type DynamicReconfigureCategories = (typeof CATEGORIES)[number]
 
-export interface DynamicReconfigureParameter {
+export interface IDynamicReconfigureParameter {
     name: string
     value: boolean | number | string | any
 }
 
 export type DynamicReconfigureMessage = {
-    [key in DynamicReconfigureCategories]: DynamicReconfigureParameter[]
+    [key in DynamicReconfigureCategories]: IDynamicReconfigureParameter[]
 }
 
-export type DynamicReconfigureEmptyConfig = {
+export interface IDynamicReconfigureEmptyConfig {
     config: {}
 }
 
-export type DynamicReconfigureConfig = {
+export interface IDynamicReconfigureConfig {
     config: DynamicReconfigureMessage
 }
 
-export type DynamicReconfigureValues = Record<string, string>
-export type DynamicReconfigureDataTypes = Record<
-    string,
-    DynamicReconfigureCategories
->
+export interface IDynamicReconfigureDataTypes {
+    [key: string]: DynamicReconfigureCategories
+}
+
+export interface IDynamicConfiguration {
+    [key: string]: string | number | boolean | any
+}

@@ -1,14 +1,14 @@
 import ROSLIB from 'roslib'
 import { useRosStore } from '@/stores/ros'
-import { computed, ref, watch } from 'vue'
+import { computed, Ref, ref, watch } from 'vue'
 import {
     CATEGORIES,
     DynamicReconfigureCategories,
-    DynamicReconfigureConfig,
-    DynamicReconfigureDataTypes,
-    DynamicReconfigureEmptyConfig,
+    IDynamicReconfigureConfig,
+    IDynamicReconfigureDataTypes,
+    IDynamicReconfigureEmptyConfig,
     DynamicReconfigureMessage,
-    DynamicReconfigureValues,
+    IDynamicConfiguration,
 } from '@/misc/roslibTypes'
 
 export const callService = <TServiceRequest, TServiceResponse = any>(
@@ -44,11 +44,13 @@ export const callService = <TServiceRequest, TServiceResponse = any>(
         )
     })
 
-export const parseDynamicReconfigureConfig = (
+export const parseDynamicReconfigureConfig = <
+    TConfiguration extends IDynamicConfiguration
+>(
     config: DynamicReconfigureMessage
-): [DynamicReconfigureValues, DynamicReconfigureDataTypes] => {
-    const result: DynamicReconfigureValues = {}
-    const dataTypes: DynamicReconfigureDataTypes = {}
+): [TConfiguration, IDynamicReconfigureDataTypes] => {
+    const result: IDynamicConfiguration = {}
+    const dataTypes: IDynamicReconfigureDataTypes = {}
 
     for (const category in CATEGORIES) {
         for (const { name, value } of config[
@@ -59,14 +61,14 @@ export const parseDynamicReconfigureConfig = (
         }
     }
 
-    return [result, dataTypes]
+    return [result as TConfiguration, dataTypes]
 }
 
-export const setDynamicReconfigureParameters = async (
+export const setDynamicReconfigureParameters = async <TConfiguration>(
     serviceName: string,
-    request: DynamicReconfigureValues,
-    dataTypes: DynamicReconfigureDataTypes
-): Promise<DynamicReconfigureConfig> => {
+    request: TConfiguration,
+    dataTypes: IDynamicReconfigureDataTypes
+): Promise<IDynamicReconfigureConfig> => {
     const config: DynamicReconfigureMessage = {
         bools: [],
         ints: [],
@@ -102,43 +104,51 @@ export const setDynamicReconfigureParameters = async (
     }
 
     return await callService<
-        DynamicReconfigureConfig,
-        DynamicReconfigureConfig
+        IDynamicReconfigureConfig,
+        IDynamicReconfigureConfig
     >(serviceName, 'dynamic_reconfigure/Reconfigure', {
         config,
     })
 }
 
-export const getDynamicReconfigureParameters = async (
+export const getDynamicReconfigureParameters = async <
+    TConfiguration extends IDynamicConfiguration
+>(
     serviceName: string
-): Promise<[DynamicReconfigureValues, DynamicReconfigureDataTypes]> => {
+): Promise<[TConfiguration, IDynamicReconfigureDataTypes]> => {
     const response = await callService<
-        DynamicReconfigureEmptyConfig,
-        DynamicReconfigureConfig
+        IDynamicReconfigureEmptyConfig,
+        IDynamicReconfigureConfig
     >(serviceName, 'dynamic_reconfigure/Reconfigure', {
         config: {},
     })
 
-    return parseDynamicReconfigureConfig(response.config)
+    return parseDynamicReconfigureConfig<TConfiguration>(response.config)
 }
 
-export const useDynamicReconfigure = (nodeName: string) => {
-    const rosCache = ref<DynamicReconfigureValues>({})
-    const mainCache = ref<DynamicReconfigureValues>({})
-    const dataTypes = ref<DynamicReconfigureDataTypes>({})
+export const useDynamicReconfigure = <
+    TConfiguration extends IDynamicConfiguration
+>(
+    nodeName: string
+): Ref<TConfiguration> => {
+    const rosCache = ref<TConfiguration | null>(null) as Ref<TConfiguration>
+    const mainCache = ref<TConfiguration | null>(null) as Ref<TConfiguration>
+    const dataTypes = ref<IDynamicReconfigureDataTypes>({})
 
     useTopicSubscriber<DynamicReconfigureMessage>(
         `${nodeName}/parameter_updates`,
         'dynamic_reconfigure/Config',
         (newConfig) => {
-            rosCache.value = parseDynamicReconfigureConfig(newConfig)[0]
+            rosCache.value =
+                parseDynamicReconfigureConfig<TConfiguration>(newConfig)[0]
         }
     )
 
     onRosConnected(async () => {
-        const [params, types] = await getDynamicReconfigureParameters(
-            `${nodeName}/set_parameters`
-        )
+        const [params, types] =
+            await getDynamicReconfigureParameters<TConfiguration>(
+                `${nodeName}/set_parameters`
+            )
         rosCache.value = params
         dataTypes.value = types
     })
@@ -155,7 +165,7 @@ export const useDynamicReconfigure = (nodeName: string) => {
             }
 
             /* @TODO: Check if await is necessary */
-            setDynamicReconfigureParameters(
+            setDynamicReconfigureParameters<TConfiguration>(
                 `${nodeName}/set_parameters`,
                 newValue,
                 dataTypes.value
