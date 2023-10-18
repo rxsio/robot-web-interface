@@ -5,8 +5,16 @@ import {
     useTopicSubscriber,
 } from '@/misc/roslibExtensions'
 import { computed, ref } from 'vue'
-import { useJoyDiffDrive } from './joyDiffDrive'
-import { useJoy5dofManipulator } from './joy5dofManipulator'
+import { useJoyDiffDrive } from '@/stores/nodes/joyDiffDrive'
+import { useJoy5dofManipulator } from '@/stores/nodes/joy5dofManipulator'
+
+export interface ITopic {
+    name: string
+}
+
+export interface IGetTopic {
+    topic: ITopic
+}
 
 export const useJoyMultiplexer = defineStore('joyMultiplexer', () => {
     const joyDiffDrive = useJoyDiffDrive()
@@ -48,14 +56,14 @@ export const useJoyMultiplexer = defineStore('joyMultiplexer', () => {
 
     onRosConnected(async () => {
         _joyTopic.value = (
-            await callService(
+            await callService<{}, IGetTopic>(
                 `/${nodeName}/get_selected_joy`,
                 'joystick_control/GetTopic',
                 {}
             )
         ).topic.name
         _outputTopic.value = (
-            await callService(
+            await callService<{}, IGetTopic>(
                 `/${nodeName}/get_selected_output`,
                 'joystick_control/GetTopic',
                 {}
@@ -63,14 +71,14 @@ export const useJoyMultiplexer = defineStore('joyMultiplexer', () => {
         ).topic.name
     })
 
-    useTopicSubscriber(
+    useTopicSubscriber<ITopic>(
         `/${nodeName}/selected_joy`,
         'joystick_control/Topic',
         (newJoystickTopic) => {
             _joyTopic.value = newJoystickTopic.name
         }
     )
-    useTopicSubscriber(
+    useTopicSubscriber<ITopic>(
         `/${nodeName}/selected_output`,
         'joystick_control/Topic',
         (newOutputTopic) => {
