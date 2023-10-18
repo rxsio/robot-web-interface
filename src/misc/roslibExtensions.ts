@@ -1,6 +1,6 @@
 import ROSLIB from 'roslib'
 import { useRosStore } from '@/stores/ros'
-import { computed, Ref, ref, watch } from 'vue'
+import { computed, ref, watch } from 'vue'
 import {
     CATEGORIES,
     DynamicReconfigureCategories,
@@ -130,9 +130,9 @@ export const useDynamicReconfigure = <
     TConfiguration extends IDynamicConfiguration
 >(
     nodeName: string
-): Ref<TConfiguration> => {
-    const rosCache = ref<TConfiguration | null>(null) as Ref<TConfiguration>
-    const mainCache = ref<TConfiguration | null>(null) as Ref<TConfiguration>
+) => {
+    const rosCache = ref<TConfiguration>({} as TConfiguration)
+    const mainCache = ref<TConfiguration>({} as TConfiguration)
     const dataTypes = ref<IDynamicReconfigureDataTypes>({})
 
     useTopicSubscriber<DynamicReconfigureMessage>(
