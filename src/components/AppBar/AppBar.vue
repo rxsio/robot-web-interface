@@ -9,6 +9,8 @@ import NormalTools from './NormalTools.vue'
 import EditTools from './EditTools.vue'
 import ManualSteering from './Streering/ManualSteering.vue'
 import AutonomousSteering from './Streering/AutonomousSteering.vue'
+import NetworkStatus from '@/components/AppBar/NetworkStatus.vue'
+import RosStatus from '@/components/AppBar/RosStatus.vue'
 
 const forceNavDrawerStore = useForceNavDrawerStore()
 const viewModeStore = useViewModeStore()
@@ -55,6 +57,8 @@ const menuIcon = computed(() =>
             />
         </v-toolbar-title>
         <v-spacer />
+        <NetworkStatus></NetworkStatus>
+        <RosStatus></RosStatus>
         <AutonomousSteering :show="viewModeStore.mode === 'normal'" />
         <ManualSteering :show="viewModeStore.mode === 'normal'" />
         <NormalTools
