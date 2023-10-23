@@ -71,6 +71,100 @@ export const useRosStore = defineStore('ros', () => {
         ros.value = newRos
     }
 
+    function scheduleReconnectRos(container) {
+        console.log('rss', container, container.value.reconnectTimeout)
+        if (!container.value.reconnectTimeout) {
+            container.value.reconnectTimeout = setTimeout(
+                () => connectRos(container),
+                1000
+            )
+        }
+    }
+
+    function connectRos(container) {
+        const newRos = new Ros({
+            url: url.value,
+        })
+
+        container.value.connectionTimeout = setTimeout(() => {
+            newRos.close()
+        }, 4000)
+
+        newRos.on('connection', () => {
+            console.log(
+                '[ROS]',
+                container.value.id,
+                'connected!',
+                newRos.socket.url
+            )
+
+            container.value.connected = container.ros.isConnected
+
+            clearTimeout(container.value.connectionTimeout)
+        })
+        newRos.on('error', () => {
+            console.log(
+                '[ROS]',
+                container.value.id,
+                'error :(',
+                newRos.socket.url
+            )
+
+            container.value.connected = container.value.ros.isConnected
+
+            scheduleReconnectRos(container)
+        })
+        newRos.on('close', () => {
+            console.log(
+                '[ROS]',
+                container.value.id,
+                'closed',
+                newRos.socket.url
+            )
+
+            container.value.connected = container.value.ros.isConnected
+
+            scheduleReconnectRos(container)
+        })
+
+        container.value.ros = newRos
+    }
+
+    let containers = [
+        ref({
+            id: 0,
+            ros: null,
+            connected: false,
+            connectionTimeout: null,
+            reconnectTimeout: null,
+        }),
+        ref({
+            id: 1,
+            ros: null,
+            connected: false,
+            connectionTimeout: null,
+            reconnectTimeout: null,
+        }),
+        ref({
+            id: 2,
+            ros: null,
+            connected: false,
+            connectionTimeout: null,
+            reconnectTimeout: null,
+        }),
+        ref({
+            id: 3,
+            ros: null,
+            connected: false,
+            connectionTimeout: null,
+            reconnectTimeout: null,
+        }),
+    ]
+
+    for (const container of containers) {
+        connectRos(container)
+    }
+
     function scheduleReconnect() {
         if (!reconnectTimeout.value)
             reconnectTimeout.value = setTimeout(() => connect(), 1000)
@@ -81,7 +175,7 @@ export const useRosStore = defineStore('ros', () => {
         url,
         connected,
         connect,
-
+        containers,
         setPort,
         setAddress,
     }
