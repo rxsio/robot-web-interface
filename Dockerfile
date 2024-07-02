@@ -10,5 +10,8 @@ WORKDIR /robot-web-interface/server
 RUN npm ci
 
 EXPOSE 80
+
+
+
 EXPOSE 443
 CMD ["node", "index.js"]
