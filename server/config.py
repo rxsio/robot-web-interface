@@ -1,4 +1,5 @@
 import json
+from enum import Enum
 from pydantic import BaseModel, FilePath, DirectoryPath
 
 
@@ -8,8 +9,14 @@ class SslConfig(BaseModel):
     root: FilePath
 
 
+class EMountType(Enum):
+    SPA = "SPA"
+    FTP = "FTP"
+
+
 class Mount(BaseModel):
     name: str
+    type: EMountType
     path: str
     directory: DirectoryPath
 

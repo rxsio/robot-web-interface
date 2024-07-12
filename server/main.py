@@ -8,8 +8,8 @@ from starlette.middleware.cors import CORSMiddleware
 from starlette.responses import FileResponse
 from starlette.staticfiles import StaticFiles
 
-from config import load_config
-from spa_staticfiles import SPAStaticFiles
+from config import load_config, EMountType
+from static_files import FTPStaticFiles, SPAStaticFiles
 
 
 config = load_config("config.json")
@@ -34,9 +34,14 @@ async def network_test():
 
 
 for mount in config.mounts:
+    static_files = {
+        EMountType.SPA: SPAStaticFiles,
+        EMountType.FTP: FTPStaticFiles
+    }.get(mount.type, SPAStaticFiles)
+
     app.mount(
         mount.path,
-        SPAStaticFiles(directory=os.path.join(os.getcwd(), mount.directory)),
+        static_files(directory=os.path.join(os.getcwd(), mount.directory)),
         name=mount.name
     )
 
