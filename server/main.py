@@ -8,27 +8,23 @@ from starlette.middleware.cors import CORSMiddleware
 from starlette.responses import FileResponse
 from starlette.staticfiles import StaticFiles
 
+from config import load_config
 from spa_staticfiles import SPAStaticFiles
 
-distribution_directory = os.path.join(os.getcwd(), "..", "dist")
-certificate_directory = os.path.join(os.getcwd(), "..", "..", "certificates")
+
+config = load_config("config.json")
+
 ssl = {
-    "ssl_keyfile": os.path.join(certificate_directory, "firo.key"),
-    "ssl_certfile": os.path.join(certificate_directory, "firo.crt")
+    "ssl_keyfile": os.path.join(os.getcwd(), config.ssl.key),
+    "ssl_certfile": os.path.join(os.getcwd(), config.ssl.certificate)
 }
-origins = [
-    "http://localhost",
-    "https://localhost",
-    "http://localhost:80",
-    "https://localhost:443"
-]
 
 app = FastAPI()
 
 
 @app.get("/rxsioCA.pem")
 async def download_certificate():
-    certificate_path = os.path.join(certificate_directory, "RootCA.pem")
+    certificate_path = os.path.join(os.getcwd(), config.ssl.root)
     return FileResponse(certificate_path)
 
 
@@ -37,12 +33,16 @@ async def network_test():
     return "Test passed"
 
 
-app.mount("/", SPAStaticFiles(directory=distribution_directory, html=True),
-          name="static")
+for mount in config.mounts:
+    app.mount(
+        mount.path,
+        SPAStaticFiles(directory=os.path.join(os.getcwd(), mount.directory)),
+        name=mount.name
+    )
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=origins,
+    allow_origins=config.origins,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
