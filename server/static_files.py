@@ -18,18 +18,14 @@ class FTPStaticFiles(StaticFiles):
         self.templates = Jinja2Templates(directory="templates", auto_reload=True)
 
     async def get_response(self, path: str, scope: Scope):
-        try:
-            full_path = os.path.join(self.directory, path)
+        full_path = os.path.join(self.directory, path)
 
-            if os.path.isdir(full_path):
-                return await self.directory_template_response(path, scope)
-            elif os.path.isfile(full_path):
-                return await super().get_response(path, scope)
-        except (HTTPException, StarletteHTTPException) as ex:
-            if ex.status_code == 404:
-                return await super().get_response("index.html", scope)
-            else:
-                raise ex
+        if os.path.isdir(full_path) and os.path.exists(full_path):
+            return await self.directory_template_response(path, scope)
+        elif os.path.isfile(full_path):
+            return await super().get_response(path, scope)
+
+        raise HTTPException(status_code=404, detail="File or directory not found")
 
     async def directory_template_response(self, path: str, scope: Scope) -> HTMLResponse:
         full_path = os.path.join(self.directory, path)

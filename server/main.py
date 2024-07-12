@@ -4,15 +4,19 @@ from subprocess import Popen
 
 import uvicorn
 from fastapi import FastAPI
+from fastapi.exceptions import RequestValidationError
+from fastapi.templating import Jinja2Templates
 from starlette.middleware.cors import CORSMiddleware
 from starlette.responses import FileResponse
 from starlette.staticfiles import StaticFiles
+from starlette.exceptions import HTTPException as StarletteHTTPException
 
 from config import load_config, EMountType
 from static_files import FTPStaticFiles, SPAStaticFiles
 
 
 config = load_config("config.json")
+templates = Jinja2Templates(directory="templates")
 
 ssl = {
     "ssl_keyfile": os.path.join(os.getcwd(), config.ssl.key),
@@ -31,6 +35,18 @@ async def download_certificate():
 @app.post("/networkTest")
 async def network_test():
     return "Test passed"
+
+
+@app.exception_handler(StarletteHTTPException)
+async def http_exception_handler(request, exc):
+    print(dir(exc), exc)
+    return templates.TemplateResponse(
+        "error.jinja",
+        {
+            "request": request,
+            "error": exc
+        }
+    )
 
 
 for mount in config.mounts:
