@@ -24,3 +24,6 @@ pnpm-debug.log*
 
 # Python Virtual Environment
 venv/
+
+# Documentation
+server/docs

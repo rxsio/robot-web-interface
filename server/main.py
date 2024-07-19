@@ -12,7 +12,7 @@ from starlette.staticfiles import StaticFiles
 from starlette.exceptions import HTTPException as StarletteHTTPException
 
 from config import load_config, EMountType
-from static_files import FTPStaticFiles, SPAStaticFiles
+from static_files import FTPStaticFiles, SPAStaticFiles, PageStaticFiles
 
 
 config = load_config("config.json")
@@ -52,7 +52,8 @@ async def http_exception_handler(request, exc):
 for mount in config.mounts:
     static_files = {
         EMountType.SPA: SPAStaticFiles,
-        EMountType.FTP: FTPStaticFiles
+        EMountType.FTP: FTPStaticFiles,
+        EMountType.PAGE: PageStaticFiles
     }.get(mount.type, SPAStaticFiles)
 
     app.mount(

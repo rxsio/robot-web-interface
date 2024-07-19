@@ -15,7 +15,16 @@
             display: flex;
             align-items: center;
             flex-direction: row;
-            margin-left: 16px;
+            justify-content: space-between;
+            margin: 8px 0 8px 16px;
+            padding: 8px;
+            border: 1px solid #333;
+            border-radius: 3px;
+        }
+        .data {
+            display: flex;
+            align-items: center;
+            flex-direction: row;
         }
         .icon {
             margin-top: -0.25em;
@@ -24,6 +33,17 @@
         }
         .name {
             font-weight: bold;
+        }
+        .control {
+            border: 1px solid #333;
+            font-size: 0.75em;
+            border-radius: 8px;
+            padding: 8px;
+            transition: all 250ms ease;
+        }
+        .control:hover {
+            color: white;
+            background: black;
         }
         </style>
     </head>
@@ -35,18 +55,22 @@
             <h1>Directory /{{ path }}</h1>
         {% endif %}
 
-        <a class="container" href=".">
-            <div class="icon">📁</div>
-            <div class="name">..</div>
+        <a class="container" href="./..">
+            <div class="data">
+                <div class="icon">📁</div>
+                <div class="name">..</div>
+            </div>
         </a>
 
         <div>
             <h2>Directories</h2>
 
             {% for directory in directories %}
-                <a class="container" href="{{ path }}/{{ directory }}">
-                    <div class="icon">📁</div>
-                    <div class="name">/{{ directory }}</div>
+                <a class="container" href="{{ directory }}/">
+                    <div class="data">
+                        <div class="icon">📁</div>
+                        <div class="name">/{{ directory }}</div>
+                    </div>
                 </a>
             {% endfor %}
         </div>
@@ -55,12 +79,37 @@
             <h2>Files</h2>
 
             {% for file in files %}
-                <a class="container" href="{{ path }}/{{ file }}">
-                    <div class="icon">🗎</div>
-                    <div class="name">{{ file }}</div>
+                <a class="container" href="{{ file }}">
+                    <div class="data">
+                        <div class="icon">🗎</div>
+                        <div class="name">{{ file }}</div>
+                    </div>
+
+                    <div class="controls">
+                        <div class="control control-360" data-src="{{ path }}/{{ file }}">360</div>
+                    </div>
                 </a>
             {% endfor %}
         </div>
     </body>
+
+    <script>
+
+    function open360Image(src) {
+        alert("Ready for 360 image")
+    }
+
+    for (let control of document.getElementsByClassName("control-360")) {
+        let src = control.getAttribute("data-src");
+
+        control.addEventListener("click", (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+
+            open360Image(src);
+        });
+    }
+
+    </script>
 </html>
 

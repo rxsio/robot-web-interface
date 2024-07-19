@@ -12,6 +12,7 @@ class SslConfig(BaseModel):
 class EMountType(Enum):
     SPA = "SPA"
     FTP = "FTP"
+    PAGE = "PAGE"
 
 
 class Mount(BaseModel):

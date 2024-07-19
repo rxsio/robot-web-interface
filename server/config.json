@@ -12,6 +12,12 @@
       "directory": "../ftp"
     },
     {
+      "name": "docs",
+      "type": "PAGE",
+      "path": "/docs",
+      "directory": "docs"
+    },
+    {
       "name": "static",
       "type": "SPA",
       "path": "/",

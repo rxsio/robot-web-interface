@@ -50,6 +50,17 @@ class FTPStaticFiles(StaticFiles):
             raise HTTPException(status_code=500, detail=f"Internal Server Error: {str(e)}")
 
 
+class PageStaticFiles(StaticFiles):
+
+    async def get_response(self, path: str, scope):
+        full_path = os.path.join(self.directory, path)
+
+        if os.path.isdir(full_path) and os.path.exists(full_path):
+            return await super().get_response(os.path.join(path, "index.html"), scope)
+
+        return await super().get_response(path, scope)
+
+
 class SPAStaticFiles(StaticFiles):
 
     async def get_response(self, path: str, scope):
