@@ -2,5 +2,5 @@
 $ErrorActionPreference = "Stop"
 
 # Call scripts
-& "$PSScriptRoot\createVirtualEnvironment.ps1"
-& "$PSScriptRoot\installRequirements.ps1"
+& "$PSScriptRoot\internal\createVirtualEnvironment.ps1"
+& "$PSScriptRoot\internal\installRequirements.ps1"

@@ -4,5 +4,5 @@
 set -e
 
 # Call scripts
-source createVirtualEnvironment
-source installRequirements
+source internal/createVirtualEnvironment
+source internal/installRequirements
