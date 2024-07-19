@@ -3,31 +3,31 @@ $ErrorActionPreference = "Stop"
 
 # Variables
 $technicalDocumentation = "https://github.com/rxsio/firo-docs/archive/refs/heads/gh-pages.zip";
-#$interfaceDocumentation = "";
+$interfaceDocumentation = "https://github.com/rxsio/interface-docs/archive/refs/heads/gh-pages.zip";
 
 $outTechnicalDocumentation = (Join-Path -Path $PSScriptRoot -ChildPath "../technicalDocumentation.zip");
-#$outInterfaceDocumentation = (Join-Path -Path $PSScriptRoot -ChildPath "../interfaceDocumentation.zip")
+$outInterfaceDocumentation = (Join-Path -Path $PSScriptRoot -ChildPath "../interfaceDocumentation.zip")
 
 # Download documentation
-Write-Host -NoNewline "Downloading documentation...";
+Write-Host "Downloading documentation...";
 $client = New-Object System.Net.WebClient;
 $client.DownloadFile($technicalDocumentation, $outTechnicalDocumentation);
-#$client.DownloadFile($interfaceDocumentation, $outInterfaceDocumentation));
+$client.DownloadFile($interfaceDocumentation, $outInterfaceDocumentation);
 
 # Create output folder
-rm -r docs;
+Remove-Item -r docs;
 mkdir -p docs;
 
 # Unpack
-Write-Host -NoNewline "Unzipping documentation..."
+Write-Host "Unzipping documentation..."
 Expand-Archive "technicalDocumentation.zip" -DestinationPath docs
-#Expand-Archive "interfaceDocumentation.zip" -DestinationPath docs
+Expand-Archive "interfaceDocumentation.zip" -DestinationPath docs
 
 # Rename
-Write-Host -NoNewline "Renaming directories"
-mv docs/firo-docs-gh-pages docs/technical
-# nv docs/... docs/interface
+Write-Host "Renaming directories"
+Move-Item docs/firo-docs-gh-pages docs/technical
+Move-Item docs/interface-docs-gh-pages docs/interface
 
 # Remove archives
-rm $outTechnicalDocumentation
-#rm $outInterfaceDocumentation
+Remove-Item $outTechnicalDocumentation
+Remove-Item $outInterfaceDocumentation
