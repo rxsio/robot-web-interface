@@ -34,18 +34,67 @@
         .name {
             font-weight: bold;
         }
+        .controls {
+            display: flex;
+            flex-direction: row;
+        }
         .control {
             border: 1px solid #333;
             font-size: 0.75em;
             border-radius: 8px;
             padding: 8px;
+            margin-right: 8px;
             transition: all 250ms ease;
         }
         .control:hover {
             color: white;
             background: black;
         }
+
+        .center {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100%;
+        }
+
+        table, th, td {
+            border: 1px solid;
+
+        }
+
+        th {
+            border: 2px solid;
+            font-weight: bold;
+            font-size: 1.25em;
+        }
+
+        th, td {
+            padding: 12px;
+        }
+
+        .panorama-container {
+            z-index: 100;
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+        }
+
+        .panorama-exit {
+            position: absolute;
+            right: 16px;
+            top: 16px;
+            font-size: 2em;
+            z-index: 200;
+            cursor: pointer;
+        }
+
         </style>
+
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/pannellum@2.5.6/build/pannellum.css"/>
+        <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/pannellum@2.5.6/build/pannellum.js"></script>
     </head>
 
     <body>
@@ -86,7 +135,16 @@
                     </div>
 
                     <div class="controls">
-                        <div class="control control-360" data-src="{{ path }}/{{ file }}">360</div>
+                        <div class="control control-download" data-src="{{ file }}">📥</div>
+
+                        {% if file.endswith('csv') %}
+                            <div class="control control-csv" data-src="{{ file }}">📈</div>
+                        {% endif %}
+
+                        {% if file.endswith('jpg') %}
+                            <div class="control control-360" data-src="{{ file }}">360</div>
+                        {% endif %}
+
                     </div>
                 </a>
             {% endfor %}
@@ -95,21 +153,149 @@
 
     <script>
 
-    function open360Image(src) {
-        alert("Ready for 360 image")
+    function addControlHandler(name, handler) {
+        for (let control of document.getElementsByClassName(name)) {
+            control.addEventListener("click", (e) => {
+                handler(control, e);
+            });
+        }
     }
 
-    for (let control of document.getElementsByClassName("control-360")) {
-        let src = control.getAttribute("data-src");
+    function downloadFile(uri, name) {
+        var link = document.createElement("a");
+        link.setAttribute("download", name);
+        link.href = uri;
+        document.body.appendChild(link);
+        link.click();
+        link.remove();
+    }
 
-        control.addEventListener("click", (e) => {
-            e.preventDefault();
-            e.stopPropagation();
+    function createWindow(title) {
+        const win = window.open("", title, "toolbar=no,location=no,directories=no,status=no,menubar=no,scrollbars=yes,resizable=yes,width=780,height=500,top="+(screen.height-100)+",left="+(screen.width-200))
 
-            open360Image(src);
+        win.document.title = title;
+        win.document.body.innerHTML = "";
+
+        document.head.querySelectorAll('link, style').forEach(htmlElement => {
+             win.document.head.appendChild(htmlElement.cloneNode(true));
         });
+
+        return win;
     }
+
+    function displayCSV(src, data) {
+        const lines = data.split("\n");
+
+        if (lines.length == 0) {
+            alert("Empty CSV");
+            return;
+        }
+
+        const modal = createWindow("CSV View: " + src);
+        const container = document.createElement("div");
+        container.classList.add("center");
+        const table = document.createElement("table");
+
+        function addRow(table, elements, maxElements, elementClass="td") {
+            const row = document.createElement("tr");
+
+            for (let i = 0; i < Math.min(elements.length, maxElements); i++) {
+                let element = document.createElement(elementClass);
+                element.innerText = elements[i];
+                row.appendChild(element);
+            }
+
+            table.appendChild(row);
+        }
+
+        const header = lines[0].split(",");
+        addRow(table, header, header.length, "th");
+
+        for (let line of lines) {
+            const elements = line.split(",");
+            addRow(table, elements, header.length);
+        }
+
+        container.appendChild(table);
+        modal.document.body.appendChild(container);
+    }
+
+    async function openCSV(src) {
+        const response = await fetch(src);
+
+        if (!response.ok) {
+            alert("Cannot load CSV file");
+            return;
+        }
+
+        const data = await response.text();
+        displayCSV(src, data);
+    }
+
+    async function open360Image(src) {
+        let container = document.createElement("div");
+        container.classList.add("panorama-container");
+
+        let panorama = document.createElement("div");
+        panorama.classList.add("panorama");
+
+        let exitButton = document.createElement("div");
+        exitButton.classList.add("panorama-exit");
+        exitButton.innerText = "❌";
+
+        exitButton.onclick = function() {
+            container.remove();
+        }
+
+        pannellum.viewer(panorama, {
+            "type": "equirectangular",
+            "panorama": src,
+            "autoLoad": true,
+        });
+
+        container.appendChild(panorama);
+        container.appendChild(exitButton);
+        document.body.appendChild(container);
+    }
+
+    addControlHandler("control-download", (control, event) => {
+        event.preventDefault();
+        event.stopPropagation();
+
+        let src = control.getAttribute("data-src");
+        downloadFile(src, src);
+    });
+
+    addControlHandler("control-360", (control, event) => {
+        event.preventDefault();
+        event.stopPropagation();
+
+        let src = control.getAttribute("data-src");
+        open360Image(src);
+    });
+
+    addControlHandler("control-csv", (control, event) => {
+        event.preventDefault();
+        event.stopPropagation();
+
+        let src = control.getAttribute("data-src");
+        openCSV(src);
+    });
 
     </script>
 </html>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
