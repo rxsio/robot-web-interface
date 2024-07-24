@@ -14,14 +14,14 @@ const encryptedPage = computed(
     <div class="backdrop">
         <v-card
             v-if="props.showError"
-            max-width="600"
+            max-width="800"
             class="card"
         >
             <v-card-title>
                 <v-icon
                     large
                     left
-                    color="primary"
+                    color="warning"
                 >
                     mdi-information
                 </v-icon>
@@ -66,7 +66,7 @@ const encryptedPage = computed(
                 <div class="actions">
                     <v-btn
                         text
-                        color="primary"
+                        color="warning"
                         :href="encryptedPage"
                     >
                         Go to encrypted page
@@ -101,7 +101,7 @@ const encryptedPage = computed(
     flex-grow: 1;
 }
 .title {
-    color: var(--v-primary-base);
+    color: var(--v-warning-base);
 }
 .actions {
     width: 100%;

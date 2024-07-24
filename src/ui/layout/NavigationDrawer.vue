@@ -44,7 +44,7 @@ onMounted(() => {
                 >
                     <v-tooltip
                         right
-                        disabled="!$vuetify.breakpoint.mdAndUp"
+                        :disabled="!$vuetify.breakpoint.mdAndUp"
                     >
                         <span>{{ item.title }}</span>
                         <template v-slot:activator="{ on, attrs }">

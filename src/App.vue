@@ -7,8 +7,8 @@ import {
     useRosStore,
     useSteeringStore,
 } from '@/stores'
-import LoadingScreen from '@/components/LoadingScreen.vue'
-import EncryptionErrorScreen from '@/components/EncryptionErrorScreen.vue'
+import LoadingScreen from '@/ui/screens/LoadingScreen.vue'
+import EncryptionErrorScreen from '@/ui/screens/EncryptionErrorScreen.vue'
 
 const rosStore = useRosStore()
 const gstreamerStore = useGstreamerStore()

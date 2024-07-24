@@ -1,10 +1,8 @@
 import Vue from 'vue'
 import VueRouter from 'vue-router'
 
-//import HomeView from '@/views/HomeView.vue'
-import PanelView from '@/views/PanelView.vue'
-
 import layout from '@/configuration/layout.json'
+import MainScreen from '@/ui/screens/MainScreen.vue'
 
 const variants = layout.map((value) => value.name)
 
@@ -22,7 +20,7 @@ const routes = [
     {
         path: '/panel/:variant',
         name: 'panel',
-        component: PanelView,
+        component: MainScreen,
     },
     {
         path: '*',
