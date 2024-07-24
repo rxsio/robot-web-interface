@@ -5,7 +5,7 @@ import { GridLayout, GridItem } from 'vue-grid-layout'
 import AppBar from '@/components/AppBar'
 import NavigationDrawer from '@/ui/layout/NavigationDrawer.vue'
 import EditDrawer from '@/components/EditDrawer'
-import BatteryBar from '@/components/BatteryBar.vue'
+import BatteryBar from '@/ui/layout/BatteryBar.vue'
 
 import { useViewModeStore, useLayoutStore } from '@/stores'
 import PanelWindow from '@/components/PanelWindow'
