@@ -68,36 +68,6 @@ onMounted(() => {
                 </v-list-item>
             </v-list-item-group>
         </v-list>
-        <template v-slot:append>
-            <v-list-item
-                dense
-                link
-                color="secondary"
-                style="margin-bottom: 8px"
-            >
-                <v-tooltip
-                    right
-                    disabled="!$vuetify.breakpoint.mdAndUp"
-                >
-                    <span>Settings</span>
-                    <template v-slot:activator="{ on, attrs }">
-                        <v-list-item-icon
-                            v-bind="attrs"
-                            v-on="on"
-                        >
-                            <v-icon>mdi-cog</v-icon>
-                        </v-list-item-icon>
-
-                        <v-list-item-content
-                            v-bind="attrs"
-                            v-on="on"
-                        >
-                            <v-list-item-title>Settings</v-list-item-title>
-                        </v-list-item-content>
-                    </template>
-                </v-tooltip>
-            </v-list-item>
-        </template>
     </v-navigation-drawer>
 </template>
 <style scoped>

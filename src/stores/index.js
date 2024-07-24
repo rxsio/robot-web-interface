@@ -1,5 +1,5 @@
 export * from './batteryLevel'
-export * from './forceNavDrawer'
+export * from './navigationDrawer'
 export * from './viewMode'
 export * from './layout'
 export * from './ros'
