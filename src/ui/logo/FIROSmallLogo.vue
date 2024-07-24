@@ -3,7 +3,6 @@
     <svg
         width="351.34"
         height="304.12"
-        version="1.1"
         viewBox="0 0 92.959 80.466"
         xmlns="http://www.w3.org/2000/svg"
         class="logo"

@@ -1,9 +1,9 @@
 <script setup>
 import { computed } from 'vue'
 
-import FIROExpandedLogo from '@/assets/FIROExpandedLogo'
-import FIROLogo from '@/assets/FIROLogo'
-import FIROSmallLogo from '@/assets/FIROSmallLogo'
+import FIROExpandedLogo from '@/ui/logo/FIROExpandedLogo.vue'
+import FIROLogo from '@/ui/logo/FIROLogo.vue'
+import FIROSmallLogo from '@/ui/logo/FIROSmallLogo.vue'
 import { useForceNavDrawerStore, useViewModeStore } from '@/stores'
 import NormalTools from './NormalTools.vue'
 import EditTools from './EditTools.vue'
