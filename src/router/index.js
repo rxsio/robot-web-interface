@@ -4,9 +4,9 @@ import VueRouter from 'vue-router'
 //import HomeView from '@/views/HomeView.vue'
 import PanelView from '@/views/PanelView.vue'
 
-import panelViewConfig from '@/assets/panelViewConfig.json'
+import layout from '@/configuration/layout.json'
 
-const variants = panelViewConfig.map((value) => value.name)
+const variants = layout.map((value) => value.name)
 
 Vue.use(VueRouter)
 

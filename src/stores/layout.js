@@ -1,10 +1,10 @@
 import { defineStore } from 'pinia'
 import { ref, computed, getCurrentInstance } from 'vue'
-import panelViewConfig from '@/assets/panelViewConfig.json'
+import layout from '@/configuration/layout.json'
 
 const generateDefaultConfig = () =>
     Object.fromEntries(
-        panelViewConfig.map(({ name }) => [
+        layout.map(({ name }) => [
             name,
             {
                 shape: [],

@@ -1,9 +1,9 @@
 <script setup>
 import { ref, onMounted, getCurrentInstance } from 'vue'
 import { useNavigationDrawerStore } from '@/stores'
-import panelViewConfig from '@/assets/panelViewConfig.json'
+import layout from '@/configuration/layout.json'
 
-const items = ref(panelViewConfig)
+const items = ref(layout)
 
 const navigationDrawer = useNavigationDrawerStore()
 onMounted(() => {
