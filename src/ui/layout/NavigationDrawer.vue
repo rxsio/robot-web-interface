@@ -1,16 +1,16 @@
 <script setup>
 import { ref, onMounted, getCurrentInstance } from 'vue'
-import { useForceNavDrawerStore } from '@/stores'
+import { useNavigationDrawerStore } from '@/stores'
 import panelViewConfig from '@/assets/panelViewConfig.json'
 
 const items = ref(panelViewConfig)
 
-const forceNavDrawer = useForceNavDrawerStore()
+const navigationDrawer = useNavigationDrawerStore()
 onMounted(() => {
     const currentInstance = getCurrentInstance()
     const $vuetify = currentInstance.proxy.$vuetify
 
-    forceNavDrawer.set($vuetify.breakpoint.mdAndUp)
+    navigationDrawer.set($vuetify.breakpoint.mdAndUp)
 })
 </script>
 <template>
@@ -18,10 +18,10 @@ onMounted(() => {
         color="primary"
         clipped
         app
-        v-model="forceNavDrawer.opened"
+        v-model="navigationDrawer.opened"
         :mini-variant="$vuetify.breakpoint.mdAndUp"
         :permanent="$vuetify.breakpoint.mdAndUp"
-        v-if="panelViewConfig.length > 1"
+        v-if="items.length > 1"
     >
         <v-list
             dense
