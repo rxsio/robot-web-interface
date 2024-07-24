@@ -9,13 +9,13 @@
       "name": "ftp",
       "type": "FTP",
       "path": "/ftp",
-      "directory": "../ftp"
+      "directory": "mounts/ftp"
     },
     {
       "name": "docs",
       "type": "PAGE",
       "path": "/docs",
-      "directory": "docs"
+      "directory": "mounts/docs"
     },
     {
       "name": "static",

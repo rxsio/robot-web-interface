@@ -13,18 +13,18 @@ wget -O "technicalDocumentation.zip" $TechnicalDocumentation
 wget -O "interfaceDocumentation.zip" $InterfaceDocumentation
 
 # Create output folder
-rm -rf docs
-mkdir -p docs
+rm -rf mounts/docs
+mkdir -p mounts/docs
 
 # Unpack
 echo -n "Unzipping documentation..."
-unzip "technicalDocumentation.zip" -d docs
-unzip "interfaceDocumentation.zip" -d docs
+unzip "technicalDocumentation.zip" -d mounts/docs
+unzip "interfaceDocumentation.zip" -d mounts/docs
 
 # Rename
 echo -n "Renaming directories"
-mv docs/firo-docs-gh-pages docs/technical
-mv docs/interface-docs-gh-pages docs/interface
+mv mounts/docs/firo-docs-gh-pages mounts/docs/technical
+mv mounts/docs/interface-docs-gh-pages mounts/docs/interface
 
 # Remove archives
 rm "technicalDocumentation.zip"

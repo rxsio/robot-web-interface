@@ -15,18 +15,18 @@ $client.DownloadFile($technicalDocumentation, $outTechnicalDocumentation);
 $client.DownloadFile($interfaceDocumentation, $outInterfaceDocumentation);
 
 # Create output folder
-Remove-Item -r docs;
-mkdir -p docs;
+Remove-Item -r mounts/docs;
+mkdir -p mounts/docs;
 
 # Unpack
 Write-Host "Unzipping documentation..."
-Expand-Archive "technicalDocumentation.zip" -DestinationPath docs
-Expand-Archive "interfaceDocumentation.zip" -DestinationPath docs
+Expand-Archive "technicalDocumentation.zip" -DestinationPath mounts/docs
+Expand-Archive "interfaceDocumentation.zip" -DestinationPath mounts/docs
 
 # Rename
 Write-Host "Renaming directories"
-Move-Item docs/firo-docs-gh-pages docs/technical
-Move-Item docs/interface-docs-gh-pages docs/interface
+Move-Item mounts/docs/firo-docs-gh-pages mounts/docs/technical
+Move-Item mounts/docs/interface-docs-gh-pages mounts/docs/interface
 
 # Remove archives
 Remove-Item $outTechnicalDocumentation

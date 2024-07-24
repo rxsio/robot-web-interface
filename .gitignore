@@ -26,4 +26,4 @@ pnpm-debug.log*
 venv/
 
 # Documentation
-server/docs
+server/mounts/docs
