@@ -1,6 +1,6 @@
 <script setup>
 import AppBar from '@/components/AppBar'
-import NavigationDrawer from '@/components/NavigationDrawer.vue'
+import NavigationDrawer from '@/ui/layout/NavigationDrawer.vue'
 </script>
 <template>
     <div>

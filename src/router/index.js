@@ -14,14 +14,13 @@ const routes = [
     {
         path: '/',
         name: 'home',
-        //component: HomeView,
         redirect: () => ({
             name: 'panel',
-            params: { screen: '1', variant: 'overview' },
+            params: { variant: 'overview' },
         }),
     },
     {
-        path: '/panel/:screen/:variant',
+        path: '/panel/:variant',
         name: 'panel',
         component: PanelView,
     },
@@ -39,17 +38,13 @@ const router = new VueRouter({
 })
 
 router.beforeEach((to, from, next) => {
-    const screen = parseInt(to.params.screen)
     const variant = to.params.variant
-    if (
-        to.name === 'panel' &&
-        (isNaN(screen) ||
-            screen < 1 ||
-            3 < screen ||
-            !variants.includes(variant))
-    )
+
+    if (to.name === 'panel' && !variants.includes(variant)) {
         next({ name: '404' })
-    else next()
+    } else {
+        next()
+    }
 })
 
 export default router
