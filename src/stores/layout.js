@@ -1,6 +1,6 @@
-import { defineStore } from 'pinia'
-import { computed, getCurrentInstance, ref } from 'vue'
 import { useConfigurationStore } from '@/stores'
+import { computed, getCurrentInstance, ref } from 'vue'
+import { defineStore } from 'pinia'
 
 const generateDefaultConfig = () => {
     const configurationStore = useConfigurationStore()

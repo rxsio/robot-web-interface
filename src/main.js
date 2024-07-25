@@ -1,9 +1,9 @@
+import App from '@/App.vue'
+import router from '@/core/router'
+import vuetify from '@/plugins/vuetify'
 import Vue from 'vue'
 import { createPinia, PiniaVuePlugin } from 'pinia'
-import router from '@/router'
-import vuetify from '@/plugins/vuetify'
 
-import App from '@/App.vue'
 import 'roboto-fontface/css/roboto/roboto-fontface.css'
 import '@mdi/font/css/materialdesignicons.css'
 import '@/styles/overrides.scss'

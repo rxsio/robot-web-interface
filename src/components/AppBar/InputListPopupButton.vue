@@ -1,6 +1,6 @@
 <script setup>
-import { defineProps, computed, ref } from 'vue'
 import { useJoystickStore } from '@/stores'
+import { computed, defineProps, ref } from 'vue'
 
 const props = defineProps(['show'])
 

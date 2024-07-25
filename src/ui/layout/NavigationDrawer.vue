@@ -1,7 +1,6 @@
 <script setup>
+import { useConfigurationStore, useNavigationDrawerStore } from '@/stores'
 import { computed, getCurrentInstance, onMounted } from 'vue'
-import { useNavigationDrawerStore } from '@/stores'
-import { useConfigurationStore } from '@/stores'
 
 const configurationStore = useConfigurationStore()
 const navigationDrawer = useNavigationDrawerStore()

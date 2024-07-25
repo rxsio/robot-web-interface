@@ -1,6 +1,7 @@
 <script setup>
+import { useGstreamerStore, useRosStore, useViewModeStore } from '@/stores'
 import { computed, defineProps } from 'vue'
-import { useViewModeStore, useGstreamerStore, useRosStore } from '@/stores'
+
 import IconButtonList from './IconButtonList.vue'
 
 const props = defineProps(['show'])

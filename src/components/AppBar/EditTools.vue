@@ -1,6 +1,7 @@
 <script setup>
+import { useLayoutStore, useViewModeStore } from '@/stores'
 import { defineProps } from 'vue'
-import { useViewModeStore, useLayoutStore } from '@/stores'
+
 import IconButtonList from './IconButtonList.vue'
 
 const props = defineProps(['show'])

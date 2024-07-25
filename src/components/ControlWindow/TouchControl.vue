@@ -1,8 +1,9 @@
 <script setup>
-import Joystick from './Joystick.vue'
 import { defineProps, onMounted, ref } from 'vue'
+
 import { createController } from './controller'
 import { roverElements } from './elements'
+import Joystick from './Joystick.vue'
 import { useRoverSender } from './messageSender'
 
 const props = defineProps(['ros', 'config'])

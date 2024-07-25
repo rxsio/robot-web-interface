@@ -1,7 +1,9 @@
 <script setup>
-import { computed, defineProps, ref, watch } from 'vue'
 import windows from '@/windows'
+import { computed, defineProps, ref, watch } from 'vue'
+
 import configInputs from './configInputs'
+
 const props = defineProps(['isOpen', 'config'])
 
 const windowTypes = Object.entries(windows).map(([type, window]) => ({

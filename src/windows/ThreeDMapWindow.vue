@@ -1,23 +1,21 @@
 <script setup>
-import { ref, defineProps, onMounted, watch, computed } from 'vue'
-
+import { onRosConnected } from '@/core/roslibExtensions'
+import { useRosStore } from '@/stores'
+import ROSLIB from 'roslib'
 import * as THREE from 'three'
-import WebGL from 'three/addons/capabilities/WebGL.js'
-import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js'
-import { OrbitControls } from 'three/addons/controls/OrbitControls.js'
 import {
+    acceleratedRaycast,
     computeBoundsTree,
     disposeBoundsTree,
-    acceleratedRaycast,
 } from 'three-mesh-bvh'
+import WebGL from 'three/addons/capabilities/WebGL.js'
+import { OrbitControls } from 'three/addons/controls/OrbitControls.js'
+import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js'
+import { computed, defineProps, onMounted, ref, watch } from 'vue'
 
 THREE.BufferGeometry.prototype.computeBoundsTree = computeBoundsTree
 THREE.BufferGeometry.prototype.disposeBoundsTree = disposeBoundsTree
 THREE.Mesh.prototype.raycast = acceleratedRaycast
-
-import ROSLIB from 'roslib'
-import { useRosStore } from '@/stores'
-import { onRosConnected } from '@/misc/roslibExtensions'
 
 const props = defineProps(['windowDimensions'])
 const width = computed(() => props.windowDimensions.width)

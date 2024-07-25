@@ -1,7 +1,8 @@
 <script setup>
+import { useKeyboardSteeringStore, useSteeringStore } from '@/stores'
 import { defineProps } from 'vue'
+
 import SteeringButtonGroup from './SteeringButtonGroup.vue'
-import { useSteeringStore, useKeyboardSteeringStore } from '@/stores'
 
 const props = defineProps(['show'])
 

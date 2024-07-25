@@ -1,9 +1,10 @@
 <script setup>
-import { computed, defineProps } from 'vue'
 import { useJoystickStore, useSteeringStore } from '@/stores'
-import SteeringPopupButton from './SteeringPopupButton.vue'
+import { computed, defineProps } from 'vue'
+
 import ManualSteeringJoystickContent from './ManualSteeringJoystickContent.vue'
 import ManualSteeringKeyboardContent from './ManualSteeringKeyboardContent.vue'
+import SteeringPopupButton from './SteeringPopupButton.vue'
 
 const props = defineProps(['show'])
 const joystickStore = useJoystickStore()

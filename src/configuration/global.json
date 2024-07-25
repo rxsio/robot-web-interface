@@ -1,6 +1,6 @@
 {
-  "views": {
-    "dynamic": false,
-    "url": "/views.json"
-  }
+    "views": {
+        "dynamic": false,
+        "url": "/views.json"
+    }
 }

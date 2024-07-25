@@ -1,8 +1,7 @@
-import Vue from 'vue'
-import VueRouter from 'vue-router'
-
 import { useConfigurationStore } from '@/stores'
 import MainScreen from '@/ui/screens/MainScreen.vue'
+import Vue from 'vue'
+import VueRouter from 'vue-router'
 import { getActivePinia } from 'pinia'
 
 Vue.use(VueRouter)

@@ -1,6 +1,6 @@
 <script setup>
-import { defineProps, defineEmits, onBeforeUnmount, onMounted, ref } from 'vue'
 import { useViewModeStore } from '@/stores'
+import { defineEmits, defineProps, onBeforeUnmount, onMounted, ref } from 'vue'
 
 const props = defineProps(['name', 'icon'])
 const emit = defineEmits(['setDimensions'])

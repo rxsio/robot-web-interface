@@ -1,5 +1,5 @@
+import { getCurrentInstance, ref } from 'vue'
 import { defineStore } from 'pinia'
-import { ref, getCurrentInstance } from 'vue'
 
 export const useViewModeStore = defineStore('viewMode', () => {
     const mode = ref('normal')

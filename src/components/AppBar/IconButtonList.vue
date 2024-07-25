@@ -1,5 +1,6 @@
 <script setup>
 import { defineProps, ref, watch } from 'vue'
+
 import InputListPopupButton from './InputListPopupButton.vue'
 
 const props = defineProps(['show', 'buttons'])

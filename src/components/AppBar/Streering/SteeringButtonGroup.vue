@@ -1,5 +1,6 @@
 <script setup>
-import { defineProps, defineEmits } from 'vue'
+import { defineEmits, defineProps } from 'vue'
+
 const props = defineProps(['value', 'values', 'icons', 'tooltips'])
 const emit = defineEmits(['input'])
 

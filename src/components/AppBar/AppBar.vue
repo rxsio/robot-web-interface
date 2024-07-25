@@ -1,14 +1,14 @@
 <script setup>
+import { useNavigationDrawerStore, useViewModeStore } from '@/stores'
+import FIROExpandedLogo from '@/ui/components/logo/FIROExpandedLogo.vue'
+import FIROLogo from '@/ui/components/logo/FIROLogo.vue'
+import FIROSmallLogo from '@/ui/components/logo/FIROSmallLogo.vue'
 import { computed } from 'vue'
 
-import FIROExpandedLogo from '@/ui/logo/FIROExpandedLogo.vue'
-import FIROLogo from '@/ui/logo/FIROLogo.vue'
-import FIROSmallLogo from '@/ui/logo/FIROSmallLogo.vue'
-import { useNavigationDrawerStore, useViewModeStore } from '@/stores'
-import NormalTools from './NormalTools.vue'
 import EditTools from './EditTools.vue'
-import ManualSteering from './Streering/ManualSteering.vue'
+import NormalTools from './NormalTools.vue'
 import AutonomousSteering from './Streering/AutonomousSteering.vue'
+import ManualSteering from './Streering/ManualSteering.vue'
 
 const navigationDrawerStore = useNavigationDrawerStore()
 const viewModeStore = useViewModeStore()

@@ -1,14 +1,12 @@
 <script setup>
-import { computed } from 'vue'
-import { GridLayout, GridItem } from 'vue-grid-layout'
-
 import AppBar from '@/components/AppBar'
-import NavigationDrawer from '@/ui/layout/NavigationDrawer.vue'
 import EditDrawer from '@/components/EditDrawer'
-import BatteryBar from '@/ui/layout/BatteryBar.vue'
-
-import { useViewModeStore, useLayoutStore } from '@/stores'
 import PanelWindow from '@/components/PanelWindow'
+import { useLayoutStore, useViewModeStore } from '@/stores'
+import BatteryBar from '@/ui/layout/BatteryBar.vue'
+import NavigationDrawer from '@/ui/layout/NavigationDrawer.vue'
+import { computed } from 'vue'
+import { GridItem, GridLayout } from 'vue-grid-layout'
 
 const viewModeStore = useViewModeStore()
 const layoutStore = useLayoutStore()

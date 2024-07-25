@@ -1,8 +1,9 @@
 <script setup>
-import { defineProps } from 'vue'
-import SteeringButtonGroup from './SteeringButtonGroup.vue'
 import { useSteeringStore } from '@/stores'
 import { useJoy5dofManipulator, useJoyDiffDrive } from '@/stores/nodes'
+import { defineProps } from 'vue'
+
+import SteeringButtonGroup from './SteeringButtonGroup.vue'
 
 const props = defineProps(['show'])
 

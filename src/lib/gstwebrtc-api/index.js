@@ -10,17 +10,18 @@
  */
 
 import 'webrtc-adapter'
+
 import {
-    SessionState,
-    registerConnectionListener,
-    unregisterConnectionListener,
-    unregisterAllConnectionListeners,
-    getAvailableProducers,
-    registerProducersListener,
-    unregisterProducersListener,
-    unregisterAllProducersListeners,
     createConsumerSession,
+    getAvailableProducers,
+    registerConnectionListener,
+    registerProducersListener,
+    SessionState,
     startGstreamerConnection,
+    unregisterAllConnectionListeners,
+    unregisterAllProducersListeners,
+    unregisterConnectionListener,
+    unregisterProducersListener,
 } from './gstwebrtc-api'
 
 export {

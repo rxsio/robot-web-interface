@@ -1,11 +1,11 @@
 <script setup>
-import { defineProps, computed, ref } from 'vue'
-import Vue from 'vue'
 import { useLayoutStore } from '@/stores'
 import windows from '@/windows'
-import WindowBorder from './WindowBorder.vue'
-import ConfigDialog from './ConfigDialog.vue'
 import InvalidWindow from '@/windows/InvalidWindow.vue'
+import Vue, { computed, defineProps, ref } from 'vue'
+
+import ConfigDialog from './ConfigDialog.vue'
+import WindowBorder from './WindowBorder.vue'
 
 const props = defineProps(['id'])
 const layoutStore = useLayoutStore()

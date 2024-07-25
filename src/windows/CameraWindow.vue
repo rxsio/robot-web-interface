@@ -1,10 +1,11 @@
 <script setup>
-import { computed, defineProps, ref, watch } from 'vue'
 import {
     createConsumerSession,
     SessionState,
 } from '@/lib/gstwebrtc-api/gstwebrtc-api'
 import { useGstreamerStore } from '@/stores'
+import { computed, defineProps, ref, watch } from 'vue'
+
 const gstreamerStore = useGstreamerStore()
 const props = defineProps(['windowDimensions', 'extraConfig'])
 

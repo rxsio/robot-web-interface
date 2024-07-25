@@ -14,4 +14,4 @@ EXPOSE 80
 
 
 EXPOSE 443
-CMD ["node", "index.js"]
+CMD ["node", "router.js"]

@@ -1,6 +1,7 @@
 <script setup>
-import { defineProps } from 'vue'
 import { useLayoutStore, useViewModeStore } from '@/stores'
+import { defineProps } from 'vue'
+
 const props = defineProps(['type', 'name'])
 
 const layoutStore = useLayoutStore()

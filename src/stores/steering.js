@@ -1,9 +1,10 @@
-import { defineStore } from 'pinia'
 import { computed } from 'vue'
+import { defineStore } from 'pinia'
+
 import { useJoystickStore } from './joystick'
-import { useRosStore } from './ros'
-import { useKeyboardSteeringStore } from './keyboardSteering'
 import { useJoystickSteeringStore } from './joystickSteering'
+import { useKeyboardSteeringStore } from './keyboardSteering'
+import { useRosStore } from './ros'
 
 export const useSteeringStore = defineStore('steering', () => {
     const joystickStore = useJoystickStore()

@@ -1,6 +1,6 @@
 <script setup>
-import { computed } from 'vue'
 import { useBatteryLevelStore } from '@/stores'
+import { computed } from 'vue'
 import colors from 'vuetify/lib/util/colors'
 
 const batteryLevelStore = useBatteryLevelStore()

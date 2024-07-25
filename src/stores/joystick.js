@@ -1,5 +1,5 @@
-import { defineStore } from 'pinia'
 import { computed, ref } from 'vue'
+import { defineStore } from 'pinia'
 
 export const useJoystickStore = defineStore('joystick', () => {
     const joystick = ref(null)

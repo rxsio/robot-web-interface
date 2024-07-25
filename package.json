@@ -2,9 +2,9 @@
     "name": "robot-web-interface",
     "version": "0.1.0",
     "private": true,
-    "engines" : {
-        "npm" : ">=9.0.0 <=11.0.0",
-        "node" : ">=18.0.0 <=21.0.0"
+    "engines": {
+        "npm": ">=9.0.0 <=11.0.0",
+        "node": ">=18.0.0 <=21.0.0"
     },
     "scripts": {
         "serve": "vue-cli-service serve",
@@ -13,6 +13,7 @@
     },
     "dependencies": {
         "@mdi/font": "^7.0.96",
+        "@vue/compiler-sfc": "^3.4.34",
         "core-js": "^3.8.3",
         "pinia": "^2.0.18",
         "roboto-fontface": "*",
@@ -28,6 +29,7 @@
     "devDependencies": {
         "@babel/core": "^7.12.16",
         "@babel/eslint-parser": "^7.12.16",
+        "@ianvs/prettier-plugin-sort-imports": "^4.3.1",
         "@vue/cli-plugin-babel": "~5.0.0",
         "@vue/cli-plugin-eslint": "~5.0.0",
         "@vue/cli-plugin-router": "~5.0.0",

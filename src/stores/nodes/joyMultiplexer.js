@@ -1,12 +1,13 @@
-import { defineStore } from 'pinia'
 import {
     callService,
     onRosConnected,
     useTopicSubscriber,
-} from '@/misc/roslibExtensions'
+} from '@/core/roslibExtensions'
 import { computed, ref } from 'vue'
-import { useJoyDiffDrive } from './joyDiffDrive'
+import { defineStore } from 'pinia'
+
 import { useJoy5dofManipulator } from './joy5dofManipulator'
+import { useJoyDiffDrive } from './joyDiffDrive'
 
 export const useJoyMultiplexer = defineStore('joyMultiplexer', () => {
     const joyDiffDrive = useJoyDiffDrive()

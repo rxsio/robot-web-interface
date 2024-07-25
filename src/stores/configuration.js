@@ -1,7 +1,7 @@
-import { defineStore } from 'pinia'
 import global from '@/configuration/global.json'
 import viewsConfiguration from '@/configuration/views.json'
 import { ref } from 'vue'
+import { defineStore } from 'pinia'
 
 export const useConfigurationStore = defineStore('configuration', () => {
     const views = ref([])

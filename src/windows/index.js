@@ -1,8 +1,9 @@
-import TestWindow from './TestWindow.vue'
+import { useGstreamerStore } from '@/stores'
+
 import CameraWindow from './CameraWindow.vue'
 import ControlWindow from './ControlWindow.vue'
+import TestWindow from './TestWindow.vue'
 import ThreeDMapWindow from './ThreeDMapWindow.vue'
-import { useGstreamerStore } from '@/stores'
 
 export default {
     cameraWindow: {

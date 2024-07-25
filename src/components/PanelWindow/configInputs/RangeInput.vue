@@ -1,5 +1,6 @@
 <script setup>
-import { defineProps, computed } from 'vue'
+import { computed, defineProps } from 'vue'
+
 const props = defineProps(['configOptions', 'value'])
 
 const range = computed(() => props.configOptions.range())

@@ -1,18 +1,18 @@
-import { defineStore } from 'pinia'
+import {
+    callService,
+    onRosConnected,
+    onRosDisconnected,
+} from '@/core/roslibExtensions'
+import ROSLIB from 'roslib'
 import { computed, ref, watch } from 'vue'
-import { useSteeringStore, useRosStore, useJoystickStore } from './'
+import { defineStore } from 'pinia'
+
+import { useJoystickStore, useRosStore, useSteeringStore } from './'
 import {
     useJoy5dofManipulator,
     useJoyDiffDrive,
     useJoyMultiplexer,
 } from './nodes'
-
-import ROSLIB from 'roslib'
-import {
-    callService,
-    onRosConnected,
-    onRosDisconnected,
-} from '@/misc/roslibExtensions'
 
 export const useJoystickSteeringStore = defineStore('joystickSteering', () => {
     const steeringStore = useSteeringStore()
@@ -153,7 +153,9 @@ export const useJoystickSteeringStore = defineStore('joystickSteering', () => {
         await callService(
             '/joy_multiplexer/select_joy',
             'joystick_control/SendTopic',
-            { topic: { name: joyTopic.value.name } }
+            {
+                topic: { name: joyTopic.value.name },
+            }
         )
     }
     const giveUpControl = async () => {
@@ -173,7 +175,9 @@ export const useJoystickSteeringStore = defineStore('joystickSteering', () => {
             callService(
                 '/joy_multiplexer/remove_joy',
                 'joystick_control/SendTopic',
-                { topic: { name: joyTopic.value.name } }
+                {
+                    topic: { name: joyTopic.value.name },
+                }
             )
         }
         joyTopic.value = null

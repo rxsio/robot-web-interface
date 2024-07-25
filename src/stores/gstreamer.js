@@ -1,10 +1,10 @@
-import { defineStore } from 'pinia'
-import Vue, { computed, ref } from 'vue'
 import {
-    startGstreamerConnection,
     registerConnectionListener,
     registerProducersListener,
+    startGstreamerConnection,
 } from '@/lib/gstwebrtc-api'
+import Vue, { computed, ref } from 'vue'
+import { defineStore } from 'pinia'
 
 export const useGstreamerStore = defineStore('gstreamer', () => {
     const address = window.location.hostname

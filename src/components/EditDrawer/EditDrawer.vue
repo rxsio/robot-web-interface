@@ -1,6 +1,7 @@
 <script setup>
 import { useViewModeStore } from '@/stores'
 import windowList from '@/windows'
+
 import WindowListEntry from './WindowListEntry.vue'
 
 const viewModeStore = useViewModeStore()

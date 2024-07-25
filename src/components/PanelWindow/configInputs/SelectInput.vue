@@ -1,5 +1,6 @@
 <script setup>
 import { computed, defineProps } from 'vue'
+
 const props = defineProps(['configOptions', 'value'])
 
 const possibleValues = computed(() => props.configOptions.possibleValues())
