@@ -5,5 +5,22 @@
     "singleQuote": true,
     "singleAttributePerLine": true,
     "htmlWhitespaceSensitivity": "ignore",
-    "endOfLine": "auto"
+    "endOfLine": "auto",
+    "plugins": [
+        "@ianvs/prettier-plugin-sort-imports"
+    ],
+    "importOrder": [
+        "^@core/(.*)$",
+        "",
+        "^@server/(.*)$",
+        "",
+        "^@ui/(.*)$",
+        "",
+        "^[./]"
+    ],
+    "importOrderParserPlugins": [
+        "typescript",
+        "jsx",
+        "decorators-legacy"
+    ]
 }
