@@ -1,10 +1,12 @@
 import { defineStore } from 'pinia'
-import { ref, computed, getCurrentInstance } from 'vue'
-import layout from '@/configuration/layout.json'
+import { computed, getCurrentInstance, ref } from 'vue'
+import { useConfigurationStore } from '@/stores'
 
-const generateDefaultConfig = () =>
-    Object.fromEntries(
-        layout.map(({ name }) => [
+const generateDefaultConfig = () => {
+    const configurationStore = useConfigurationStore()
+
+    return Object.fromEntries(
+        configurationStore.views.map(({ name }) => [
             name,
             {
                 shape: [],
@@ -13,12 +15,16 @@ const generateDefaultConfig = () =>
             },
         ])
     )
+}
 
 export const useLayoutStore = defineStore('layout', () => {
     const getConfig = () => {
         const currentLayoutJSON = localStorage.getItem('layout')
-        if (!currentLayoutJSON) return generateDefaultConfig()
-        else return JSON.parse(currentLayoutJSON)
+        if (!currentLayoutJSON) {
+            return generateDefaultConfig()
+        } else {
+            return JSON.parse(currentLayoutJSON)
+        }
     }
 
     const allLayouts = ref(getConfig())
@@ -26,9 +32,11 @@ export const useLayoutStore = defineStore('layout', () => {
     function resetAll() {
         allLayouts.value = generateDefaultConfig()
     }
+
     function save() {
         localStorage.setItem('layout', JSON.stringify(allLayouts.value))
     }
+
     function reload() {
         allLayouts.value = getConfig()
     }
@@ -40,6 +48,7 @@ export const useLayoutStore = defineStore('layout', () => {
     const layout = computed(() => {
         return allLayouts.value[panel.value]
     })
+
     function nextWindowId() {
         return `${panel.value};${layout.value.nextId++}`
     }

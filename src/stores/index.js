@@ -1,3 +1,4 @@
+export * from './configuration'
 export * from './batteryLevel'
 export * from './navigationDrawer'
 export * from './viewMode'

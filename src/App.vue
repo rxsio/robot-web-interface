@@ -9,11 +9,13 @@ import {
 } from '@/stores'
 import LoadingScreen from '@/ui/screens/LoadingScreen.vue'
 import EncryptionErrorScreen from '@/ui/screens/EncryptionErrorScreen.vue'
+import { useConfigurationStore } from '@/stores'
 
 const rosStore = useRosStore()
 const gstreamerStore = useGstreamerStore()
 const joystickStore = useJoystickStore()
 const steeringStore = useSteeringStore()
+const configurationStore = useConfigurationStore()
 
 const isReady = ref(null)
 
@@ -45,6 +47,7 @@ onMounted(() => {
             rosStore.connect()
             joystickStore.start()
             steeringStore.start()
+            configurationStore.start()
         }
     })
 })

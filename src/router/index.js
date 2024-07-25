@@ -1,10 +1,9 @@
 import Vue from 'vue'
 import VueRouter from 'vue-router'
 
-import layout from '@/configuration/layout.json'
+import { useConfigurationStore } from '@/stores'
 import MainScreen from '@/ui/screens/MainScreen.vue'
-
-const variants = layout.map((value) => value.name)
+import { getActivePinia } from 'pinia'
 
 Vue.use(VueRouter)
 
@@ -36,6 +35,13 @@ const router = new VueRouter({
 })
 
 router.beforeEach((to, from, next) => {
+    let variants = ['overview']
+
+    if (getActivePinia()) {
+        const configurationStore = useConfigurationStore()
+        variants = configurationStore.views.map((value) => value.name)
+    }
+
     const variant = to.params.variant
 
     if (to.name === 'panel' && !variants.includes(variant)) {

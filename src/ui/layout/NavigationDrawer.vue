@@ -1,11 +1,13 @@
 <script setup>
-import { ref, onMounted, getCurrentInstance } from 'vue'
+import { computed, getCurrentInstance, onMounted } from 'vue'
 import { useNavigationDrawerStore } from '@/stores'
-import layout from '@/configuration/layout.json'
+import { useConfigurationStore } from '@/stores'
 
-const items = ref(layout)
-
+const configurationStore = useConfigurationStore()
 const navigationDrawer = useNavigationDrawerStore()
+
+const views = computed(() => configurationStore.views)
+
 onMounted(() => {
     const currentInstance = getCurrentInstance()
     const $vuetify = currentInstance.proxy.$vuetify
@@ -13,38 +15,39 @@ onMounted(() => {
     navigationDrawer.set($vuetify.breakpoint.mdAndUp)
 })
 </script>
+
 <template>
     <v-navigation-drawer
-        color="primary"
-        clipped
-        app
+        v-if="views.length > 1"
         v-model="navigationDrawer.opened"
         :mini-variant="$vuetify.breakpoint.mdAndUp"
         :permanent="$vuetify.breakpoint.mdAndUp"
-        v-if="items.length > 1"
+        app
+        clipped
+        color="primary"
     >
         <v-list
             dense
             shaped
         >
             <v-list-item-group
-                color="secondary"
                 active-class="selected"
+                color="secondary"
             >
                 <v-list-item
-                    v-for="item in items"
+                    v-for="item in views"
                     :key="item.title"
-                    link
                     :to="{
                         name: 'panel',
                         params: {
                             variant: item.name,
                         },
                     }"
+                    link
                 >
                     <v-tooltip
-                        right
                         :disabled="!$vuetify.breakpoint.mdAndUp"
+                        right
                     >
                         <span>{{ item.title }}</span>
                         <template v-slot:activator="{ on, attrs }">
@@ -70,6 +73,7 @@ onMounted(() => {
         </v-list>
     </v-navigation-drawer>
 </template>
+
 <style scoped>
 .selected {
     color: var(--v-primary-base);
