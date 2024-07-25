@@ -4,6 +4,7 @@ import { useBatteryLevelStore } from '@/stores'
 import colors from 'vuetify/lib/util/colors'
 
 const batteryLevelStore = useBatteryLevelStore()
+
 const coverLevel = computed(() => {
     return 100 - batteryLevelStore.percentage + '%'
 })
@@ -27,17 +28,18 @@ const batteryColor = computed(() => {
 
     return colors.teal.lighten2
 })
+
 const batteryBackgroundColor = colors.blueGrey.darken2
 </script>
 <template>
     <v-navigation-drawer
-        clipped
         app
-        fixed
-        width="24"
-        right
-        permanent
         class="battery"
+        clipped
+        fixed
+        permanent
+        right
+        width="24"
     >
         <div class="battery-level"></div>
     </v-navigation-drawer>
@@ -46,6 +48,7 @@ const batteryBackgroundColor = colors.blueGrey.darken2
 .battery {
     background-color: v-bind(batteryColor);
 }
+
 .battery-level {
     width: 100%;
     height: v-bind(coverLevel);
