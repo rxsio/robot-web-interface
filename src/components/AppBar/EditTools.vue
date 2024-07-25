@@ -20,10 +20,10 @@ const discardAndClose = () => {
 }
 
 const exportLayout = () => {
-    console.log(JSON.stringify(layoutStore.allLayouts))
+    console.log(JSON.stringify(layoutStore.layouts))
 
     const a = document.createElement('a')
-    const file = new Blob([JSON.stringify(layoutStore.allLayouts)], {
+    const file = new Blob([JSON.stringify(layoutStore.layouts)], {
         type: 'text/json',
     })
     a.href = URL.createObjectURL(file)
@@ -34,9 +34,7 @@ const exportLayout = () => {
 const importLayout = (event) => {
     ;(async () => {
         if (event.target?.files?.[0]) {
-            layoutStore.allLayouts = JSON.parse(
-                await event.target.files[0].text()
-            )
+            layoutStore.layouts = JSON.parse(await event.target.files[0].text())
         }
     })()
 }

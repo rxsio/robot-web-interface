@@ -1,10 +1,20 @@
 import global from '@/configuration/global.json'
+import layoutConfiguration from '@/configuration/layout.json'
 import viewsConfiguration from '@/configuration/views.json'
 import { ref } from 'vue'
 import { defineStore } from 'pinia'
 
+export const State = {
+    Initial: 'Initial',
+    Loading: 'Loading',
+    Loaded: 'Loaded',
+    Error: 'Error',
+}
+
 export const useConfigurationStore = defineStore('configuration', () => {
+    const state = ref(State.Initial)
     const views = ref([])
+    const layout = ref({})
 
     const fetchConfiguration = async (url) => {
         const response = await fetch(url)
@@ -33,12 +43,21 @@ export const useConfigurationStore = defineStore('configuration', () => {
         }
     }
 
-    const start = async () => {
+    const load = async () => {
+        if (state.value !== State.Initial) {
+            return
+        }
+
+        state.value = State.Loading
         await loadConfiguration(views, 'views', viewsConfiguration)
+        await loadConfiguration(layout, 'layout', layoutConfiguration)
+        state.value = State.Loaded
     }
 
     return {
-        start,
+        state,
+        load,
         views,
+        layout,
     }
 })
