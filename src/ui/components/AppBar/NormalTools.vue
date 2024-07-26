@@ -45,7 +45,7 @@ const buttons = computed(() => [
         : {
               type: 'icon',
               icon: 'mdi-video-off',
-              color: 'red',
+              color: 'error',
               tooltip: 'Video server disconnected',
               onClick: () => {},
           },
@@ -60,7 +60,7 @@ const buttons = computed(() => [
         : {
               type: 'icon',
               icon: 'mdi-robot-off',
-              color: 'red',
+              color: 'error',
               tooltip: 'Robot disconnected',
               onClick: () => {},
           },

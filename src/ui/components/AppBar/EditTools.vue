@@ -76,14 +76,14 @@ const buttons = [
     {
         type: 'icon',
         icon: 'mdi-refresh',
-        color: 'red',
+        color: 'error',
         tooltip: 'Reset layout',
         onClick: layoutStore.resetAll,
     },
     {
         type: 'icon',
         icon: 'mdi-close',
-        color: 'red',
+        color: 'error',
         tooltip: 'Close without saving',
         onClick: discardAndClose,
     },
