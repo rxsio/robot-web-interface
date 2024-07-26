@@ -1,7 +1,7 @@
 <script setup>
 import { useLayoutStore } from '@/stores'
-import windows from '@/windows'
-import InvalidWindow from '@/windows/InvalidWindow.vue'
+import windows from '@/ui/windows'
+import InvalidWindow from '@/ui/windows/InvalidWindow.vue'
 import Vue, { computed, defineProps, ref } from 'vue'
 
 import ConfigDialog from './ConfigDialog.vue'
@@ -41,10 +41,20 @@ const remove = () => {
 const showConfigDialog = ref(false)
 const closeConfig = (newConfig) => {
     showConfigDialog.value = false
+
     if (newConfig) {
         windowData.value = newConfig
     }
 }
+const hasConfig = computed(() => {
+    if (!(windowData.value.type in windows)) {
+        return false
+    }
+
+    return (
+        Object.entries(windows[windowData.value.type].configOptions).length > 0
+    )
+})
 
 const windowDimensions = ref({ height: null, width: null })
 </script>
@@ -52,6 +62,7 @@ const windowDimensions = ref({ height: null, width: null })
     <WindowBorder
         :name="windowData.name"
         :icon="window.icon"
+        :has-config="hasConfig"
         @remove="remove()"
         @openConfig="showConfigDialog = true"
         @setDimensions="(value) => (windowDimensions = value)"

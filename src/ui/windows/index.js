@@ -2,8 +2,6 @@ import { useGstreamerStore } from '@/stores'
 
 import CameraWindow from './CameraWindow.vue'
 import ControlWindow from './ControlWindow.vue'
-import TestWindow from './TestWindow.vue'
-import ThreeDMapWindow from './ThreeDMapWindow.vue'
 
 export default {
     cameraWindow: {
@@ -11,10 +9,8 @@ export default {
         icon: 'mdi-camera-outline',
         component: CameraWindow,
         defaultShape: {
-            x: 0,
-            y: 0,
             w: 2,
-            h: 2,
+            h: 15,
         },
         configOptions: {
             videoSource: {
@@ -27,70 +23,13 @@ export default {
             },
         },
     },
-    ThreeDMapWindow: {
-        typeName: '3D Map Window',
-        icon: 'mdi-cube-outline',
-        component: ThreeDMapWindow,
-        defaultShape: {
-            x: 0,
-            y: 0,
-            w: 2,
-            h: 2,
-        },
-        configOptions: {},
-    },
-    testWindow: {
-        typeName: 'Test Window',
-        icon: 'mdi-camera',
-        component: TestWindow,
-        defaultShape: {
-            x: 0,
-            y: 0,
-            w: 2,
-            h: 2,
-        },
-        configOptions: {
-            videoSource: {
-                name: 'Video Source',
-                type: 'select',
-                possibleValues: () => {
-                    const gstreamerStore = useGstreamerStore()
-                    return Object.keys(gstreamerStore.peers)
-                },
-            },
-            textTest: {
-                name: 'Text test',
-                type: 'text',
-            },
-            numberTest: {
-                name: 'Number test',
-                type: 'number',
-            },
-            rangeTest: {
-                name: 'Range test',
-                type: 'range',
-                range: () => ({ min: -0.2, max: 5, step: 0.1 }),
-            },
-            aaaa: {
-                name: 'AAAAA',
-                type: 'range',
-                range: () => ({ min: -0.2, max: 5, step: 0.1 }),
-            },
-            bbbb: {
-                name: 'BBBBBB',
-                type: 'boolean',
-            },
-        },
-    },
     controlWindow: {
         typeName: 'Control Window',
         component: ControlWindow,
         icon: 'mdi-controller',
         defaultShape: {
-            x: 0,
-            y: 0,
             w: 5,
-            h: 3,
+            h: 20,
         },
         configOptions: {
             movementStrategy: {

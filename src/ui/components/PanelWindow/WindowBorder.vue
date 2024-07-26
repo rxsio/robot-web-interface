@@ -2,7 +2,7 @@
 import { Modes, useViewModeStore } from '@/stores'
 import { defineEmits, defineProps, onBeforeUnmount, onMounted, ref } from 'vue'
 
-const props = defineProps(['name', 'icon'])
+const props = defineProps(['name', 'icon', 'hasConfig'])
 const emit = defineEmits(['setDimensions'])
 const viewModeStore = useViewModeStore()
 
@@ -34,12 +34,12 @@ onBeforeUnmount(() => {
     <v-sheet
         color="white"
         elevation="2"
+        rounded
         class="background"
     >
         <v-system-bar
             height="30"
             color="secondary"
-            dark
             window
             class="window-grab-handle"
         >
@@ -53,10 +53,10 @@ onBeforeUnmount(() => {
 
             <v-icon
                 color="primary"
-                v-if="viewModeStore.mode === Modes.Edit"
+                v-if="viewModeStore.mode === Modes.Edit && props.hasConfig"
                 @click="$emit('openConfig')"
             >
-                mdi-cog
+                mdi-tune
             </v-icon>
             <v-icon
                 color="primary"
@@ -78,9 +78,9 @@ onBeforeUnmount(() => {
 .background {
     flex-grow: 1;
     width: inherit;
+    overflow: hidden;
 }
 .content {
-    overflow: scroll;
     height: calc(100% - 30px);
     width: inherit;
     display: flex;

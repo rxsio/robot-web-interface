@@ -1,6 +1,6 @@
 <script setup>
 import { useViewModeStore } from '@/stores'
-import windowList from '@/windows'
+import windowList from '@/ui/windows'
 
 import WindowListEntry from './WindowListEntry.vue'
 

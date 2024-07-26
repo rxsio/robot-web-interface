@@ -18,6 +18,11 @@ const getDefaultConfiguration = async () => {
 
 export const useLayoutStore = defineStore('layout', () => {
     const layouts = ref({})
+    const columns = ref(12)
+
+    const updateColumns = (c) => {
+        columns.value = c
+    }
 
     const loadConfiguration = () => {
         const localConfiguration = localStorage.getItem('layout')
@@ -39,8 +44,6 @@ export const useLayoutStore = defineStore('layout', () => {
 
     function resetAll() {
         getDefaultConfiguration().then((layout) => {
-            console.log('Yes')
-            console.log(JSON.stringify(layouts.value))
             layouts.value = layout
         })
     }
@@ -50,7 +53,7 @@ export const useLayoutStore = defineStore('layout', () => {
     }
 
     function reload() {
-        layouts.value = loadConfiguration()
+        loadConfiguration()
     }
 
     const panel = computed(() => {
@@ -59,8 +62,6 @@ export const useLayoutStore = defineStore('layout', () => {
     })
 
     const layout = computed(() => {
-        console.log('Layout', JSON.stringify(layouts.value), panel.value)
-
         if (!(panel.value in layouts.value)) {
             layouts.value[panel.value] = createDefaultViewConfiguration()
         }
@@ -75,6 +76,8 @@ export const useLayoutStore = defineStore('layout', () => {
     return {
         panel,
         layouts,
+        updateColumns,
+        columns,
         layout,
         nextWindowId,
         resetAll,
