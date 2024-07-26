@@ -12,7 +12,7 @@ const createDefaultViewConfiguration = () => {
 
 const getDefaultConfiguration = async () => {
     const configurationStore = useConfigurationStore()
-    await configurationStore.load()
+    await configurationStore.loadConfiguration('layout')
     return configurationStore.layout
 }
 
@@ -39,6 +39,8 @@ export const useLayoutStore = defineStore('layout', () => {
 
     function resetAll() {
         getDefaultConfiguration().then((layout) => {
+            console.log('Yes')
+            console.log(JSON.stringify(layouts.value))
             layouts.value = layout
         })
     }

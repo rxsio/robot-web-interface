@@ -1,11 +1,17 @@
 <script setup>
-import { useGstreamerStore, useRosStore, useViewModeStore } from '@/stores'
+import {
+    useGstreamerStore,
+    useJoystickStore,
+    useRosStore,
+    useViewModeStore,
+} from '@/stores'
 import { computed, defineProps } from 'vue'
 
 import IconButtonList from './IconButtonList.vue'
 
 const props = defineProps(['show'])
 
+const joystickStore = useJoystickStore()
 const viewModeStore = useViewModeStore()
 const gstreamerStore = useGstreamerStore()
 const rosStore = useRosStore()
@@ -13,6 +19,21 @@ const { editMode } = viewModeStore
 
 const buttons = computed(() => [
     { type: 'inputList' },
+    joystickStore.connected
+        ? {
+              type: 'icon',
+              icon: 'mdi-controller',
+              color: 'primary',
+              tooltip: ' Controller connected',
+              onClick: () => {},
+          }
+        : {
+              type: 'icon',
+              icon: 'mdi-controller-off',
+              color: 'error',
+              tooltip: 'No controller detected!',
+              onClick: () => {},
+          },
     gstreamerStore.connected
         ? {
               type: 'icon',
@@ -63,7 +84,7 @@ const buttons = computed(() => [
 </script>
 <template>
     <IconButtonList
-        :show="props.show"
         :buttons="buttons"
+        :show="props.show"
     />
 </template>

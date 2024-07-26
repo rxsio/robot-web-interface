@@ -1,14 +1,13 @@
 <script setup>
 import { defineProps, ref, watch } from 'vue'
 
-import InputListPopupButton from './InputListPopupButton.vue'
-
 const props = defineProps(['show', 'buttons'])
 
 const canClick = ref(true)
 
 watch(props, () => {
     canClick.value = false
+
     setTimeout(() => {
         canClick.value = true
     }, 300)
@@ -78,10 +77,6 @@ watch(props, () => {
                 </template>
                 <span>{{ button.tooltip }}</span>
             </v-tooltip>
-            <InputListPopupButton
-                v-if="button.type === 'inputList'"
-                :show="props.show"
-            />
         </div>
     </div>
 </template>
@@ -92,7 +87,9 @@ watch(props, () => {
     flex-shrink: 1;
 }
 .divider {
-    margin: 0px 4px;
+    min-height: calc(100% - 8px);
+    max-height: calc(100% - 8px);
+    margin: 4px;
     border-color: rgba(255, 255, 255, 0.12);
 }
 </style>

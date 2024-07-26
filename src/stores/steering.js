@@ -65,7 +65,9 @@ export const useSteeringStore = defineStore('steering', () => {
     })
 
     function takeOverControl() {
-        if (!rosStore.ros) return
+        if (!rosStore.ros) {
+            return
+        }
 
         if (currentInput.value === 'joystick') {
             joystickSteeringStore.takeOverControl()

@@ -47,7 +47,7 @@ onMounted(() => {
             rosStore.connect()
             joystickStore.start()
             steeringStore.start()
-            configurationStore.start()
+            configurationStore.load()
         }
     })
 })

@@ -77,6 +77,16 @@ const enabled = ref(false)
                     ></v-slider>
                 </div>
             </v-expand-transition>
+
+            <v-btn
+                color="error"
+                class="text--secondary"
+                rounded
+                v-if="enabled"
+                @click="enabled = false"
+            >
+                Disable autonomy
+            </v-btn>
         </v-card>
     </v-menu>
 </template>

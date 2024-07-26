@@ -5,7 +5,9 @@ const props = defineProps(['value', 'values', 'icons', 'tooltips'])
 const emit = defineEmits(['input'])
 
 const setCurrentValue = (index) => {
-    if (props.values[index]) emit('input', props.values[index])
+    if (props.values[index]) {
+        emit('input', props.values[index])
+    }
 }
 </script>
 <template>

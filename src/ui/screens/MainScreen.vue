@@ -1,8 +1,8 @@
 <script setup>
-import AppBar from '@/components/AppBar'
 import EditDrawer from '@/components/EditDrawer'
 import PanelWindow from '@/components/PanelWindow'
 import { useLayoutStore, useViewModeStore } from '@/stores'
+import AppBar from '@/ui/components/AppBar'
 import BatteryBar from '@/ui/layout/BatteryBar.vue'
 import NavigationDrawer from '@/ui/layout/NavigationDrawer.vue'
 import { computed } from 'vue'

@@ -66,7 +66,8 @@ const currentIcon = computed(
             />
             <v-expand-transition>
                 <v-btn
-                    color="red"
+                    color="error"
+                    class="text--secondary"
                     rounded
                     v-show="steeringStore.enabled"
                     @click="steeringStore.giveUpControl()"

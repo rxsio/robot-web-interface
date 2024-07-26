@@ -7,8 +7,8 @@ import { computed } from 'vue'
 
 import EditTools from './EditTools.vue'
 import NormalTools from './NormalTools.vue'
-import AutonomousSteering from './Streering/AutonomousSteering.vue'
-import ManualSteering from './Streering/ManualSteering.vue'
+import AutonomousSteering from './Steering/AutonomousSteering.vue'
+import ManualSteering from './Steering/ManualSteering.vue'
 
 const navigationDrawerStore = useNavigationDrawerStore()
 const viewModeStore = useViewModeStore()

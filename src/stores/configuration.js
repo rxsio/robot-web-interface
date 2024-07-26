@@ -16,6 +16,17 @@ export const useConfigurationStore = defineStore('configuration', () => {
     const views = ref([])
     const layout = ref({})
 
+    const configurations = {
+        views: {
+            cell: views,
+            defaultConfiguration: viewsConfiguration,
+        },
+        layout: {
+            cell: layout,
+            defaultConfiguration: layoutConfiguration,
+        },
+    }
+
     const fetchConfiguration = async (url) => {
         const response = await fetch(url)
 
@@ -26,7 +37,10 @@ export const useConfigurationStore = defineStore('configuration', () => {
         return await response.json()
     }
 
-    const loadConfiguration = async (cell, name, defaultValue) => {
+    const loadConfiguration = async (name) => {
+        const cell = configurations[name].cell
+        const defaultConfiguration = configurations[name].defaultConfiguration
+
         if (global[name].dynamic) {
             try {
                 cell.value = ref(await fetchConfiguration(global[name].url))
@@ -36,10 +50,10 @@ export const useConfigurationStore = defineStore('configuration', () => {
                     name,
                     '. Using local'
                 )
-                cell.value = defaultValue
+                cell.value = defaultConfiguration
             }
         } else {
-            cell.value = defaultValue
+            cell.value = defaultConfiguration
         }
     }
 
@@ -49,14 +63,15 @@ export const useConfigurationStore = defineStore('configuration', () => {
         }
 
         state.value = State.Loading
-        await loadConfiguration(views, 'views', viewsConfiguration)
-        await loadConfiguration(layout, 'layout', layoutConfiguration)
+        await loadConfiguration('views')
+        await loadConfiguration('layout')
         state.value = State.Loaded
     }
 
     return {
         state,
         load,
+        loadConfiguration,
         views,
         layout,
     }
