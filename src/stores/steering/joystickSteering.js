@@ -3,11 +3,11 @@ import {
     onRosConnected,
     onRosDisconnected,
 } from '@/core/roslibExtensions'
+import { useJoystickStore, useRosStore, useSteeringStore } from '@/stores/'
 import ROSLIB from 'roslib'
 import { computed, ref, watch } from 'vue'
 import { defineStore } from 'pinia'
 
-import { useJoystickStore, useRosStore, useSteeringStore } from './'
 import {
     useJoy5dofManipulator,
     useJoyDiffDrive,

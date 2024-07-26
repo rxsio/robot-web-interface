@@ -1,6 +1,6 @@
 <script setup>
 import { useSteeringStore } from '@/stores'
-import { useJoy5dofManipulator, useJoyDiffDrive } from '@/stores/nodes'
+import { useJoy5dofManipulator, useJoyDiffDrive } from '@/stores/steering/nodes'
 import { defineProps } from 'vue'
 
 import SteeringButtonGroup from './SteeringButtonGroup.vue'

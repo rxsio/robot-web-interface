@@ -1,9 +1,7 @@
+import { useRosStore, useSteeringStore } from '@/stores'
 import ROSLIB from 'roslib'
 import { computed, ref } from 'vue'
 import { defineStore } from 'pinia'
-
-import { useRosStore } from './ros'
-import { useSteeringStore } from './steering'
 
 export const useKeyboardSteeringStore = defineStore('keyboardSteering', () => {
     const rosStore = useRosStore()

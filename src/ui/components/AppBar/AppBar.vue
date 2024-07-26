@@ -1,5 +1,5 @@
 <script setup>
-import { useNavigationDrawerStore, useViewModeStore } from '@/stores'
+import { Modes, useNavigationDrawerStore, useViewModeStore } from '@/stores'
 import FIROExpandedLogo from '@/ui/components/logo/FIROExpandedLogo.vue'
 import FIROLogo from '@/ui/components/logo/FIROLogo.vue'
 import FIROSmallLogo from '@/ui/components/logo/FIROSmallLogo.vue'
@@ -54,15 +54,15 @@ const menuIcon = computed(() =>
             />
         </v-toolbar-title>
         <v-spacer />
-        <AutonomousSteering :show="viewModeStore.mode === 'normal'" />
-        <ManualSteering :show="viewModeStore.mode === 'normal'" />
+        <AutonomousSteering :show="viewModeStore.mode === Modes.Normal" />
+        <ManualSteering :show="viewModeStore.mode === Modes.Edit" />
         <NormalTools
             key="normalTools"
             :show="viewModeStore.mode === 'normal'"
         />
         <EditTools
             key="editTools"
-            :show="viewModeStore.mode === 'edit'"
+            :show="viewModeStore.mode === Modes.Edit"
         />
     </v-app-bar>
 </template>

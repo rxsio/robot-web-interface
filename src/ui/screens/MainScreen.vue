@@ -1,7 +1,7 @@
 <script setup>
 import EditDrawer from '@/components/EditDrawer'
 import PanelWindow from '@/components/PanelWindow'
-import { useLayoutStore, useViewModeStore } from '@/stores'
+import { Modes, useLayoutStore, useViewModeStore } from '@/stores'
 import AppBar from '@/ui/components/AppBar'
 import BatteryBar from '@/ui/layout/BatteryBar.vue'
 import NavigationDrawer from '@/ui/layout/NavigationDrawer.vue'
@@ -11,7 +11,7 @@ import { GridItem, GridLayout } from 'vue-grid-layout'
 const viewModeStore = useViewModeStore()
 const layoutStore = useLayoutStore()
 
-const isEditMode = computed(() => viewModeStore.mode === 'edit')
+const isEditMode = computed(() => viewModeStore.mode === Modes.Edit)
 </script>
 <template>
     <div style="width: 100%; flex-grow: 1; display: flex">

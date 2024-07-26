@@ -1,5 +1,5 @@
 <script setup>
-import { useViewModeStore } from '@/stores'
+import { Modes, useViewModeStore } from '@/stores'
 import { defineEmits, defineProps, onBeforeUnmount, onMounted, ref } from 'vue'
 
 const props = defineProps(['name', 'icon'])
@@ -53,14 +53,14 @@ onBeforeUnmount(() => {
 
             <v-icon
                 color="primary"
-                v-if="viewModeStore.mode === 'edit'"
+                v-if="viewModeStore.mode === Modes.Edit"
                 @click="$emit('openConfig')"
             >
                 mdi-cog
             </v-icon>
             <v-icon
                 color="primary"
-                v-if="viewModeStore.mode === 'edit'"
+                v-if="viewModeStore.mode === Modes.Edit"
                 @click="$emit('remove')"
             >
                 mdi-close
