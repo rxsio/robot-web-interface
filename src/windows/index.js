@@ -8,7 +8,14 @@ import ThreeDMapWindow from './ThreeDMapWindow.vue'
 export default {
     cameraWindow: {
         typeName: 'Camera Window',
+        icon: 'mdi-camera-outline',
         component: CameraWindow,
+        defaultShape: {
+            x: 0,
+            y: 0,
+            w: 2,
+            h: 2,
+        },
         configOptions: {
             videoSource: {
                 name: 'Video Source',
@@ -19,17 +26,29 @@ export default {
                 },
             },
         },
-        icon: 'mdi-camera',
     },
     ThreeDMapWindow: {
         typeName: '3D Map Window',
-        component: ThreeDMapWindow,
-        configOptions: {},
         icon: 'mdi-cube-outline',
+        component: ThreeDMapWindow,
+        defaultShape: {
+            x: 0,
+            y: 0,
+            w: 2,
+            h: 2,
+        },
+        configOptions: {},
     },
     testWindow: {
         typeName: 'Test Window',
+        icon: 'mdi-camera',
         component: TestWindow,
+        defaultShape: {
+            x: 0,
+            y: 0,
+            w: 2,
+            h: 2,
+        },
         configOptions: {
             videoSource: {
                 name: 'Video Source',
@@ -62,11 +81,17 @@ export default {
                 type: 'boolean',
             },
         },
-        icon: 'mdi-camera',
     },
     controlWindow: {
         typeName: 'Control Window',
         component: ControlWindow,
+        icon: 'mdi-controller',
+        defaultShape: {
+            x: 0,
+            y: 0,
+            w: 5,
+            h: 3,
+        },
         configOptions: {
             movementStrategy: {
                 name: 'Movement Strategy',
@@ -114,6 +139,5 @@ export default {
                 type: 'number',
             },
         },
-        icon: 'mdi-controller',
     },
 }

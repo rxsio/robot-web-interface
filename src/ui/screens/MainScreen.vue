@@ -1,10 +1,10 @@
 <script setup>
-import EditDrawer from '@/components/EditDrawer'
 import PanelWindow from '@/components/PanelWindow'
 import { Modes, useLayoutStore, useViewModeStore } from '@/stores'
 import AppBar from '@/ui/components/AppBar'
-import BatteryBar from '@/ui/layout/BatteryBar.vue'
-import NavigationDrawer from '@/ui/layout/NavigationDrawer.vue'
+import BatteryBar from '@/ui/components/BatteryBar.vue'
+import NavigationDrawer from '@/ui/components/NavigationDrawer.vue'
+import EditDrawer from 'src/ui/components/EditDrawer'
 import { computed } from 'vue'
 import { GridItem, GridLayout } from 'vue-grid-layout'
 

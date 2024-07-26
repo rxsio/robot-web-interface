@@ -1,23 +1,22 @@
 <script setup>
-import { useLayoutStore, useViewModeStore } from '@/stores'
+import { useLayoutStore } from '@/stores'
 import { defineProps } from 'vue'
 
-const props = defineProps(['type', 'name'])
+const props = defineProps(['type', 'name', 'icon', 'shape'])
 
 const layoutStore = useLayoutStore()
-const viewModeStore = useViewModeStore()
+
 const addItem = () => {
     const windowId = layoutStore.nextWindowId()
+
     layoutStore.layout.shape = [
         ...layoutStore.layout.shape,
         {
-            x: 0,
-            y: 0,
-            w: 2,
-            h: 2,
+            ...props.shape,
             i: windowId,
         },
     ]
+
     layoutStore.layout.windows = {
         ...layoutStore.layout.windows,
         [windowId]: {
@@ -26,12 +25,14 @@ const addItem = () => {
             extraConfig: {},
         },
     }
-
-    viewModeStore.toggleEditDrawer()
 }
 </script>
 <template>
     <v-list-item @click="addItem()">
+        <v-list-item-icon>
+            <v-icon>{{ props.icon }}</v-icon>
+        </v-list-item-icon>
+
         <v-list-item-content>
             <v-list-item-title>{{ props.name }}</v-list-item-title>
         </v-list-item-content>

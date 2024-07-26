@@ -5,34 +5,32 @@ import windowList from '@/windows'
 import WindowListEntry from './WindowListEntry.vue'
 
 const viewModeStore = useViewModeStore()
-const { toggleEditDrawer } = viewModeStore
 </script>
 <template>
     <v-navigation-drawer
-        temporary
         v-model="viewModeStore.editDrawer"
+        temporary
         right
         fixed
         hide-overlay
         touchless
+        color="primaryEdit"
     >
-        <v-list dense>
+        <v-list
+            dense
+            nav
+        >
             <v-list-item-group>
-                <v-list-item @click="toggleEditDrawer()">
-                    <v-list-item-icon>
-                        <v-icon>mdi-close</v-icon>
-                    </v-list-item-icon>
-
-                    <v-list-item-content>
-                        <v-list-item-title>Close</v-list-item-title>
-                    </v-list-item-content>
-                </v-list-item>
-                <v-divider />
                 <WindowListEntry
-                    v-for="[type, { typeName }] in Object.entries(windowList)"
+                    v-for="[
+                        type,
+                        { typeName, icon, defaultShape },
+                    ] in Object.entries(windowList)"
                     :key="type"
                     :name="typeName"
                     :type="type"
+                    :icon="icon"
+                    :shape="defaultShape"
                 />
             </v-list-item-group>
         </v-list>
