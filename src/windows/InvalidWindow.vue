@@ -9,7 +9,7 @@ const props = defineProps(['type', 'extraConfig'])
             x-large
             color="red"
         >
-            mdi-alert-circle
+            mdi-alert-circle-outline
         </v-icon>
         <h3 class="red--text">Invalid window type!</h3>
         <code>{{ props.type }}</code>
