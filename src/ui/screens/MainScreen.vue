@@ -28,7 +28,7 @@ const breakpointChanged = (b, _) => {
         <EditDrawer />
         <v-main>
             <div
-                class="grey lighten-4 content-wrapper"
+                class="background content-wrapper"
                 :style="{ 'user-select': isEditMode ? 'none' : 'text' }"
             >
                 <GridLayout
