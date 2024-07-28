@@ -8,17 +8,17 @@ const layoutStore = useLayoutStore()
 
 const addItem = () => {
     const windowId = layoutStore.nextWindowId()
-
-    const x = (layoutStore.layout.shape.length * 2) % layoutStore.columns
-    const y =
-        Math.floor(layoutStore.layout.shape.length / layoutStore.columns) * 2
+    const size = layoutStore.calculateNextWindowPosition(
+        props.shape.w,
+        props.shape.h
+    )
 
     layoutStore.layout.shape = [
         ...layoutStore.layout.shape,
         {
             ...props.shape,
-            x: x,
-            y: y,
+            x: size.x,
+            y: size.y,
             i: windowId,
         },
     ]

@@ -73,6 +73,46 @@ export const useLayoutStore = defineStore('layout', () => {
         return `${panel.value};${layout.value.nextId++}`
     }
 
+    const calculateNextWindowPosition = (w, h) => {
+        let y = 0
+        let x = 0
+
+        yLoop: for (y = 0; y < 1000; y++) {
+            xLoop: for (x = 0; x < columns.value - 1; x++) {
+                // It should fit horizontally
+                if (x + w >= columns.value) {
+                    // Shift vertically, cause there is not enough space in this line
+                    continue yLoop
+                }
+
+                // It should not collide with any other window
+                for (let window of layout.value.shape) {
+                    const collision =
+                        x < window.x + window.w &&
+                        x + w > window.x &&
+                        y < window.y + window.h &&
+                        y + h > window.y
+
+                    if (collision) {
+                        // Next allowed x should be not lower than blocking window end
+                        x = Math.max(x, window.x + window.w - 1)
+
+                        // Maybe if fit after x shift
+                        continue xLoop
+                    }
+                }
+
+                // Found matching space
+                break yLoop
+            }
+        }
+
+        return {
+            x: x,
+            y: y,
+        }
+    }
+
     return {
         panel,
         layouts,
@@ -80,6 +120,7 @@ export const useLayoutStore = defineStore('layout', () => {
         columns,
         layout,
         nextWindowId,
+        calculateNextWindowPosition,
         resetAll,
         save,
         reload,
