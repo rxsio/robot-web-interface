@@ -5,7 +5,7 @@ set -e
 
 # Variables
 TechnicalDocumentation="https://github.com/rxsio/firo-docs/archive/refs/heads/gh-pages.zip"
-InterfaceDocumentation="https://github.com/rxsio/interface-docs/archive/refs/heads/gh-pages.zip"
+InterfaceDocumentation="https://github.com/rxsio/firo-user-manual/archive/refs/heads/gh-pages.zip"
 
 # Download documentation
 echo -n "Downloading documentation..."
@@ -24,7 +24,7 @@ unzip "interfaceDocumentation.zip" -d mounts/docs
 # Rename
 echo -n "Renaming directories"
 mv mounts/docs/firo-docs-gh-pages mounts/docs/technical
-mv mounts/docs/interface-docs-gh-pages mounts/docs/interface
+mv mounts/docs/firo-user-manual-gh-pages mounts/docs/interface
 
 # Remove archives
 rm "technicalDocumentation.zip"

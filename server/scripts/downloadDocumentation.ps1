@@ -3,7 +3,7 @@ $ErrorActionPreference = "Stop"
 
 # Variables
 $technicalDocumentation = "https://github.com/rxsio/firo-docs/archive/refs/heads/gh-pages.zip";
-$interfaceDocumentation = "https://github.com/rxsio/interface-docs/archive/refs/heads/gh-pages.zip";
+$interfaceDocumentation = "https://github.com/rxsio/firo-user-manual/archive/refs/heads/gh-pages.zip";
 
 $outTechnicalDocumentation = (Join-Path -Path $PSScriptRoot -ChildPath "../technicalDocumentation.zip");
 $outInterfaceDocumentation = (Join-Path -Path $PSScriptRoot -ChildPath "../interfaceDocumentation.zip")
@@ -26,7 +26,7 @@ Expand-Archive "interfaceDocumentation.zip" -DestinationPath mounts/docs
 # Rename
 Write-Host "Renaming directories"
 Move-Item mounts/docs/firo-docs-gh-pages mounts/docs/technical
-Move-Item mounts/docs/interface-docs-gh-pages mounts/docs/interface
+Move-Item mounts/docs/firo-user-manual-gh-pages mounts/docs/interface
 
 # Remove archives
 Remove-Item $outTechnicalDocumentation
