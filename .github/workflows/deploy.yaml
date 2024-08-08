@@ -11,7 +11,7 @@ jobs:
     runs-on: ubuntu-latest
     env:
       PLATFORM: linux/amd64, linux/arm64
-      MAIN_IMAGE: ghcr.io/${{ github.repository_owner }}/robot-web-interface:stable
+      MAIN_IMAGE: ghcr.io/${{ github.repository_owner }}/robot-web-interface:${{ github.ref == 'refs/heads/main' && 'stable' || 'nightly' }}
 
     steps:
       # github.repository_owner can contain uppercase chars, 
@@ -53,8 +53,7 @@ jobs:
           context: .
           file: Dockerfile
           push: true
-          tags: |
-            rxsio/robot-web-interface:${{ github.ref == 'refs/heads/main' && 'stable' || 'nightly' }}
+          tags: ${{ env.MAIN_IMAGE }}
           platforms: ${{ env.PLATFORM }}
           cache-from: ${{ env.MAIN_IMAGE }}
           build-args: BUILDKIT_INLINE_CACHE=1
