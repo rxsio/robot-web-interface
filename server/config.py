@@ -19,7 +19,7 @@ class Mount(BaseModel):
     name: str
     type: EMountType
     path: str
-    directory: DirectoryPath
+    directory: str
 
 
 class Config(BaseModel):

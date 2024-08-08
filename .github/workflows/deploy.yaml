@@ -53,7 +53,8 @@ jobs:
           context: .
           file: Dockerfile
           push: true
-          tags: ${{ env.MAIN_IMAGE }}
+          tags: |
+            rxsio/robot-web-interface:${{ github.ref == 'refs/heads/main' && 'stable' || 'nightly' }}
           platforms: ${{ env.PLATFORM }}
           cache-from: ${{ env.MAIN_IMAGE }}
           build-args: BUILDKIT_INLINE_CACHE=1

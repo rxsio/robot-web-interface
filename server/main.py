@@ -1,5 +1,6 @@
 import os
 import os.path
+import warnings
 from subprocess import Popen
 
 import uvicorn
@@ -56,9 +57,14 @@ for mount in config.mounts:
         EMountType.PAGE: PageStaticFiles
     }.get(mount.type, SPAStaticFiles)
 
+    directory = os.path.join(os.getcwd(), mount.directory)
+    if not os.path.exists(directory):
+        warnings.warn(f"Cannot find directory {mount.directory} for mount {mount.path}")
+        continue
+
     app.mount(
         mount.path,
-        static_files(directory=os.path.join(os.getcwd(), mount.directory)),
+        static_files(directory=directory),
         name=mount.name
     )
 

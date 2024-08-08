@@ -1,4 +1,5 @@
 #!/bin/bash
+
 SRC_ROOT="$(dirname "${BASH_SOURCE}")"
 
 # Stop script after first error
