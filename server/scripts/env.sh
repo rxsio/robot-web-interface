@@ -1,2 +1,5 @@
+#!/bin/bash
+SRC_ROOT="$(dirname "${BASH_SOURCE}")"
+
 # Activate
-source ./venv/bin/activate
+source "$SRC_ROOT/../venv/bin/activate"

@@ -1,4 +1,5 @@
 #!/bin/bash
+SRC_ROOT="$(dirname "${BASH_SOURCE}")"
 
 # Stop script after first error
 set -e
@@ -11,11 +12,12 @@ then
 fi
 
 # Activate
-source ./venv/bin/activate
+source "$SRC_ROOT/../env.sh"
+SRC_ROOT="$(dirname "${BASH_SOURCE}")"
 
 # Install requirements
 echo -n "INFO | Installing requirements...  ";
-python3.8 -m pip install -r requirements.txt
+python3 -m pip install -r "$SRC_ROOT/../../requirements.txt"
 echo "done";
 
 # Deactivate

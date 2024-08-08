@@ -71,7 +71,7 @@ app.add_middleware(
 )
 
 if __name__ == "__main__":
-    Popen(["venv/Scripts/python", "-m", "http_bridge"])
+    Popen(["venv/bin/python", "-m", "http_bridge"])
     uvicorn.run(
         "main:app",
         port=443,

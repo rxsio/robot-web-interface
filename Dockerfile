@@ -1,17 +1,37 @@
-FROM node:18
+FROM ubuntu:23.04
 
+# region Install dependencies
 
+    # Update repository
+RUN apt-get update
+
+    # Install dependencies
+RUN apt-get install -y python3 python3-venv
+
+# endregion
+
+# region Copy solution
+
+    # Copy
 WORKDIR /robot-web-interface
-
 COPY server ./server/
-COPY dist ./dist/
+COPY dist ./dist
 
+# endregion
+
+# region Copy scripts
+
+    # Copy
 WORKDIR /robot-web-interface/server
-RUN npm ci
+RUN chmod +x ./scripts/*.sh
 
-EXPOSE 80
+# endregion
 
+# region Setup server environment
 
+    # Setup server
+RUN ./scripts/setupServer.sh
 
-EXPOSE 443
-CMD ["node", "router.js"]
+# endregion
+
+CMD ["./scripts/run.sh"]

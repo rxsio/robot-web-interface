@@ -1,4 +1,5 @@
 #!/bin/bash
+SRC_ROOT="$(dirname "${BASH_SOURCE}")"
 
 # Stop script after first error
 set -e
@@ -8,7 +9,7 @@ echo -n "INFO | Creating Virtual Environment...  ";
 
 if [ ! -d "venv" ];
 then
-  python3.8 -m venv venv
+  python3 -m venv "$SRC_ROOT/../../venv"
   echo "done";
 else
   echo "already exists";
