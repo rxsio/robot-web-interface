@@ -140,21 +140,25 @@ const statusIcon = computed(() => {
         }"
     >
         <v-icon
-            color="primary"
-            class="status-icon"
             v-if="statusIcon !== 'none'"
+            class="status-icon"
+            color="primary"
         >
             {{ statusIcon }}
         </v-icon>
+        <div
+            v-if="props.extraConfig.crosshair && statusIcon === 'none'"
+            class="crosshair"
+        ></div>
         <video
-            preload="none"
             ref="viewer"
-            @playing="streamStarted"
             :style="{
                 width: dimensions.width + 'px',
                 height: dimensions.height + 'px',
                 'object-fit': 'cover',
             }"
+            preload="none"
+            @playing="streamStarted"
         />
     </div>
 </template>
@@ -169,6 +173,29 @@ const statusIcon = computed(() => {
     top: 10px;
     left: 10px;
 }
+.crosshair {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 30px;
+    height: 5px;
+    border-radius: 4px;
+    background: var(--v-accent-base);
+}
+.crosshair::after {
+    position: absolute;
+    display: block;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    content: '';
+    width: 5px;
+    height: 30px;
+    border-radius: 4px;
+    background: var(--v-accent-base);
+}
+
 .status-icon {
     position: absolute;
     top: 50%;

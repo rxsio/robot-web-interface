@@ -21,6 +21,10 @@ export default {
                     return Object.keys(gstreamerStore.producers)
                 },
             },
+            crosshair: {
+                name: 'Crosshair',
+                type: 'boolean',
+            },
         },
     },
     controlWindow: {
