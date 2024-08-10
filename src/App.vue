@@ -1,7 +1,7 @@
 <script setup>
 import {
     useConfigurationStore,
-    useGstreamerStore,
+    useGStreamerStore,
     useJoystickStore,
     useRosStore,
     useSteeringStore,
@@ -12,7 +12,7 @@ import { onMounted, onUnmounted, ref } from 'vue'
 import { RouterView } from 'vue-router'
 
 const rosStore = useRosStore()
-const gstreamerStore = useGstreamerStore()
+const gstreamerStore = useGStreamerStore()
 const joystickStore = useJoystickStore()
 const steeringStore = useSteeringStore()
 const configurationStore = useConfigurationStore()

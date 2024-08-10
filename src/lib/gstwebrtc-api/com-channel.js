@@ -9,7 +9,8 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
 
-import ConsumerSession from './consumer-session'
+import ConsumerSession from './consumer-session.js'
+import ProducerSession from './producer-session.js'
 
 const SignallingServerMessageType = Object.freeze({
     welcome: 'welcome',
@@ -61,15 +62,8 @@ export default class ComChannel extends EventTarget {
         this._ws = new WebSocket(url)
         this._ready = false
         this._channelId = ''
+        this._producerSession = null
         this._consumerSessions = {}
-
-        this._connectionTimeout = window.setTimeout(() => {
-            this.close()
-        }, 2000)
-
-        this._ws.onopen = () => {
-            window.clearTimeout(this._connectionTimeout)
-        }
 
         this._ws.onerror = (event) => {
             this.dispatchEvent(
@@ -93,6 +87,11 @@ export default class ComChannel extends EventTarget {
             this._ws = null
 
             this.closeAllConsumerSessions()
+
+            if (this._producerSession) {
+                this._producerSession.close()
+                this._producerSession = null
+            }
 
             this.dispatchEvent(new Event('closed'))
         }
@@ -133,6 +132,13 @@ export default class ComChannel extends EventTarget {
                                     this._ready = true
                                     this.dispatchEvent(new Event('ready'))
                                     this.send({ type: 'list' })
+                                }
+
+                                if (
+                                    this._producerSession &&
+                                    msg.roles.includes('producer')
+                                ) {
+                                    this._producerSession.onProducerRegistered()
                                 }
                             } else {
                                 const normalizedProducer = normalizeProducer(
@@ -209,11 +215,18 @@ export default class ComChannel extends EventTarget {
                                 )
                                 if (session) {
                                     session.onSessionPeerMessage(msg)
+                                } else if (this._producerSession) {
+                                    this._producerSession.onSessionPeerMessage(
+                                        msg
+                                    )
                                 }
                             }
                             break
 
                         case SignallingServerMessageType.startSession:
+                            if (this._producerSession) {
+                                this._producerSession.onStartSessionMessage(msg)
+                            }
                             break
 
                         case SignallingServerMessageType.endSession:
@@ -223,6 +236,10 @@ export default class ComChannel extends EventTarget {
                                 )
                                 if (session) {
                                     session.close()
+                                } else if (this._producerSession) {
+                                    this._producerSession.onEndSessionMessage(
+                                        msg
+                                    )
                                 }
                             }
                             break
@@ -271,9 +288,42 @@ export default class ComChannel extends EventTarget {
         return this._channelId
     }
 
-    createConsumerSession(producerId) {
+    get producerSession() {
+        return this._producerSession
+    }
+
+    createProducerSession(stream) {
+        if (!this._ready || !(stream instanceof MediaStream)) {
+            return null
+        }
+
+        if (this._producerSession) {
+            if (this._producerSession.stream === stream) {
+                return this._producerSession
+            } else {
+                return null
+            }
+        }
+
+        const session = new ProducerSession(this, stream)
+        this._producerSession = session
+
+        session.addEventListener('closed', () => {
+            if (this._producerSession === session) {
+                this._producerSession = null
+            }
+        })
+
+        return session
+    }
+
+    createConsumerSession(producerId, offerOptions) {
         if (!this._ready || !producerId || typeof producerId !== 'string') {
             return null
+        }
+
+        if (offerOptions && typeof offerOptions !== 'object') {
+            offerOptions = undefined
         }
 
         if (producerId in this._consumerSessions) {
@@ -286,7 +336,7 @@ export default class ComChannel extends EventTarget {
             }
         }
 
-        const session = new ConsumerSession(producerId, this)
+        const session = new ConsumerSession(producerId, this, offerOptions)
         this._consumerSessions[producerId] = session
 
         session.addEventListener('closed', (event) => {
@@ -347,6 +397,11 @@ export default class ComChannel extends EventTarget {
             this._ws.close()
 
             this.closeAllConsumerSessions()
+
+            if (this._producerSession) {
+                this._producerSession.close()
+                this._producerSession = null
+            }
         }
     }
 }

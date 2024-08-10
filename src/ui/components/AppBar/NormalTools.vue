@@ -1,6 +1,6 @@
 <script setup>
 import {
-    useGstreamerStore,
+    useGStreamerStore,
     useJoystickStore,
     useRosStore,
     useViewModeStore,
@@ -13,7 +13,7 @@ const props = defineProps(['show'])
 
 const joystickStore = useJoystickStore()
 const viewModeStore = useViewModeStore()
-const gstreamerStore = useGstreamerStore()
+const gstreamerStore = useGStreamerStore()
 const rosStore = useRosStore()
 const { editMode } = viewModeStore
 

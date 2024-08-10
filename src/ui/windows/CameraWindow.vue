@@ -1,12 +1,9 @@
 <script setup>
-import {
-    createConsumerSession,
-    SessionState,
-} from '@/lib/gstwebrtc-api/gstwebrtc-api'
-import { useGstreamerStore } from '@/stores'
+import { SessionState } from '@/lib/gstwebrtc-api/gstwebrtc-api'
+import { useGStreamerStore } from '@/stores'
 import { computed, defineProps, ref, watch } from 'vue'
 
-const gstreamerStore = useGstreamerStore()
+const gstreamerStore = useGStreamerStore()
 const props = defineProps(['windowDimensions', 'extraConfig'])
 
 const producerId = computed(
@@ -15,15 +12,16 @@ const producerId = computed(
 const session = ref(null)
 const state = ref(SessionState.closed)
 
-const videoDim = ref({
-    width: null,
-    height: null,
+const videoDimensions = ref({
+    width: 0,
+    height: 0,
 })
 
 const viewer = ref(null)
 
 const dimensions = computed(() => {
-    const aspectRatio = videoDim.value.width / videoDim.value.height
+    const aspectRatio =
+        videoDimensions.value.width / videoDimensions.value.height
     let { width, height } = props.windowDimensions
 
     // room for the border
@@ -50,47 +48,52 @@ const dimensions = computed(() => {
 
 const connect = () => {
     console.log('[dbg] connect()', producerId.value)
-    if (producerId.value && viewer.value) {
-        const currSession = createConsumerSession(producerId.value)
-        if (currSession) {
-            session.value = currSession
 
-            currSession.addEventListener('error', (event) => {
-                if (session.value === currSession) {
-                    console.error(event.message, event.error)
+    if (!producerId.value || !viewer.value) {
+        return
+    }
+    const currentSession = gstreamerStore.api.createConsumerSession(
+        producerId.value
+    )
+
+    if (currentSession) {
+        session.value = currentSession
+
+        currentSession.addEventListener('error', (event) => {
+            if (session.value === currentSession) {
+                console.error(event.message, event.error)
+            }
+        })
+
+        currentSession.addEventListener('closed', () => {
+            console.log('[dbg] closed()', session.value._sessionId)
+            if (session.value === currentSession) {
+                if (viewer.value) {
+                    viewer.value.pause()
+                    viewer.value.srcObject = null
                 }
-            })
 
-            currSession.addEventListener('closed', () => {
-                console.log('[dbg] closed()', session.value._sessionId)
-                if (session.value === currSession) {
+                session.value = null
+                state.value = SessionState.closed
+            }
+        })
+
+        currentSession.addEventListener('streamsChanged', () => {
+            if (session.value === currentSession) {
+                console.log('[dbg] streaming()', session.value._sessionId)
+                const streams = currentSession.streams
+                if (streams.length > 0) {
                     if (viewer.value) {
-                        viewer.value.pause()
-                        viewer.value.srcObject = null
+                        viewer.value.srcObject = streams[0]
+                        viewer.value.play().catch(() => {})
                     }
-
-                    session.value = null
-                    state.value = SessionState.closed
+                    state.value = SessionState.streaming
                 }
-            })
+            }
+        })
 
-            currSession.addEventListener('streamsChanged', () => {
-                if (session.value === currSession) {
-                    console.log('[dbg] streaming()', session.value._sessionId)
-                    const streams = currSession.streams
-                    if (streams.length > 0) {
-                        if (viewer.value) {
-                            viewer.value.srcObject = streams[0]
-                            viewer.value.play().catch(() => {})
-                        }
-                        state.value = SessionState.streaming
-                    }
-                }
-            })
-
-            state.value = SessionState.connecting
-            currSession.connect()
-        }
+        state.value = SessionState.connecting
+        currentSession.connect()
     }
 }
 
@@ -102,8 +105,8 @@ const disconnect = () => {
 }
 
 const streamStarted = () => {
-    videoDim.value.width = viewer.value && viewer.value.videoWidth
-    videoDim.value.height = viewer.value && viewer.value.videoHeight
+    videoDimensions.value.width = viewer.value && viewer.value.videoWidth
+    videoDimensions.value.height = viewer.value && viewer.value.videoHeight
 }
 
 watch(

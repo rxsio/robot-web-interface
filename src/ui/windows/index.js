@@ -1,4 +1,4 @@
-import { useGstreamerStore } from '@/stores'
+import { useGStreamerStore } from '@/stores'
 
 import CameraWindow from './CameraWindow.vue'
 import ControlWindow from './ControlWindow.vue'
@@ -17,7 +17,7 @@ export default {
                 name: 'Video Source',
                 type: 'select',
                 possibleValues: () => {
-                    const gstreamerStore = useGstreamerStore()
+                    const gstreamerStore = useGStreamerStore()
                     return Object.keys(gstreamerStore.producers)
                 },
             },
