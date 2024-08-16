@@ -1,0 +1,10 @@
+{
+    "views": {
+        "dynamic": false,
+        "url": "/views.json"
+    },
+    "layout": {
+        "dynamic": true,
+        "url": "/layout.json"
+    }
+}

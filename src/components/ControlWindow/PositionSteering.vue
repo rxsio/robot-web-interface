@@ -1,6 +1,6 @@
 <script setup>
+import { Message, Service, ServiceRequest, Topic } from 'roslib'
 import { defineProps, onBeforeMount, ref } from 'vue'
-import { Topic, Message, Service, ServiceRequest } from 'roslib'
 
 const props = defineProps(['ros'])
 

@@ -4,5 +4,37 @@
     "semi": false,
     "singleQuote": true,
     "singleAttributePerLine": true,
-    "htmlWhitespaceSensitivity": "ignore"
+    "htmlWhitespaceSensitivity": "ignore",
+    "endOfLine": "auto",
+    "plugins": [
+        "@ianvs/prettier-plugin-sort-imports"
+    ],
+    "importOrder": [
+        "<THIRD_PARTY_MODULES>",
+        "^vue(.*)$",
+        "^pinia(.*)$",
+        "",
+        "^@core/(.*)$",
+        "",
+        "^@lib/(.*)$",
+        "",
+        "^@configuration/(.*)$",
+        "",
+        "^@stores/(.*)$",
+        "",
+        "^@styles/(.*)$",
+        "",
+        "^@ui/screens/(.*)$",
+        "^@ui/layout/(.*)$",
+        "^@ui/windows/(.*)$",
+        "^@ui/components/(.*)$",
+        "^@ui/(.*)$",
+        "",
+        "^[./]"
+    ],
+    "importOrderParserPlugins": [
+        "typescript",
+        "jsx",
+        "decorators-legacy"
+    ]
 }

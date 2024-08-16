@@ -1,0 +1,11 @@
+services:
+  robot-web-interface:
+    build: .
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+    environment:
+      - "true"
+    volumes:
+      - "../certificates/:/certificates"

@@ -1,29 +1,47 @@
 <!DOCTYPE html>
 <html lang="en">
+
     <head>
+        <!-- Title -->
+        <title><%= VUE_APP_PROJECT_ROVER_NAME %> Control Panel</title>
+    
+        <!-- Meta -->
         <meta charset="utf-8" />
-        <meta
-            http-equiv="X-UA-Compatible"
-            content="IE=edge"
-        />
-        <meta
-            name="viewport"
-            content="width=device-width,initial-scale=1.0"
-        />
-        <link
-            rel="icon"
-            href="<%= BASE_URL %>favicon.ico"
-        />
-        <title>FIRO2 Control Panel</title>
+        <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+        <meta name="viewport" content="width=device-width,initial-scale=1.0" />
+    
+        <!-- Styles -->
+        <link rel="icon" href="<%= BASE_URL %>favicon.ico" />
     </head>
+    
     <body>
         <noscript>
-            <strong>
-                We're sorry but the FIRO2 Control Panel doesn't work properly
-                without JavaScript enabled. Please enable it to continue.
-            </strong>
+            We're sorry but the <%= VUE_APP_PROJECT_ROVER_NAME %> Control Panel
+            doesn't work properly without JavaScript enabled. <br/> <br/>
+            Please enable it to continue.
         </noscript>
+        
         <div id="app"></div>
+        
         <!-- built files will be auto injected -->
+    
+        <style>
+            body {
+                margin: 0;
+            }
+            noscript {
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                width: 100vw;
+                height: 100vh;
+                padding: 0 15%;
+                box-sizing: border-box;
+                text-align: center;
+                font-size: 2em;
+                font-family: sans-serif;
+            }
+        </style>
     </body>
+
 </html>

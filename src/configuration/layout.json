@@ -1,0 +1,39 @@
+{
+    "overview": {
+        "shape": [
+            {
+                "x": 0,
+                "y": 0,
+                "w": 2,
+                "h": 15,
+                "i": "overview;0",
+                "moved": false
+            },
+            {
+                "x": 3,
+                "y": 0,
+                "w": 7,
+                "h": 20,
+                "i": "overview;1",
+                "moved": false
+            }
+        ],
+        "windows": {
+            "overview;0": {
+                "type": "cameraWindow",
+                "name": "Camera Window",
+                "extraConfig": {}
+            },
+            "overview;1": {
+                "type": "controlWindow",
+                "name": "Control Window",
+                "extraConfig": {
+                    "movementStrategy": "Velocity",
+                    "controlledObject": "Rover",
+                    "controlMode": "Touch"
+                }
+            }
+        },
+        "nextId": 2
+    }
+}

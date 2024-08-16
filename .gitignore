@@ -21,3 +21,9 @@ pnpm-debug.log*
 *.njsproj
 *.sln
 *.sw?
+
+# Python Virtual Environment
+venv/
+
+# Documentation
+server/mounts/docs

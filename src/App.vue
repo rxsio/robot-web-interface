@@ -1,19 +1,21 @@
 <script setup>
-import { onMounted, onUnmounted, ref } from 'vue'
-import { RouterView } from 'vue-router'
 import {
+    useConfigurationStore,
+    useGStreamerStore,
     useJoystickStore,
-    useGstreamerStore,
     useRosStore,
     useSteeringStore,
 } from '@/stores'
-import LoadingScreen from '@/components/LoadingScreen.vue'
-import EncryptionErrorScreen from '@/components/EncryptionErrorScreen.vue'
+import EncryptionErrorScreen from '@/ui/screens/EncryptionErrorScreen.vue'
+import LoadingScreen from '@/ui/screens/LoadingScreen.vue'
+import { onMounted, onUnmounted, ref } from 'vue'
+import { RouterView } from 'vue-router'
 
 const rosStore = useRosStore()
-const gstreamerStore = useGstreamerStore()
+const gstreamerStore = useGStreamerStore()
 const joystickStore = useJoystickStore()
 const steeringStore = useSteeringStore()
+const configurationStore = useConfigurationStore()
 
 const isReady = ref(null)
 
@@ -42,10 +44,10 @@ onMounted(() => {
     networkTest().then((passed) => {
         if (passed) {
             gstreamerStore.connect()
-            //gstreamerStore
             rosStore.connect()
             joystickStore.start()
             steeringStore.start()
+            configurationStore.load()
         }
     })
 })

@@ -1,5 +1,40 @@
+html {
+    overflow: hidden;
+}
+
 .v-application {
     [class*='text-'] {
         color: #36405a;
+    }
+}
+
+::-webkit-scrollbar {
+    width: 8px;
+}
+
+::-webkit-scrollbar-track {
+    background: var(--v-background-base);
+    border-radius: 8px;
+}
+
+::-webkit-scrollbar-thumb {
+    background: var(--v-primary-base);
+    border-radius: 8px;
+    border: 2px solid #f5f5f5;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    cursor: pointer;
+    background: var(--v-primary-darken1);
+}
+
+::-webkit-scrollbar-corner {
+    background: var(--v-background-base);
+}
+
+@supports not selector(::-webkit-scrollbar) {
+    body {
+        scrollbar-color: var(--v-primary-base)
+        var(--v-background-base);
     }
 }

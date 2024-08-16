@@ -18,6 +18,7 @@ export default new Vuetify({
                 info: colors.blue.base,
                 success: colors.green.base,
                 warning: colors.amber.base,
+                background: colors.grey.lighten4,
 
                 primaryNormal: colors.teal.lighten1,
                 primaryEdit: colors.amber.base,

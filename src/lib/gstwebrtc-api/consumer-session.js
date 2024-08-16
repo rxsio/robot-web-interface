@@ -9,42 +9,47 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
 
-import WebRTCSession from './webrtc-session'
-import SessionState from './session-state'
+import RemoteController from './remote-controller.js'
+import SessionState from './session-state.js'
+import WebRTCSession from './webrtc-session.js'
 
 /**
  * Event name: "streamsChanged".<br>
- * Triggered when the underlying media streams of a {@link gstWebRTCAPI.ConsumerSession} change.
- * @event gstWebRTCAPI#StreamsChangedEvent
+ * Triggered when the underlying media streams of a {@link GstWebRTCAPI.ConsumerSession} change.
+ * @event GstWebRTCAPI#StreamsChangedEvent
  * @type {external:Event}
- * @see gstWebRTCAPI.ConsumerSession#streams
+ * @see GstWebRTCAPI.ConsumerSession#streams
  */
 /**
  * Event name: "remoteControllerChanged".<br>
- * Triggered when the underlying remote controller of a {@link gstWebRTCAPI.ConsumerSession} changes.
- * @event gstWebRTCAPI#RemoteControllerChangedEvent
+ * Triggered when the underlying remote controller of a {@link GstWebRTCAPI.ConsumerSession} changes.
+ * @event GstWebRTCAPI#RemoteControllerChangedEvent
  * @type {external:Event}
- * @see gstWebRTCAPI.ConsumerSession#remoteController
+ * @see GstWebRTCAPI.ConsumerSession#remoteController
  */
 
 /**
- * @class gstWebRTCAPI.ConsumerSession
+ * @class GstWebRTCAPI.ConsumerSession
  * @hideconstructor
  * @classdesc Consumer session managing a peer-to-peer WebRTC channel between a remote producer and this client
  * instance.
- * <p>Call {@link gstWebRTCAPI#createConsumerSession} to create a ConsumerSession instance.</p>
- * @extends {gstWebRTCAPI.WebRTCSession}
- * @fires {@link gstWebRTCAPI#event:StreamsChangedEvent}
- * @fires {@link gstWebRTCAPI#event:RemoteControllerChangedEvent}
+ * <p>Call {@link GstWebRTCAPI#createConsumerSession} to create a ConsumerSession instance.</p>
+ * @extends {GstWebRTCAPI.WebRTCSession}
+ * @fires {@link GstWebRTCAPI#event:StreamsChangedEvent}
+ * @fires {@link GstWebRTCAPI#event:RemoteControllerChangedEvent}
  */
 export default class ConsumerSession extends WebRTCSession {
-    constructor(peerId, comChannel) {
+    constructor(peerId, comChannel, offerOptions) {
         super(peerId, comChannel)
         this._streams = []
         this._remoteController = null
+        this._pendingCandidates = []
+
+        this._offerOptions = offerOptions
 
         this.addEventListener('closed', () => {
             this._streams = []
+            this._pendingCandidates = []
 
             if (this._remoteController) {
                 this._remoteController.close()
@@ -54,7 +59,7 @@ export default class ConsumerSession extends WebRTCSession {
 
     /**
      * The array of remote media streams consumed locally through this WebRTC channel.
-     * @member {external:MediaStream[]} gstWebRTCAPI.ConsumerSession#streams
+     * @member {external:MediaStream[]} GstWebRTCAPI.ConsumerSession#streams
      * @readonly
      */
     get streams() {
@@ -64,7 +69,7 @@ export default class ConsumerSession extends WebRTCSession {
     /**
      * The remote controller associated with this WebRTC consumer session. Value may be null if consumer session
      * has no remote controller.
-     * @member {gstWebRTCAPI.RemoteController} gstWebRTCAPI.ConsumerSession#remoteController
+     * @member {GstWebRTCAPI.RemoteController} GstWebRTCAPI.ConsumerSession#remoteController
      * @readonly
      */
     get remoteController() {
@@ -76,10 +81,10 @@ export default class ConsumerSession extends WebRTCSession {
      * This method must be called after creating the consumer session in order to start receiving the remote streams.
      * It registers this consumer session to the signaling server and gets ready to receive audio/video streams.
      * <p>Even on success, streaming can fail later if any error occurs during or after connection. In order to know
-     * the effective streaming state, you should be listening to the [error]{@link gstWebRTCAPI#event:ErrorEvent},
-     * [stateChanged]{@link gstWebRTCAPI#event:StateChangedEvent} and/or [closed]{@link gstWebRTCAPI#event:ClosedEvent}
+     * the effective streaming state, you should be listening to the [error]{@link GstWebRTCAPI#event:ErrorEvent},
+     * [stateChanged]{@link GstWebRTCAPI#event:StateChangedEvent} and/or [closed]{@link GstWebRTCAPI#event:ClosedEvent}
      * events.</p>
-     * @method gstWebRTCAPI.ConsumerSession#connect
+     * @method GstWebRTCAPI.ConsumerSession#connect
      * @returns {boolean} true in case of success (may fail later during or after connection) or false in case of
      * immediate error (wrong session state or no connection to the signaling server).
      */
@@ -92,26 +97,73 @@ export default class ConsumerSession extends WebRTCSession {
             return true
         }
 
-        const msg = {
-            type: 'startSession',
-            peerId: this._peerId,
-        }
-        if (!this._comChannel.send(msg)) {
-            this.dispatchEvent(
-                new ErrorEvent('error', {
-                    message: 'cannot connect consumer session',
-                    error: new Error(
-                        'cannot send startSession message to signaling server'
-                    ),
+        if (this._offerOptions) {
+            this.ensurePeerConnection()
+
+            this._rtcPeerConnection
+                .createOffer(this._offerOptions)
+                .then((desc) => {
+                    if (this._rtcPeerConnection && desc) {
+                        return this._rtcPeerConnection.setLocalDescription(desc)
+                    } else {
+                        throw new Error(
+                            'cannot send local offer to WebRTC peer'
+                        )
+                    }
                 })
-            )
+                .then(() => {
+                    if (this._rtcPeerConnection && this._comChannel) {
+                        const msg = {
+                            type: 'startSession',
+                            peerId: this._peerId,
+                            offer: this._rtcPeerConnection.localDescription.toJSON()
+                                .sdp,
+                        }
+                        if (!this._comChannel.send(msg)) {
+                            throw new Error(
+                                'cannot send startSession message to signaling server'
+                            )
+                        }
+                        this._state = SessionState.connecting
+                        this.dispatchEvent(new Event('stateChanged'))
+                    }
+                })
+                .catch((ex) => {
+                    if (this._state !== SessionState.closed) {
+                        this.dispatchEvent(
+                            new ErrorEvent('error', {
+                                message:
+                                    'an unrecoverable error occurred during SDP handshake',
+                                error: ex,
+                            })
+                        )
 
-            this.close()
-            return false
+                        this.close()
+                    }
+                })
+        } else {
+            const msg = {
+                type: 'startSession',
+                peerId: this._peerId,
+            }
+            if (!this._comChannel.send(msg)) {
+                this.dispatchEvent(
+                    new ErrorEvent('error', {
+                        message: 'cannot connect consumer session',
+                        error: new Error(
+                            'cannot send startSession message to signaling server'
+                        ),
+                    })
+                )
+
+                this.close()
+                return false
+            }
+
+            this._state = SessionState.connecting
+            this.dispatchEvent(new Event('stateChanged'))
         }
 
-        this._state = SessionState.connecting
-        this.dispatchEvent(new Event('stateChanged'))
         return true
     }
 
@@ -121,19 +173,26 @@ export default class ConsumerSession extends WebRTCSession {
             this._state === SessionState.connecting &&
             !this._sessionId
         ) {
+            console.log('Session started', this._sessionId)
             this._sessionId = sessionId
+
+            for (const candidate of this._pendingCandidates) {
+                console.log(
+                    'Sending delayed ICE with session id',
+                    this._sessionId
+                )
+                this._comChannel.send({
+                    type: 'peer',
+                    sessionId: this._sessionId,
+                    ice: candidate.toJSON(),
+                })
+            }
+
+            this._pendingCandidates = []
         }
     }
 
-    onSessionPeerMessage(msg) {
-        if (
-            this._state === SessionState.closed ||
-            !this._comChannel ||
-            !this._sessionId
-        ) {
-            return
-        }
-
+    ensurePeerConnection() {
         if (!this._rtcPeerConnection) {
             const connection = new RTCPeerConnection(
                 this._comChannel.webrtcConfig
@@ -165,67 +224,141 @@ export default class ConsumerSession extends WebRTCSession {
                 }
             }
 
+            connection.ondatachannel = (event) => {
+                const rtcDataChannel = event.channel
+                if (rtcDataChannel && rtcDataChannel.label === 'input') {
+                    if (this._remoteController) {
+                        const previousController = this._remoteController
+                        this._remoteController = null
+                        previousController.close()
+                    }
+
+                    const remoteController = new RemoteController(
+                        rtcDataChannel,
+                        this
+                    )
+                    this._remoteController = remoteController
+                    this.dispatchEvent(new Event('remoteControllerChanged'))
+
+                    remoteController.addEventListener('closed', () => {
+                        if (this._remoteController === remoteController) {
+                            this._remoteController = null
+                            this.dispatchEvent(
+                                new Event('remoteControllerChanged')
+                            )
+                        }
+                    })
+                }
+            }
+
             connection.onicecandidate = (event) => {
                 if (
                     this._rtcPeerConnection === connection &&
                     event.candidate &&
                     this._comChannel
                 ) {
-                    this._comChannel.send({
-                        type: 'peer',
-                        sessionId: this._sessionId,
-                        ice: event.candidate.toJSON(),
-                    })
+                    if (this._sessionId) {
+                        console.log(
+                            'Sending ICE with session id',
+                            this._sessionId
+                        )
+                        this._comChannel.send({
+                            type: 'peer',
+                            sessionId: this._sessionId,
+                            ice: event.candidate.toJSON(),
+                        })
+                    } else {
+                        this._pendingCandidates.push(event.candidate)
+                    }
                 }
             }
 
             this.dispatchEvent(new Event('rtcPeerConnectionChanged'))
         }
+    }
+
+    onSessionPeerMessage(msg) {
+        if (
+            this._state === SessionState.closed ||
+            !this._comChannel ||
+            !this._sessionId
+        ) {
+            return
+        }
+
+        this.ensurePeerConnection()
 
         if (msg.sdp) {
-            this._rtcPeerConnection
-                .setRemoteDescription(msg.sdp)
-                .then(() => {
-                    if (this._rtcPeerConnection) {
-                        return this._rtcPeerConnection.createAnswer()
-                    } else {
-                        return null
-                    }
-                })
-                .then((desc) => {
-                    if (this._rtcPeerConnection && desc) {
-                        return this._rtcPeerConnection.setLocalDescription(desc)
-                    } else {
-                        return null
-                    }
-                })
-                .then(() => {
-                    if (this._rtcPeerConnection && this._comChannel) {
-                        const sdp = {
-                            type: 'peer',
-                            sessionId: this._sessionId,
-                            sdp: this._rtcPeerConnection.localDescription.toJSON(),
-                        }
-                        if (!this._comChannel.send(sdp)) {
-                            throw new Error(
-                                'cannot send local SDP configuration to WebRTC peer'
+            if (this._offerOptions) {
+                this._rtcPeerConnection
+                    .setRemoteDescription(msg.sdp)
+                    .then(() => {
+                        console.log('done')
+                    })
+                    .catch((ex) => {
+                        if (this._state !== SessionState.closed) {
+                            this.dispatchEvent(
+                                new ErrorEvent('error', {
+                                    message:
+                                        'an unrecoverable error occurred during SDP handshake',
+                                    error: ex,
+                                })
                             )
-                        }
-                    }
-                })
-                .catch((ex) => {
-                    if (this._state !== SessionState.closed) {
-                        this.dispatchEvent(
-                            new ErrorEvent('error', {
-                                message:
-                                    'an unrecoverable error occurred during SDP handshake',
-                                error: ex,
-                            })
-                        )
 
-                        this.close()
-                    }
-                })
+                            this.close()
+                        }
+                    })
+            } else {
+                this._rtcPeerConnection
+                    .setRemoteDescription(msg.sdp)
+                    .then(() => {
+                        if (this._rtcPeerConnection) {
+                            return this._rtcPeerConnection.createAnswer()
+                        } else {
+                            return null
+                        }
+                    })
+                    .then((desc) => {
+                        if (this._rtcPeerConnection && desc) {
+                            return this._rtcPeerConnection.setLocalDescription(
+                                desc
+                            )
+                        } else {
+                            return null
+                        }
+                    })
+                    .then(() => {
+                        if (this._rtcPeerConnection && this._comChannel) {
+                            console.log(
+                                'Sending SDP with session id',
+                                this._sessionId
+                            )
+                            const sdp = {
+                                type: 'peer',
+                                sessionId: this._sessionId,
+                                sdp: this._rtcPeerConnection.localDescription.toJSON(),
+                            }
+                            if (!this._comChannel.send(sdp)) {
+                                throw new Error(
+                                    'cannot send local SDP configuration to WebRTC peer'
+                                )
+                            }
+                        }
+                    })
+                    .catch((ex) => {
+                        if (this._state !== SessionState.closed) {
+                            this.dispatchEvent(
+                                new ErrorEvent('error', {
+                                    message:
+                                        'an unrecoverable error occurred during SDP handshake',
+                                    error: ex,
+                                })
+                            )
+
+                            this.close()
+                        }
+                    })
+            }
         } else if (msg.ice) {
             const candidate = new RTCIceCandidate(msg.ice)
             this._rtcPeerConnection.addIceCandidate(candidate).catch((ex) => {
