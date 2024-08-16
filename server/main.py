@@ -16,7 +16,7 @@ from config import load_config, EMountType
 from static_files import FTPStaticFiles, SPAStaticFiles, PageStaticFiles
 
 
-config = load_config("config.json")
+config = load_config("/configuration/interface/config.json")
 templates = Jinja2Templates(directory="templates")
 
 ssl = {
