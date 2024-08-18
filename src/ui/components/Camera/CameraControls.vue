@@ -9,7 +9,9 @@ const props = defineProps({
 <template>
     <div :class="['overlay', { contrast: props.contrast }]">
         <div class="rotate rotate-left"></div>
-        <div class="restart"><v-icon>mdi-reload</v-icon></div>
+        <div class="restart">
+            <v-icon>mdi-format-horizontal-align-center</v-icon>
+        </div>
         <div class="rotate rotate-right"></div>
     </div>
 </template>
