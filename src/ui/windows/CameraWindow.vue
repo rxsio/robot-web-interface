@@ -198,7 +198,7 @@ defineExpose({
                 'object-fit': 'cover',
             }"
             preload="none"
-            :muted="userStore.hasInteracted"
+            :muted="!userStore.hasInteracted"
             @playing="streamStarted"
         />
     </div>
