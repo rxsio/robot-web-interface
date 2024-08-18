@@ -1,7 +1,13 @@
-<script setup></script>
+<script setup>
+import { defineProps } from 'vue'
+
+const props = defineProps({
+    contrast: Boolean,
+})
+</script>
 
 <template>
-    <div class="overlay">
+    <div :class="['overlay', { contrast: props.contrast }]">
         <div class="rotate rotate-left"></div>
         <div class="restart"><v-icon>mdi-reload</v-icon></div>
         <div class="rotate rotate-right"></div>
@@ -15,7 +21,10 @@
     width: 100%;
     height: 100%;
     border: 24px solid transparent;
-    --camera-controls-base-color: #888;
+    --camera-controls-base-color: #555;
+}
+.overlay.contrast {
+    --camera-controls-base-color: #aaa;
 }
 
 .rotate {
@@ -27,9 +36,6 @@
     border: 0 solid var(--camera-controls-base-color);
     transform: translateY(-50%) rotate(45deg);
     transition: all 250ms ease;
-}
-.rotate:hover {
-    border-color: black;
 }
 .rotate-left {
     left: 0;
@@ -51,8 +57,5 @@
 }
 .restart .v-icon {
     color: var(--camera-controls-base-color);
-}
-.restart:hover .v-icon {
-    color: black;
 }
 </style>
