@@ -1,10 +1,11 @@
 <script setup>
 import { SessionState } from '@/lib/gstwebrtc-api/gstwebrtc-api'
-import { useGStreamerStore } from '@/stores'
+import { useGStreamerStore, useUserStore } from '@/stores'
 import CameraControls from '@/ui/components/Camera/CameraControls.vue'
 import CameraOverlay from '@/ui/components/Camera/CameraOverlay.vue'
 import { computed, defineExpose, defineProps, ref, watch } from 'vue'
 
+const userStore = useUserStore()
 const gstreamerStore = useGStreamerStore()
 const props = defineProps(['windowDimensions', 'extraConfig'])
 
@@ -88,7 +89,7 @@ const connect = () => {
                     if (viewer.value) {
                         viewer.value.srcObject = streams[0]
                         viewer.value.play().catch((err) => {
-                            console.error(err) // for some reason video is not playing, but stream is connected correctly
+                            console.error(err)
                         })
                     }
                     state.value = SessionState.streaming
@@ -131,15 +132,17 @@ watch(
 )
 
 const statusIcon = computed(() => {
-    if (!gstreamerStore.connected) return 'mdi-power-plug-off'
-    else
-        return (
-            {
-                [SessionState.closed]: 'mdi-video-off',
-                [SessionState.connecting]: 'mdi-loading',
-                [SessionState.streaming]: 'none',
-            }[state.value] || 'mdi-help'
-        )
+    if (!gstreamerStore.connected) {
+        return 'mdi-power-plug-off'
+    }
+
+    return (
+        {
+            [SessionState.closed]: 'mdi-video-off',
+            [SessionState.connecting]: 'mdi-loading',
+            [SessionState.streaming]: 'none',
+        }[state.value] || 'mdi-help'
+    )
 })
 
 defineExpose({
@@ -195,6 +198,7 @@ defineExpose({
                 'object-fit': 'cover',
             }"
             preload="none"
+            :muted="userStore.hasInteracted"
             @playing="streamStarted"
         />
     </div>
