@@ -1,6 +1,7 @@
 <script setup>
 import { SessionState } from '@/lib/gstwebrtc-api/gstwebrtc-api'
 import { useGStreamerStore } from '@/stores'
+import CameraOverlay from '@/ui/components/CameraOverlay.vue'
 import { computed, defineProps, ref, watch } from 'vue'
 
 const gstreamerStore = useGStreamerStore()
@@ -149,10 +150,12 @@ const statusIcon = computed(() => {
         >
             {{ statusIcon }}
         </v-icon>
-        <div
-            v-if="props.extraConfig.crosshair && statusIcon === 'none'"
-            class="crosshair"
-        ></div>
+        <CameraOverlay
+            v-if="props.extraConfig.overlay === true && statusIcon === 'none'"
+            :recording="true"
+            :resolution="'1080p'"
+            :fps="30"
+        />
         <video
             ref="viewer"
             :style="{
@@ -176,29 +179,6 @@ const statusIcon = computed(() => {
     top: 10px;
     left: 10px;
 }
-.crosshair {
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    width: 30px;
-    height: 5px;
-    border-radius: 4px;
-    background: var(--v-accent-base);
-}
-.crosshair::after {
-    position: absolute;
-    display: block;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    content: '';
-    width: 5px;
-    height: 30px;
-    border-radius: 4px;
-    background: var(--v-accent-base);
-}
-
 .status-icon {
     position: absolute;
     top: 50%;

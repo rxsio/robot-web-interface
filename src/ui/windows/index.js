@@ -21,8 +21,8 @@ export default {
                     return Object.keys(gstreamerStore.producers)
                 },
             },
-            crosshair: {
-                name: 'Crosshair',
+            overlay: {
+                name: 'Overlay',
                 type: 'boolean',
             },
         },
