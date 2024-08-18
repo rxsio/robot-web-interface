@@ -23,11 +23,13 @@ const window = computed(
         windows[windowData.value.type] || {
             typeName: 'Invalid Window',
             component: InvalidWindow,
+            barControls: [],
             configOptions: {},
             icon: 'mdi-alert-circle',
         }
 )
 const WindowContentComponent = computed(() => window.value.component)
+const windowRef = ref(null)
 
 const remove = () => {
     const index = layoutStore.layout.shape
@@ -56,6 +58,20 @@ const hasConfig = computed(() => {
     )
 })
 
+const control = (id) => {
+    switch (id) {
+        case 'close':
+            remove()
+            break
+        case 'openConfig':
+            showConfigDialog.value = true
+            break
+        default:
+            windowRef.value.control(id)
+            break
+    }
+}
+
 const windowDimensions = ref({ height: null, width: null })
 </script>
 <template>
@@ -63,11 +79,12 @@ const windowDimensions = ref({ height: null, width: null })
         :name="windowData.name"
         :icon="window.icon"
         :has-config="hasConfig"
-        @remove="remove()"
-        @openConfig="showConfigDialog = true"
+        :controls="window.barControls"
+        @control="(id) => control(id)"
         @setDimensions="(value) => (windowDimensions = value)"
     >
         <WindowContentComponent
+            ref="windowRef"
             :name="windowData.name"
             :type="windowData.type"
             :extraConfig="windowData.extraConfig"

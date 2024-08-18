@@ -1,4 +1,4 @@
-import { useGStreamerStore } from '@/stores'
+import { Modes, useGStreamerStore } from '@/stores'
 
 import CameraWindow from './CameraWindow.vue'
 import ControlWindow from './ControlWindow.vue'
@@ -12,6 +12,14 @@ export default {
             w: 2,
             h: 15,
         },
+        barControls: [
+            {
+                id: 'reload',
+                name: 'Reload',
+                icon: 'mdi-reload',
+                mode: Modes.Normal,
+            },
+        ],
         configOptions: {
             videoSource: {
                 name: 'Video Source',
@@ -43,6 +51,7 @@ export default {
             w: 5,
             h: 20,
         },
+        barControls: [],
         configOptions: {
             movementStrategy: {
                 name: 'Movement Strategy',
