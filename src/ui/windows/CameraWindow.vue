@@ -158,6 +158,7 @@ const statusIcon = computed(() => {
             :recording="true"
             :resolution="'1080p'"
             :fps="30"
+            :contrast="props.extraConfig.contrast"
             :style="{
                 width: dimensions.width + 'px',
                 height: dimensions.height + 'px',
@@ -166,6 +167,7 @@ const statusIcon = computed(() => {
         />
         <CameraControls
             v-if="props.extraConfig.controls && statusIcon === 'none'"
+            :contrast="props.extraConfig.contrast"
             :style="{
                 width: dimensions.width + 'px',
                 height: dimensions.height + 'px',

@@ -21,6 +21,10 @@ export default {
                     return Object.keys(gstreamerStore.producers)
                 },
             },
+            contrast: {
+                name: 'High Contrast',
+                type: 'boolean',
+            },
             overlay: {
                 name: 'Overlay',
                 type: 'boolean',

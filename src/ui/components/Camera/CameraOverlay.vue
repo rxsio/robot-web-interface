@@ -5,11 +5,12 @@ const props = defineProps({
     recording: Boolean,
     resolution: String,
     fps: Number,
+    contrast: Boolean,
 })
 </script>
 
 <template>
-    <div class="overlay">
+    <div :class="['overlay', { contrast: props.contrast }]">
         <div class="corner corner-nw">
             <div
                 class="recording"
@@ -49,10 +50,14 @@ const props = defineProps({
     width: 100%;
     height: 100%;
     border: 24px solid transparent;
+    color: var(--universal-corner-color);
     --universal-corner-color: #333;
     --universal-corner-size: 10%;
     --universal-corner-padding: 8px;
     --universal-corner-thickness: 3px;
+}
+.overlay.contrast {
+    --universal-corner-color: #ccc;
 }
 
 .crosshair {
