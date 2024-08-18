@@ -152,12 +152,14 @@ const statusIcon = computed(() => {
             {{ statusIcon }}
         </v-icon>
         <CameraOverlay
-            v-if="props.extraConfig.overlay === true && statusIcon !== 'none'"
+            v-if="props.extraConfig.overlay === true && statusIcon === 'none'"
             :recording="true"
             :resolution="'1080p'"
             :fps="30"
         />
-        <CameraControls v-if="props.extraConfig.controls" />
+        <CameraControls
+            v-if="props.extraConfig.controls && statusIcon === 'none'"
+        />
         <video
             ref="viewer"
             :style="{
