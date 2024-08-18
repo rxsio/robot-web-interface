@@ -116,6 +116,7 @@ const streamStarted = () => {
 const control = (id) => {
     switch (id) {
         case 'reload':
+            disconnect()
             connect()
             break
     }
