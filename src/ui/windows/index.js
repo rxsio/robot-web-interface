@@ -17,7 +17,7 @@ export default {
                 id: 'reload',
                 name: 'Reload',
                 icon: 'mdi-reload',
-                mode: Modes.Normal,
+                mode: () => Modes.Normal,
             },
         ],
         configOptions: {

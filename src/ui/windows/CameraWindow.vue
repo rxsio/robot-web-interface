@@ -123,6 +123,10 @@ const control = (id) => {
     }
 }
 
+const cameraControl = (id) => {
+    alert(id)
+}
+
 watch(
     () => [producerId.value, viewer.value],
     (oldVal, newVal, onCleanup) => {
@@ -184,11 +188,13 @@ defineExpose({
         <CameraControls
             v-if="props.extraConfig.controls && statusIcon === 'none'"
             :contrast="props.extraConfig.contrast"
+            :records="true"
             :style="{
                 width: dimensions.width + 'px',
                 height: dimensions.height + 'px',
                 'object-fit': 'cover',
             }"
+            @cameraControl="(c) => cameraControl(c)"
         />
         <video
             ref="viewer"
