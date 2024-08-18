@@ -3,14 +3,55 @@ import { defineProps } from 'vue'
 
 const props = defineProps({
     contrast: Boolean,
+    records: Boolean,
 })
+
+const controls = [
+    props.records
+        ? {
+              id: 'stopRecording',
+              name: 'Stop recording',
+              icon: 'mdi-stop',
+          }
+        : {
+              id: 'startRecording',
+              name: 'Start recording',
+              icon: 'mdi-record-circle-outline',
+          },
+    {
+        id: 'restart',
+        name: 'Restart camera position',
+        icon: 'mdi-format-horizontal-align-center',
+    },
+    {
+        id: 'screenshot',
+        name: 'Take photo',
+        icon: 'mdi-camera',
+    },
+]
 </script>
 
 <template>
     <div :class="['overlay', { contrast: props.contrast }]">
         <div class="rotate rotate-left"></div>
-        <div class="restart">
-            <v-icon>mdi-format-horizontal-align-center</v-icon>
+        <div class="controls">
+            <v-tooltip
+                v-for="control in controls"
+                :key="control.id"
+                bottom
+            >
+                <template v-slot:activator="{ on, attrs }">
+                    <v-icon
+                        v-bind="attrs"
+                        v-on="on"
+                        :class="['control', control.id]"
+                        @click="$emit('cameraControl', control.id)"
+                    >
+                        {{ control.icon }}
+                    </v-icon>
+                </template>
+                <span>{{ control.name }}</span>
+            </v-tooltip>
         </div>
         <div class="rotate rotate-right"></div>
     </div>
@@ -50,14 +91,18 @@ const props = defineProps({
     border-top-width: 3px;
 }
 
-.restart {
-    cursor: pointer;
+.controls {
     position: absolute;
+    display: flex;
     bottom: 0;
     left: 50%;
     transform: translateX(-50%);
 }
-.restart .v-icon {
+.control {
+    cursor: pointer;
+    padding: 0 4px;
+}
+.control.v-icon {
     color: var(--camera-controls-base-color);
 }
 </style>
