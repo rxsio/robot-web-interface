@@ -15,7 +15,7 @@
     width: 100%;
     height: 100%;
     border: 24px solid transparent;
-    --camera-controls-base-color: #888;
+    --camera-controls-base-color: #555;
 }
 
 .rotate {
@@ -27,9 +27,6 @@
     border: 0 solid var(--camera-controls-base-color);
     transform: translateY(-50%) rotate(45deg);
     transition: all 250ms ease;
-}
-.rotate:hover {
-    border-color: black;
 }
 .rotate-left {
     left: 0;
@@ -51,8 +48,5 @@
 }
 .restart .v-icon {
     color: var(--camera-controls-base-color);
-}
-.restart:hover .v-icon {
-    color: black;
 }
 </style>

@@ -77,4 +77,7 @@ const breakpointChanged = (b, _) => {
     display: flex;
     touch-action: none;
 }
+.window-wrapper .vue-resizable-handle {
+    z-index: 1000;
+}
 </style>

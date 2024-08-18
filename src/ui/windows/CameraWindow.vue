@@ -88,6 +88,8 @@ const connect = () => {
                     if (viewer.value) {
                         viewer.value.srcObject = streams[0]
                         viewer.value.play().catch(() => {})
+                    } else {
+                        console.log('Viever not available yet')
                     }
                     state.value = SessionState.streaming
                 }
@@ -156,9 +158,19 @@ const statusIcon = computed(() => {
             :recording="true"
             :resolution="'1080p'"
             :fps="30"
+            :style="{
+                width: dimensions.width + 'px',
+                height: dimensions.height + 'px',
+                'object-fit': 'cover',
+            }"
         />
         <CameraControls
             v-if="props.extraConfig.controls && statusIcon === 'none'"
+            :style="{
+                width: dimensions.width + 'px',
+                height: dimensions.height + 'px',
+                'object-fit': 'cover',
+            }"
         />
         <video
             ref="viewer"
