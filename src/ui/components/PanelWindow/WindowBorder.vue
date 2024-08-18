@@ -1,8 +1,15 @@
 <script setup>
 import { Modes, useViewModeStore } from '@/stores'
-import { defineEmits, defineProps, onBeforeUnmount, onMounted, ref } from 'vue'
+import {
+    computed,
+    defineEmits,
+    defineProps,
+    onBeforeUnmount,
+    onMounted,
+    ref,
+} from 'vue'
 
-const props = defineProps(['name', 'icon', 'hasConfig'])
+const props = defineProps(['name', 'icon', 'hasConfig', 'controls'])
 const emit = defineEmits(['setDimensions'])
 const viewModeStore = useViewModeStore()
 
@@ -23,6 +30,31 @@ const resizeObserver = ref(
         }
     })
 )
+
+const modeControls = computed(() => {
+    let filtered = props.controls.filter((x) => x.mode === viewModeStore.mode)
+
+    if (viewModeStore.mode === Modes.Edit) {
+        if (props.hasConfig) {
+            filtered.push({
+                id: 'openConfig',
+                name: 'Open Config',
+                icon: 'mdi-tune',
+                mode: viewModeStore.mode,
+            })
+        }
+
+        filtered.push({
+            id: 'close',
+            name: 'Close',
+            icon: 'mdi-close',
+            mode: viewModeStore.mode,
+        })
+    }
+
+    return filtered
+})
+
 onMounted(() => {
     resizeObserver.value.observe(container.value)
 })
@@ -51,20 +83,23 @@ onBeforeUnmount(() => {
             </span>
             <v-spacer></v-spacer>
 
-            <v-icon
-                color="primary"
-                v-if="viewModeStore.mode === Modes.Edit && props.hasConfig"
-                @click="$emit('openConfig')"
+            <v-tooltip
+                v-for="control of modeControls"
+                :key="control.name"
+                bottom
             >
-                mdi-tune
-            </v-icon>
-            <v-icon
-                color="primary"
-                v-if="viewModeStore.mode === Modes.Edit"
-                @click="$emit('remove')"
-            >
-                mdi-close
-            </v-icon>
+                <template v-slot:activator="{ on, attrs }">
+                    <v-icon
+                        v-bind="attrs"
+                        v-on="on"
+                        color="primary"
+                        @click="$emit('control', control.id)"
+                    >
+                        {{ control.icon }}
+                    </v-icon>
+                </template>
+                <span>{{ control.name }}</span>
+            </v-tooltip>
         </v-system-bar>
         <div
             ref="container"

@@ -3,7 +3,7 @@ import { SessionState } from '@/lib/gstwebrtc-api/gstwebrtc-api'
 import { useGStreamerStore } from '@/stores'
 import CameraControls from '@/ui/components/Camera/CameraControls.vue'
 import CameraOverlay from '@/ui/components/Camera/CameraOverlay.vue'
-import { computed, defineProps, ref, watch } from 'vue'
+import { computed, defineExpose, defineProps, ref, watch } from 'vue'
 
 const gstreamerStore = useGStreamerStore()
 const props = defineProps(['windowDimensions', 'extraConfig'])
@@ -87,9 +87,9 @@ const connect = () => {
                 if (streams.length > 0) {
                     if (viewer.value) {
                         viewer.value.srcObject = streams[0]
-                        viewer.value.play().catch(() => {})
-                    } else {
-                        console.log('Viever not available yet')
+                        viewer.value.play().catch((err) => {
+                            console.error(err) // for some reason video is not playing, but stream is connected correctly
+                        })
                     }
                     state.value = SessionState.streaming
                 }
@@ -113,6 +113,14 @@ const streamStarted = () => {
     videoDimensions.value.height = viewer.value && viewer.value.videoHeight
 }
 
+const control = (id) => {
+    switch (id) {
+        case 'reload':
+            connect()
+            break
+    }
+}
+
 watch(
     () => [producerId.value, viewer.value],
     (oldVal, newVal, onCleanup) => {
@@ -131,6 +139,10 @@ const statusIcon = computed(() => {
                 [SessionState.streaming]: 'none',
             }[state.value] || 'mdi-help'
         )
+})
+
+defineExpose({
+    control,
 })
 </script>
 <template>
