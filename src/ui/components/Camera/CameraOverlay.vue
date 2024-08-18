@@ -44,6 +44,7 @@ const props = defineProps({
 }
 
 .overlay {
+    z-index: 90;
     position: absolute;
     width: 100%;
     height: 100%;

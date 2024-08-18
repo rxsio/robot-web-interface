@@ -1,7 +1,8 @@
 <script setup>
 import { SessionState } from '@/lib/gstwebrtc-api/gstwebrtc-api'
 import { useGStreamerStore } from '@/stores'
-import CameraOverlay from '@/ui/components/CameraOverlay.vue'
+import CameraControls from '@/ui/components/Camera/CameraControls.vue'
+import CameraOverlay from '@/ui/components/Camera/CameraOverlay.vue'
 import { computed, defineProps, ref, watch } from 'vue'
 
 const gstreamerStore = useGStreamerStore()
@@ -151,11 +152,12 @@ const statusIcon = computed(() => {
             {{ statusIcon }}
         </v-icon>
         <CameraOverlay
-            v-if="props.extraConfig.overlay === true && statusIcon === 'none'"
+            v-if="props.extraConfig.overlay === true && statusIcon !== 'none'"
             :recording="true"
             :resolution="'1080p'"
             :fps="30"
         />
+        <CameraControls v-if="props.extraConfig.controls" />
         <video
             ref="viewer"
             :style="{

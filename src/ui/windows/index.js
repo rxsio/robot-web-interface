@@ -25,6 +25,10 @@ export default {
                 name: 'Overlay',
                 type: 'boolean',
             },
+            controls: {
+                name: 'Controls',
+                type: 'boolean',
+            },
         },
     },
     controlWindow: {
