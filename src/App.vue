@@ -5,12 +5,14 @@ import {
     useJoystickStore,
     useRosStore,
     useSteeringStore,
+    useUserStore,
 } from '@/stores'
 import EncryptionErrorScreen from '@/ui/screens/EncryptionErrorScreen.vue'
 import LoadingScreen from '@/ui/screens/LoadingScreen.vue'
 import { onMounted, onUnmounted, ref } from 'vue'
 import { RouterView } from 'vue-router'
 
+const userStore = useUserStore()
 const rosStore = useRosStore()
 const gstreamerStore = useGStreamerStore()
 const joystickStore = useJoystickStore()
@@ -40,6 +42,11 @@ const networkTest = async () => {
         })
 }
 
+const onClick = () => {
+    userStore.recordInteraction()
+    document.removeEventListener('click', onClick)
+}
+
 onMounted(() => {
     networkTest().then((passed) => {
         if (passed) {
@@ -50,11 +57,14 @@ onMounted(() => {
             configurationStore.load()
         }
     })
+
+    document.addEventListener('click', onClick)
 })
 
 onUnmounted(() => {
     joystickStore.stop()
     steeringStore.stop()
+    document.removeEventListener('click', onClick)
 })
 </script>
 <template>
