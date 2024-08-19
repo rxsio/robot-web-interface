@@ -15,7 +15,7 @@ const update = () => {
         return
     }
 
-    const tracks = props.viewer.getVideoTracks()
+    const tracks = props.viewer.srcObject.getVideoTracks()
     if (tracks.length === 0) {
         resolution.value = '---'
         fps.value = '---'
