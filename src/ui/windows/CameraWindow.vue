@@ -152,6 +152,29 @@ const statusIcon = computed(() => {
 defineExpose({
     control,
 })
+
+const settings = computed(() => {
+    if (viewer.value.srcObject != null) {
+        const tracks = viewer.value.srcObject.getVideoTracks()
+
+        if (tracks.length > 0) {
+            const track = tracks[0]
+            const settings = track.getSettings()
+
+            if (settings === null || settings === undefined) {
+                return ['Unknown', 'Unknown', 'Unknown']
+            }
+
+            const width = settings['width'] || 'Unknown'
+            const height = settings['height'] || 'Unknown'
+            const frameRate = settings['frameRate'] || 'Unknown'
+
+            return [width, height, frameRate]
+        }
+    }
+
+    return ['Unknown', 'Unknown', 'Unknown']
+})
 </script>
 <template>
     <div
@@ -176,8 +199,8 @@ defineExpose({
         <CameraOverlay
             v-if="props.extraConfig.overlay === true && statusIcon === 'none'"
             :recording="true"
-            :resolution="'1080p'"
-            :fps="30"
+            :resolution="settings[0] + 'x' + settings[1]"
+            :fps="settings[2]"
             :contrast="props.extraConfig.contrast"
             :style="{
                 width: dimensions.width + 'px',
