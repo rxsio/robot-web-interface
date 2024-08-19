@@ -1,11 +1,47 @@
 <script setup>
-import { defineProps } from 'vue'
+import { defineProps, onMounted, onUnmounted, ref } from 'vue'
 
 const props = defineProps({
     recording: Boolean,
-    resolution: String,
-    fps: Number,
+    viewer: undefined,
     contrast: Boolean,
+})
+
+const resolution = ref('---')
+const fps = ref('---')
+
+const update = () => {
+    if (props.viewer.srcObject === null) {
+        return
+    }
+
+    const tracks = props.viewer.getVideoTracks()
+    if (tracks.length === 0) {
+        resolution.value = '---'
+        fps.value = '---'
+    } else {
+        const settings = tracks[0].getSettings()
+
+        if (settings.width !== undefined && settings.height !== undefined) {
+            resolution.value = `${settings.width}x${settings.height}`
+        } else {
+            resolution.value = '---'
+        }
+
+        if (settings.frameRate !== undefined) {
+            fps.value = settings.frameRate || '---'
+        }
+    }
+
+    requestAnimationFrame(update)
+}
+
+onMounted(() => {
+    props.viewer.addEventListener('play', update)
+})
+
+onUnmounted(() => {
+    props.viewer.removeEventListener('play', update)
 })
 </script>
 
@@ -22,10 +58,10 @@ const props = defineProps({
         </div>
         <div class="corner corner-ne"></div>
         <div class="corner corner-sw">
-            <div class="resolution">{{ props.resolution }}</div>
+            <div class="resolution">{{ resolution }}</div>
         </div>
         <div class="corner corner-se">
-            <div class="frame-rate">{{ props.fps }} FPS</div>
+            <div class="frame-rate">{{ fps }} FPS</div>
         </div>
 
         <div class="crosshair">
