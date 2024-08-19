@@ -29,7 +29,7 @@ const update = () => {
         }
 
         if (settings.frameRate !== undefined) {
-            fps.value = settings.frameRate || '---'
+            fps.value = Math.round(settings.frameRate) || '---'
         }
     }
 
