@@ -51,13 +51,13 @@ const props = defineProps({
     height: 100%;
     border: 24px solid transparent;
     color: var(--universal-corner-color);
-    --universal-corner-color: #333;
+    --universal-corner-color: #ccc;
     --universal-corner-size: 10%;
     --universal-corner-padding: 8px;
     --universal-corner-thickness: 3px;
 }
 .overlay.contrast {
-    --universal-corner-color: #ccc;
+    --universal-corner-color: #fffa00;
 }
 
 .crosshair {

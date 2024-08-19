@@ -21,10 +21,10 @@ const props = defineProps({
     width: 100%;
     height: 100%;
     border: 24px solid transparent;
-    --camera-controls-base-color: #555;
+    --camera-controls-base-color: #aaa;
 }
 .overlay.contrast {
-    --camera-controls-base-color: #aaa;
+    --camera-controls-base-color: #fffa00;
 }
 
 .rotate {
