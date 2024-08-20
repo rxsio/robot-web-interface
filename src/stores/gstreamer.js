@@ -22,7 +22,8 @@ export const useGStreamerStore = defineStore('gstreamer', () => {
         await fetch(`https://${address}/getCamerasConfiguration`).then(
             async (r) => {
                 if (r.status !== 200) {
-                    console.error('Cannot get turn configuration')
+                    turn.value = false
+                    console.error('Cannot get TURN configuration')
                 } else {
                     turn.value = true
                     turnServers = await r.json()
@@ -30,6 +31,14 @@ export const useGStreamerStore = defineStore('gstreamer', () => {
                 }
             }
         )
+
+        const defaultServers = {
+            urls: [
+                'stun:stun.l.google.com:19302',
+                'stun:stun1.l.google.com:19302',
+                'stun:stun.mit.de:3478',
+            ],
+        }
 
         return {
             meta: {
@@ -39,14 +48,7 @@ export const useGStreamerStore = defineStore('gstreamer', () => {
             reconnectionTimeout: 2500,
             webrtcConfig: {
                 iceServers: [
-                    {
-                        urls: [
-                            'stun:stun.l.google.com:19302',
-                            'stun:stun1.l.google.com:19302',
-                            'stun:stun.mit.de:3478',
-                        ],
-                    },
-                    turnServers,
+                    turnServers === null ? defaultServers : turnServers,
                 ],
             },
         }
@@ -57,7 +59,7 @@ export const useGStreamerStore = defineStore('gstreamer', () => {
         }
 
         if (!turn.value) {
-            return CamerasStatus.Connected
+            return CamerasStatus.ConnectedWithoutTurn
         }
 
         return CamerasStatus.Connected
