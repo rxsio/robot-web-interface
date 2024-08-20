@@ -17,7 +17,7 @@ export const useGStreamerStore = defineStore('gstreamer', () => {
         new URL(`${protocol}://${address}:${port}`).toString()
     )
     const config = computed(async () => {
-        let turnServers = {}
+        let turnServers = null
 
         await fetch(`https://${address}/getCamerasConfiguration`).then(
             async (r) => {
