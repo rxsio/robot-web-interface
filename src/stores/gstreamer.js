@@ -115,8 +115,8 @@ export const useGStreamerStore = defineStore('gstreamer', () => {
         const connectionListener = new ConnectionListener()
         const producerListener = new ProducerListener()
 
-        config.value.then(() => {
-            api.value = new GstWebRTCAPI(config.value)
+        config.value.then((c) => {
+            api.value = new GstWebRTCAPI(c)
             api.value.registerConnectionListener(connectionListener)
             api.value.registerProducersListener(producerListener)
 
