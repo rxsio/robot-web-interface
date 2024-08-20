@@ -9,6 +9,12 @@ class SslConfig(BaseModel):
     root: FilePath
 
 
+class TurnConfig(BaseModel):
+    url: str
+    apiToken: str
+    turnToken: str
+
+
 class EMountType(Enum):
     SPA = "SPA"
     FTP = "FTP"
@@ -24,6 +30,7 @@ class Mount(BaseModel):
 
 class Config(BaseModel):
     ssl: SslConfig
+    turn: TurnConfig
     mounts: list[Mount]
     origins: list[str]
 

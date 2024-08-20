@@ -1,5 +1,6 @@
 <script setup>
 import {
+    CamerasStatus,
     useGStreamerStore,
     useJoystickStore,
     useRosStore,
@@ -34,21 +35,29 @@ const buttons = computed(() => [
               tooltip: 'No controller detected!',
               onClick: () => {},
           },
-    gstreamerStore.connected
-        ? {
-              type: 'icon',
-              icon: 'mdi-video',
-              color: 'primary',
-              tooltip: 'Video server connected',
-              onClick: () => {},
-          }
-        : {
-              type: 'icon',
-              icon: 'mdi-video-off',
-              color: 'error',
-              tooltip: 'Video server disconnected',
-              onClick: () => {},
-          },
+    {
+        [CamerasStatus.Connected]: {
+            type: 'icon',
+            icon: 'mdi-video',
+            color: 'primary',
+            tooltip: 'Video server connected',
+            onClick: () => {},
+        },
+        [CamerasStatus.ConnectedWithoutTurn]: {
+            type: 'icon',
+            icon: 'mdi-video-minus',
+            color: 'warning',
+            tooltip: 'Video server connected (without TURN)',
+            onClick: () => {},
+        },
+        [CamerasStatus.Disconnected]: {
+            type: 'icon',
+            icon: 'mdi-video-off',
+            color: 'error',
+            tooltip: 'Video server disconnected',
+            onClick: () => {},
+        },
+    }[gstreamerStore.status],
     rosStore.connected
         ? {
               type: 'icon',

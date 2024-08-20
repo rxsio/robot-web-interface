@@ -2,6 +2,12 @@ import { GstWebRTCAPI } from '@/lib/gstwebrtc-api'
 import Vue, { computed, ref } from 'vue'
 import { defineStore } from 'pinia'
 
+export const CamerasStatus = {
+    Connected: 'Connected',
+    Disconnected: 'Disconnected',
+    ConnectedWithoutTurn: 'ConnectedWithoutTurn',
+}
+
 export const useGStreamerStore = defineStore('gstreamer', () => {
     const protocol = 'wss'
     const address = window.location.hostname
@@ -10,7 +16,21 @@ export const useGStreamerStore = defineStore('gstreamer', () => {
     const url = computed(() =>
         new URL(`${protocol}://${address}:${port}`).toString()
     )
-    const config = computed(() => {
+    const config = computed(async () => {
+        let turnServers = {}
+
+        await fetch(`https://${address}/getCamerasConfiguration`).then(
+            async (r) => {
+                if (r.status !== 200) {
+                    console.error('Cannot get turn configuration')
+                } else {
+                    turn.value = true
+                    turnServers = await r.json()
+                    console.log('TURN Configuration', turnServers)
+                }
+            }
+        )
+
         return {
             meta: {
                 name: 'Interface',
@@ -26,12 +46,25 @@ export const useGStreamerStore = defineStore('gstreamer', () => {
                             'stun:stun.mit.de:3478',
                         ],
                     },
+                    turnServers,
                 ],
             },
         }
     })
+    const status = computed(() => {
+        if (!connected.value) {
+            return CamerasStatus.Disconnected
+        }
+
+        if (!turn.value) {
+            return CamerasStatus.Connected
+        }
+
+        return CamerasStatus.Connected
+    })
 
     const api = ref()
+    const turn = ref(false)
     const connected = ref(false)
     const producers = ref({})
 
@@ -39,6 +72,7 @@ export const useGStreamerStore = defineStore('gstreamer', () => {
         connected(clientId) {
             console.log('[GST]', 'Connected! with id', clientId)
             connected.value = true
+            status.value = CamerasStatus.On
         }
 
         disconnected() {
@@ -78,19 +112,23 @@ export const useGStreamerStore = defineStore('gstreamer', () => {
     const connect = () => {
         console.log('[GST]', 'Connecting...')
 
+        const connectionListener = new ConnectionListener()
         const producerListener = new ProducerListener()
 
-        api.value = new GstWebRTCAPI(config.value)
-        api.value.registerConnectionListener(new ConnectionListener())
-        api.value.registerProducersListener(producerListener)
+        config.value.then(() => {
+            api.value = new GstWebRTCAPI(config.value)
+            api.value.registerConnectionListener(connectionListener)
+            api.value.registerProducersListener(producerListener)
 
-        for (const producer of api.value.getAvailableProducers()) {
-            producerListener.producerAdded(producer)
-        }
+            for (const producer of api.value.getAvailableProducers()) {
+                producerListener.producerAdded(producer)
+            }
+        })
     }
 
     return {
         api,
+        status,
         connected,
         producers,
         connect,
