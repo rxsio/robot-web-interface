@@ -4,6 +4,11 @@
     "certificate": "../../certificates/firo.crt",
     "root": "../../certificates/RootCA.pem"
   },
+  "turn": {
+    "apiToken": "<API_TOKEN>",
+    "turnToken": "<TURN_TOKEN>",
+    "url": "https://rtc.live.cloudflare.com/v1/turn/keys/{TURN_TOKEN}/credentials/generate"
+  },
   "mounts": [
     {
       "name": "ftp",

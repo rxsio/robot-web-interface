@@ -3,8 +3,10 @@ import os.path
 import warnings
 from subprocess import Popen
 
+import httpx
+from pydantic import BaseModel
 import uvicorn
-from fastapi import FastAPI
+from fastapi import FastAPI, HTTPException
 from fastapi.exceptions import RequestValidationError
 from fastapi.templating import Jinja2Templates
 from starlette.middleware.cors import CORSMiddleware
@@ -16,7 +18,7 @@ from config import load_config, EMountType
 from static_files import FTPStaticFiles, SPAStaticFiles, PageStaticFiles
 
 
-config = load_config("/configuration/interface/config.json")
+config = load_config("config.json")
 templates = Jinja2Templates(directory="templates")
 
 ssl = {
@@ -26,6 +28,19 @@ ssl = {
 
 app = FastAPI()
 
+# region Models
+
+class IceServers(BaseModel):
+    urls: list[str]
+    username: str
+    credential: str
+
+class IceServersResponse(BaseModel):
+    iceServers: IceServers
+
+# endregion
+
+# region Routes
 
 @app.get("/rxsioCA.pem")
 async def download_certificate():
@@ -38,6 +53,32 @@ async def network_test():
     return "Test passed"
 
 
+@app.get("/getCamerasConfiguration")
+async def get_cameras_configuration() -> IceServers:
+    async with httpx.AsyncClient() as client:
+        headers = {
+            "Authorization": f"Bearer {config.turn.apiToken}",
+            "Content-Type": "application/json",
+        }
+        payload = {"ttl": 86400}
+
+        try:
+            response = await client.post(
+                config.turn.url.format(TURN_TOKEN=config.turn.turnToken),
+                headers=headers,
+                json=payload
+            )
+            response.raise_for_status()
+            return response.json().get("iceServers")
+        except httpx.HTTPStatusError as e:
+            raise HTTPException(status_code=e.response.status_code, detail=str(e))
+        except httpx.RequestError as e:
+            raise HTTPException(status_code=500, detail=str(e))
+
+# endregion
+
+# region Handlers
+
 @app.exception_handler(StarletteHTTPException)
 async def http_exception_handler(request, exc):
     print(dir(exc), exc)
@@ -46,9 +87,13 @@ async def http_exception_handler(request, exc):
         {
             "request": request,
             "error": exc
-        }
+        },
+        status_code=404
     )
 
+# endregion
+
+# region Mounts
 
 for mount in config.mounts:
     static_files = {
@@ -68,6 +113,8 @@ for mount in config.mounts:
         name=mount.name
     )
 
+# endregion
+
 app.add_middleware(
     CORSMiddleware,
     allow_origins=config.origins,
@@ -77,7 +124,7 @@ app.add_middleware(
 )
 
 if __name__ == "__main__":
-    Popen(["venv/bin/python", "-m", "http_bridge"])
+    Popen(["venv/Scripts/python", "-m", "http_bridge"])
     uvicorn.run(
         "main:app",
         port=443,
