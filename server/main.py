@@ -79,10 +79,10 @@ async def get_cameras_configuration() -> IceServers:
             response.raise_for_status()
             return response.json().get("iceServers")
         except httpx.HTTPStatusError as e:
-            print("[ERROR]", str(e)
+            print("[ERROR]", str(e))
             raise HTTPException(status_code=501, detail="Not available")
         except httpx.RequestError as e:
-            print("[ERROR]", str(e)
+            print("[ERROR]", str(e))
             raise HTTPException(status_code=501, detail="Not available")
 
 # endregion
