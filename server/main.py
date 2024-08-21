@@ -14,11 +14,16 @@ from starlette.responses import FileResponse
 from starlette.staticfiles import StaticFiles
 from starlette.exceptions import HTTPException as StarletteHTTPException
 
-from config import load_config, EMountType
+from config import load_config, load_turn_config, EMountType
 from static_files import FTPStaticFiles, SPAStaticFiles, PageStaticFiles
 
 
-config = load_config("/configuration/interface/config.json")
+config = load_config("/configuration/interface.yaml")
+turn_config = load_config("/configuration/turn.yaml")
+
+if turn_config is None:
+    print("[WARN]", "Cannot load TURN configuration")
+
 templates = Jinja2Templates(directory="templates")
 
 ssl = {
@@ -55,25 +60,30 @@ async def network_test():
 
 @app.get("/getCamerasConfiguration")
 async def get_cameras_configuration() -> IceServers:
+    if turn_config is None or not turn_config.enable:
+        raise raise HTTPException(status_code=501, detail="Not available")
+
     async with httpx.AsyncClient() as client:
         headers = {
-            "Authorization": f"Bearer {config.turn.apiToken}",
+            "Authorization": f"Bearer {config_turn.apiToken}",
             "Content-Type": "application/json",
         }
         payload = {"ttl": 86400}
 
         try:
             response = await client.post(
-                config.turn.url.format(TURN_TOKEN=config.turn.turnToken),
+                config_turn.url.format(TURN_TOKEN=config_turn.turnToken),
                 headers=headers,
                 json=payload
             )
             response.raise_for_status()
             return response.json().get("iceServers")
         except httpx.HTTPStatusError as e:
-            raise HTTPException(status_code=e.response.status_code, detail=str(e))
+            print("[ERROR]", str(e)
+            raise HTTPException(status_code=501, detail="Not available")
         except httpx.RequestError as e:
-            raise HTTPException(status_code=500, detail=str(e))
+            print("[ERROR]", str(e)
+            raise HTTPException(status_code=501, detail="Not available")
 
 # endregion
 

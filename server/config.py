@@ -1,4 +1,4 @@
-import json
+import yaml
 from enum import Enum
 from pydantic import BaseModel, FilePath, DirectoryPath
 
@@ -7,12 +7,6 @@ class SslConfig(BaseModel):
     key: FilePath
     certificate: FilePath
     root: FilePath
-
-
-class TurnConfig(BaseModel):
-    url: str
-    apiToken: str
-    turnToken: str
 
 
 class EMountType(Enum):
@@ -28,15 +22,30 @@ class Mount(BaseModel):
     directory: str
 
 
+class TurnConfig(BaseModel):
+    url: str
+    apiToken: str
+    turnToken: str
+
+
 class Config(BaseModel):
     ssl: SslConfig
-    turn: TurnConfig
     mounts: list[Mount]
     origins: list[str]
 
 
 def load_config(filepath: FilePath) -> Config:
     with open(filepath, "r") as handle:
-        data = json.load(handle)
+        data = yaml.safe_load(handle)
 
     return Config(**data)
+
+
+def load_turn_config(filepath: FilePath) -> Optional[TurnConfig]:
+    try:
+        with open(filepath, "r") as handle:
+            data = yaml.safe_load(handle)
+
+        return TurnConfig(**data)
+    except:
+        return None
