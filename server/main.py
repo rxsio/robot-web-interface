@@ -19,7 +19,7 @@ from static_files import FTPStaticFiles, SPAStaticFiles, PageStaticFiles
 
 
 config = load_config("/configuration/interface.yaml")
-turn_config = load_config("/configuration/turn.yaml")
+turn_config = load_turn_config("/configuration/turn.yaml")
 
 if turn_config is None:
     print("[WARN]", "Cannot load TURN configuration")
