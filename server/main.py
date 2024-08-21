@@ -61,7 +61,7 @@ async def network_test():
 @app.get("/getCamerasConfiguration")
 async def get_cameras_configuration() -> IceServers:
     if turn_config is None or not turn_config.enable:
-        raise raise HTTPException(status_code=501, detail="Not available")
+        raise HTTPException(status_code=501, detail="Not available")
 
     async with httpx.AsyncClient() as client:
         headers = {
