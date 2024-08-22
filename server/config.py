@@ -24,6 +24,7 @@ class Mount(BaseModel):
 
 
 class TurnConfig(BaseModel):
+    enable: bool
     url: str
     apiToken: str
     turnToken: str
