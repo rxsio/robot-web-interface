@@ -19,9 +19,9 @@ from static_files import FTPStaticFiles, SPAStaticFiles, PageStaticFiles
 
 
 config = load_config("/configuration/interface.yaml")
-turn_config = load_turn_config("/configuration/turn.yaml")
+config_turn = load_turn_config("/configuration/turn.yaml")
 
-if turn_config is None:
+if config_turn is None:
     print("[WARN]", "Cannot load TURN configuration")
 
 templates = Jinja2Templates(directory="templates")
@@ -60,7 +60,7 @@ async def network_test():
 
 @app.get("/getCamerasConfiguration")
 async def get_cameras_configuration() -> IceServers:
-    if turn_config is None or not turn_config.enable:
+    if config_turn is None or not config_turn.enable:
         raise HTTPException(status_code=501, detail="Not available")
 
     async with httpx.AsyncClient() as client:
