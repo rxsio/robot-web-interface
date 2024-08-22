@@ -8,7 +8,7 @@ export const useBatteryLevelStore = defineStore('batteryLevel', () => {
 
     useTopicSubscriber(
         '/power_status',
-        'canbus_modules/PowerStatus',
+        'sensor_msgs/BatteryState',
         (status) => {
             percentage.value = status.battery_percentage
             voltage.value = status.battery_voltage
