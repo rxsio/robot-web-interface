@@ -10,8 +10,8 @@ export const useBatteryLevelStore = defineStore('batteryLevel', () => {
         '/battery_state',
         'sensor_msgs/BatteryState',
         (status) => {
-            percentage.value = status.battery_percentage
-            voltage.value = status.battery_voltage
+            percentage.value = status.percentage
+            voltage.value = status.voltage
         }
     )
 
