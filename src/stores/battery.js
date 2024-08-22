@@ -7,7 +7,7 @@ export const useBatteryLevelStore = defineStore('batteryLevel', () => {
     const voltage = ref(0)
 
     useTopicSubscriber(
-        '/power_status',
+        '/battery_state',
         'sensor_msgs/BatteryState',
         (status) => {
             percentage.value = status.battery_percentage
