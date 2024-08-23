@@ -11,12 +11,14 @@ export const useJoystickStore = defineStore('joystick', () => {
 
     const findJoystick = async () => {
         const gamepads = navigator.getGamepads()
+
         for (const gamepad of gamepads) {
             if (gamepad && gamepad.connected) {
                 joystick.value = gamepad
                 return
             }
         }
+
         joystick.value = null
     }
 
@@ -56,10 +58,11 @@ export const useJoystickStore = defineStore('joystick', () => {
         '045e-02ea-Microsoft X-Box One S pad': 'xboxOneS',
     }
 
-    const getJoystick = () => navigator.getGamepads()[0]
+    const getJoystick = () => joystick.value
 
     const getAxes = () => {
         const joystick = getJoystick()
+
         if (joystick.mapping === 'standard') {
             return joystick.axes
         } else {

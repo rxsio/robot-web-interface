@@ -27,8 +27,9 @@ export const useJoystickSteeringStore = defineStore('joystickSteering', () => {
     const joyTopic = ref(null)
 
     const enabled = computed(() => {
-        if (joyTopic.value)
+        if (joyTopic.value) {
             return joyMultiplexer.joyTopic === joyTopic.value.name
+        }
 
         return false
     })
@@ -38,13 +39,16 @@ export const useJoystickSteeringStore = defineStore('joystickSteering', () => {
             if (
                 joyMultiplexer.outputTopic ===
                 joyMultiplexer.outputTopics.driving
-            )
+            ) {
                 return joyDiffDrive.mode
+            }
+
             if (
                 joyMultiplexer.outputTopic ===
                 joyMultiplexer.outputTopics.manipulator
-            )
+            ) {
                 return joy5dofManipulator.mode
+            }
 
             return '__none'
         },
@@ -74,7 +78,9 @@ export const useJoystickSteeringStore = defineStore('joystickSteering', () => {
 
     onRosConnected(async () => {
         // start transmitting if a joystick has been connected before
-        if (joystickStore.connected) await startTransmitting()
+        if (joystickStore.connected) {
+            await startTransmitting()
+        }
     })
     onRosDisconnected(() => {
         stop()
@@ -83,8 +89,11 @@ export const useJoystickSteeringStore = defineStore('joystickSteering', () => {
     watch(
         () => joystickStore.joystick,
         async () => {
-            if (joystickStore.connected) await startTransmitting()
-            else stop()
+            if (joystickStore.connected) {
+                await startTransmitting()
+            } else {
+                stop()
+            }
         }
     )
 
@@ -171,6 +180,7 @@ export const useJoystickSteeringStore = defineStore('joystickSteering', () => {
             clearInterval(statusTransmitter.value)
             statusTransmitter.value = null
         }
+
         if (joyTopic.value) {
             callService(
                 '/joy_multiplexer/remove_joy',

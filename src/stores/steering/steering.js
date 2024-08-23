@@ -8,6 +8,12 @@ import { defineStore } from 'pinia'
 
 import { useRosStore } from '../ros'
 
+export const InputType = {
+    Joystick: 'joystick',
+    Keyboard: 'keyboard',
+    None: 'none',
+}
+
 export const useSteeringStore = defineStore('steering', () => {
     const joystickStore = useJoystickStore()
     const rosStore = useRosStore()
@@ -34,35 +40,48 @@ export const useSteeringStore = defineStore('steering', () => {
     }
 
     const currentInput = computed(() => {
-        if (joystickStore.connected) return 'joystick'
-        else return 'keyboard'
+        if (joystickStore.connected) {
+            return InputType.Joystick
+        } else {
+            return InputType.Keyboard
+        }
     })
 
     const enabled = computed(() => {
-        if (currentInput.value === 'joystick')
+        if (currentInput.value === InputType.Joystick)
             return joystickSteeringStore.enabled
-        if (currentInput.value === 'keyboard')
+        if (currentInput.value === InputType.Keyboard)
             return keyboardSteeringStore.enabled
         return 0
     })
 
     const currentGear = computed(() => {
-        if (currentInput.value === 'joystick')
+        if (currentInput.value === InputType.Joystick) {
             return joystickSteeringStore.currentGear
-        if (currentInput.value === 'keyboard') return keyboardSteeringStore.gear
+        }
+
+        if (currentInput.value === InputType.Keyboard) {
+            return keyboardSteeringStore.gear
+        }
+
         return 0
     })
 
     const currentMode = computed({
         get() {
-            if (currentInput.value === 'joystick')
+            if (currentInput.value === InputType.Joystick) {
                 return joystickSteeringStore.currentMode
-            if (currentInput.value === 'keyboard') return 'keyboard'
-            return 'none'
+            }
+
+            if (currentInput.value === InputType.Keyboard) {
+                return InputType.Keyboard
+            }
+            return InputType.None
         },
         set(newValue) {
-            if (currentInput.value === 'joystick')
+            if (currentInput.value === InputType.Joystick) {
                 joystickSteeringStore.currentMode = newValue
+            }
         },
     })
 
@@ -71,19 +90,19 @@ export const useSteeringStore = defineStore('steering', () => {
             return
         }
 
-        if (currentInput.value === 'joystick') {
+        if (currentInput.value === InputType.Joystick) {
             joystickSteeringStore.takeOverControl()
         }
-        if (currentInput.value === 'keyboard') {
+        if (currentInput.value === InputType.Keyboard) {
             keyboardSteeringStore.takeOverControl()
         }
     }
 
     function giveUpControl() {
-        if (currentInput.value === 'joystick') {
+        if (currentInput.value === InputType.Joystick) {
             joystickSteeringStore.giveUpControl()
         }
-        if (currentInput.value === 'keyboard') {
+        if (currentInput.value === InputType.Keyboard) {
             keyboardSteeringStore.giveUpControl()
         }
     }

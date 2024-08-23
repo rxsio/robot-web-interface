@@ -12,33 +12,50 @@ export const useJoyDiffDrive = defineStore('joyDiffDrive', () => {
 
     const mode = computed({
         get() {
-            if (connected.value) return modes[nodeConfig.value.mode]
-            else return '__none'
+            if (connected.value) {
+                return modes[nodeConfig.value.mode]
+            } else {
+                return '__none'
+            }
         },
         set(newMode) {
-            if (connected.value) nodeConfig.value.mode = modes.indexOf(newMode)
+            if (connected.value && newMode in modes) {
+                nodeConfig.value.mode = modes.indexOf(newMode)
+            }
         },
     })
 
     const gear = computed({
         get() {
-            if (connected.value) return nodeConfig.value.gear
-            else return 0
+            if (connected.value) {
+                return nodeConfig.value.gear
+            } else {
+                return 0
+            }
         },
         set(newGear) {
-            if (connected.value) nodeConfig.value.gear = newGear
+            if (connected.value) {
+                nodeConfig.value.gear = newGear
+            }
         },
     })
 
     const maxGearSpeed = computed({
         get() {
             let paramName = `gear_${gear.value}_max_speed`
-            if (gear.value) return nodeConfig.value[paramName]
-            else return 0
+
+            if (gear.value) {
+                return nodeConfig.value[paramName]
+            } else {
+                return 0
+            }
         },
         set(newGearMaxSpeed) {
             let paramName = `gear_${gear.value}_max_speed`
-            if (gear.value) nodeConfig.value[paramName] = newGearMaxSpeed
+
+            if (gear.value) {
+                nodeConfig.value[paramName] = newGearMaxSpeed
+            }
         },
     })
 
