@@ -69,6 +69,7 @@ export const useRosStore = defineStore('ros', () => {
         })
 
         ros.value = newRos
+        window.ros = ros.value
     }
 
     function scheduleReconnect() {
