@@ -11,13 +11,13 @@ const call = () => {
 <template>
     <div class="content">
         <div
-            v-if="!!props.extraConfig.service"
+            v-if="!props.extraConfig.service"
             class="content-error"
         >
             <v-icon>mdi-magnify</v-icon>
             Service not selected
         </div>
-        <div v-if="!props.extraConfig.service">
+        <div v-if="props.extraConfig.service">
             <div class="content-name">
                 {{ props.extraConfig.service || 'Unknown' }}
             </div>

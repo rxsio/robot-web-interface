@@ -41,13 +41,13 @@ onBeforeUnmount(() => {
 <template>
     <div class="content">
         <div
-            v-if="!!props.extraConfig.topic"
+            v-if="!props.extraConfig.topic"
             class="content-error"
         >
             <v-icon>mdi-magnify</v-icon>
             Topic not selected
         </div>
-        <div v-if="!props.extraConfig.topic">
+        <div v-if="props.extraConfig.topic">
             <div class="content-name">
                 {{ props.extraConfig.topic || 'Unknown' }}
             </div>
