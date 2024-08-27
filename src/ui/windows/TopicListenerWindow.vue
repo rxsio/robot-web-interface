@@ -15,7 +15,7 @@ const clear = () => {
 }
 
 watch(
-    () => [props.extraConfig.topic],
+    () => [props.extraConfig.topic, rosStore.ros],
     // eslint-disable-next-line no-unused-vars
     (oldVal, newVal, _) => {
         if (topic.value !== null) {
@@ -60,7 +60,7 @@ onBeforeUnmount(() => {
                     @click="clear"
                     color="error"
                 >
-                    <v-icon>mdi-broadcast</v-icon>
+                    <v-icon>mdi-delete-outline</v-icon>
                     Clear
                 </v-btn>
             </div>

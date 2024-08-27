@@ -7,6 +7,7 @@ const props = defineProps(['extraConfig'])
 const rosStore = useRosStore()
 
 const serviceType = ref(null)
+const serviceRequestDetails = ref(null)
 
 const call = () => {
     alert('Call service')
@@ -38,6 +39,33 @@ watch(
         )
     }
 )
+
+watch(
+    () => [serviceType],
+    // eslint-disable-next-line no-unused-vars
+    (oldValue, newValue, onCleanup) => {
+        serviceRequestDetails.value = null
+
+        if (rosStore.ros === null) {
+            return
+        }
+
+        rosStore.ros.getServiceRequestDetails(
+            serviceType.value,
+            (requestDetails) => {
+                serviceRequestDetails.value = requestDetails
+            },
+            (error) => {
+                console.warn(
+                    'Cannot get service request details. Service type: ',
+                    serviceType.value,
+                    ', error: ',
+                    error
+                )
+            }
+        )
+    }
+)
 </script>
 
 <template>
@@ -57,6 +85,7 @@ watch(
                     Type: {{ serviceType || 'Unknown' }}
                 </div>
             </div>
+            {{ serviceRequestDetails || 'Nothing' }}
             <v-btn
                 @click="call"
                 color="primary"
