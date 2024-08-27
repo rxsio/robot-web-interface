@@ -97,10 +97,15 @@ watch(
                     Type: {{ serviceType || 'Unknown' }}
                 </div>
             </div>
-            <div class="content-small">Request</div>
-            <code class="content-message">
-                <ServiceParameters :parameters="serviceRequestDetails.value" />
-            </code>
+            <template v-if="serviceRequestDetails">
+                <div class="content-small">Request</div>
+                <code class="content-message">
+                    <ServiceParameters :parameters="serviceRequestDetails" />
+                </code>
+            </template>
+            <template v-else>
+                <div class="content-small">Fetching request...</div>
+            </template>
             <v-btn
                 @click="call"
                 color="primary"
