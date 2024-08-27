@@ -9,15 +9,21 @@ export const useRosStore = defineStore('ros', () => {
     const url = computed(() =>
         new URL(`wss://${address.value}:${port.value}`).toString()
     )
+
     function setAddress(newAddress) {
         address.value = newAddress
     }
+
     function setPort(newPort) {
         port.value = newPort
     }
 
     const ros = ref(null)
     const connected = ref(false)
+
+    const topics = ref({})
+    const services = ref([])
+
     const reconnectTimeout = ref(null)
     const connectionTimeout = ref(null)
 
@@ -51,8 +57,33 @@ export const useRosStore = defineStore('ros', () => {
 
             connected.value = ros.value.isConnected
 
+            ros.getTopics(
+                (newTopics) => {
+                    topics.value = newTopics.topics.forEach(
+                        (obj, topic, index) => {
+                            obj[topic] = newTopics.types[index]
+                            return obj
+                        }
+                    )
+                },
+                (error) => {
+                    console.warn('Cannot get topics list', error)
+                    topics.value = {}
+                }
+            )
+            ros.getServices(
+                (newServices) => {
+                    services.value = newServices
+                },
+                (error) => {
+                    console.warn('Cannot get services', error)
+                    services.value = []
+                }
+            )
+
             clearTimeout(connectionTimeout.value)
         })
+
         newRos.on('error', () => {
             console.log('[ROS]', 'error :(', newRos.socket.url)
 
@@ -82,7 +113,8 @@ export const useRosStore = defineStore('ros', () => {
         url,
         connected,
         connect,
-
+        topics,
+        services,
         setPort,
         setAddress,
     }

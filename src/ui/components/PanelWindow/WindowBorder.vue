@@ -32,7 +32,9 @@ const resizeObserver = ref(
 )
 
 const modeControls = computed(() => {
-    let filtered = props.controls.filter((x) => x.mode() === viewModeStore.mode)
+    let filtered = props.controls
+        ? props.controls.filter((x) => x.mode() === viewModeStore.mode)
+        : []
 
     if (viewModeStore.mode === Modes.Edit) {
         if (props.hasConfig) {

@@ -80,9 +80,12 @@ export const useLayoutStore = defineStore('layout', () => {
         yLoop: for (y = 0; y < 1000; y++) {
             xLoop: for (x = 0; x < columns.value - 1; x++) {
                 // It should fit horizontally
+                // Skip if it exceeds line
                 if (x + w >= columns.value) {
                     // Shift vertically, cause there is not enough space in this line
-                    continue yLoop
+                    if (w !== 0 && w !== columns.value) {
+                        continue yLoop
+                    }
                 }
 
                 // It should not collide with any other window

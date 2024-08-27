@@ -1,4 +1,6 @@
-import { Modes, useGStreamerStore } from '@/stores'
+import { Modes, useGStreamerStore, useRosStore } from '@/stores'
+import ServiceWindow from '@/ui/windows/ServiceWindow.vue'
+import TopicListenerWindow from '@/ui/windows/TopicListenerWindow.vue'
 
 import CameraWindow from './CameraWindow.vue'
 import ControlWindow from './ControlWindow.vue'
@@ -40,6 +42,46 @@ export default {
             controls: {
                 name: 'Controls',
                 type: 'boolean',
+            },
+        },
+    },
+    topicListenerWindow: {
+        typeName: 'Topic Listener Window',
+        component: TopicListenerWindow,
+        icon: 'mdi-eye-outline',
+        defaultShape: {
+            w: 4,
+            h: 2,
+        },
+        barControls: [],
+        configOptions: {
+            topic: {
+                name: 'Topic',
+                type: 'select',
+                possibleValues: () => {
+                    const rosStore = useRosStore()
+                    return Object.keys(rosStore.topics)
+                },
+            },
+        },
+    },
+    serviceWindow: {
+        typeName: 'Service Window',
+        component: ServiceWindow,
+        icon: 'mdi-broadcast',
+        defaultShape: {
+            w: 4,
+            h: 2,
+        },
+        barControls: [],
+        configOptions: {
+            service: {
+                name: 'Service',
+                type: 'select',
+                possibleValues: () => {
+                    const rosStore = useRosStore()
+                    return Object.keys(rosStore.services)
+                },
             },
         },
     },
