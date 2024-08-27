@@ -23,6 +23,11 @@ const call = () => {
     }
 }
 
+const updateParameters = (value) => {
+    alert(value)
+    console.log(value)
+}
+
 const fetchServiceType = () => {
     serviceType.value = null
 
@@ -129,6 +134,7 @@ defineExpose({
                     <code class="content-message">
                         <ServiceParameters
                             :parameters="serviceRequestDetails"
+                            @update="(value) => updateParameters(value)"
                         />
                     </code>
                 </template>

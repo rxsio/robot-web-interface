@@ -7,7 +7,10 @@ const props = defineProps(['name', 'type'])
 <template>
     <span>
         <span class="parameters-key">{{ props.name }}:</span>
-        <input class="parameter-input" />
+        <input
+            class="parameter-input"
+            @input="(event) => $emit('update', event.target.value)"
+        />
         {{ props.type }}
     </span>
 </template>
