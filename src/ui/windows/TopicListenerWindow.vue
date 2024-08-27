@@ -6,8 +6,9 @@ import { defineProps, onBeforeUnmount, ref, watch } from 'vue'
 const props = defineProps(['extraConfig'])
 
 const rosStore = useRosStore()
+
 const topic = ref(null)
-const result = ref(JSON.stringify({ a: { b: 3 }, c: 'test' }, null, 2))
+const result = ref(null)
 
 const clear = () => {
     result.value = null
@@ -18,7 +19,7 @@ watch(
     // eslint-disable-next-line no-unused-vars
     (oldVal, newVal, _) => {
         if (topic.value !== null) {
-            topic.unsubscribe()
+            topic.value.unsubscribe()
         }
 
         topic.value = useTopic(
@@ -33,7 +34,7 @@ watch(
 
 onBeforeUnmount(() => {
     if (topic.value !== null) {
-        topic.unsubscribe()
+        topic.value.unsubscribe()
     }
 })
 </script>

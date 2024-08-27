@@ -1,11 +1,43 @@
 <script setup>
-import { defineProps } from 'vue'
+import { useRosStore } from '@/stores'
+import { defineProps, ref, watch } from 'vue'
 
 const props = defineProps(['extraConfig'])
+
+const rosStore = useRosStore()
+
+const serviceType = ref(null)
 
 const call = () => {
     alert('Call service')
 }
+
+watch(
+    () => [props.extraConfig.service, rosStore.ros],
+    // eslint-disable-next-line no-unused-vars
+    (oldValue, newValue, onCleanup) => {
+        serviceType.value = null
+
+        if (rosStore.ros === null) {
+            return
+        }
+
+        rosStore.ros.getServiceType(
+            props.extraConfig.service,
+            (newServiceType) => {
+                serviceType.value = newServiceType
+            },
+            (error) => {
+                console.warn(
+                    'Cannot get service type. Service name: ',
+                    props.extraConfig.service,
+                    ', error: ',
+                    error
+                )
+            }
+        )
+    }
+)
 </script>
 
 <template>
@@ -20,10 +52,15 @@ const call = () => {
         <div v-if="props.extraConfig.service">
             <div class="content-name">
                 {{ props.extraConfig.service || 'Unknown' }}
+                <br />
+                <div class="content-small">
+                    Type: {{ serviceType || 'Unknown' }}
+                </div>
             </div>
             <v-btn
                 @click="call"
                 color="primary"
+                :disabled="!serviceType"
             >
                 <v-icon>mdi-broadcast</v-icon>
                 Call
