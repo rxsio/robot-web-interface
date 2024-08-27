@@ -174,28 +174,26 @@ defineExpose({
             <template v-else>
                 <div class="content-small">Fetching request details...</div>
             </template>
-            
         </div>
-            <v-btn
-                @click="clear"
-                color="error"
-                block
-                v-if="requestResponse || requestError"
-                :disabled="!serviceType"
-            >
-                <v-icon>mdi-delete-outline</v-icon>
-                Clear
-            </v-btn>
-            <v-btn
-                @click="call"
-                color="primary"
-                block
-                :disabled="!serviceType"
-            >
-                <v-icon>mdi-broadcast</v-icon>
-                Call
-            </v-btn>
-        </div>
+        <v-btn
+            @click="clear"
+            color="error"
+            block
+            v-if="requestResponse || requestError"
+            :disabled="!serviceType"
+        >
+            <v-icon>mdi-delete-outline</v-icon>
+            Clear
+        </v-btn>
+        <v-btn
+            @click="call"
+            color="primary"
+            block
+            :disabled="!serviceType"
+        >
+            <v-icon>mdi-broadcast</v-icon>
+            Call
+        </v-btn>
     </div>
 </template>
 
