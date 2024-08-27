@@ -9,16 +9,8 @@ const result = ref({})
 
 const update = (key, value) => {
     result[key] = value
-    emit('update', result)
+    emit('update', result.value)
 }
-
-/*
-    @TODO: Dodaj budowanie odpowiedzi przez zejscie w dol i kaskade callbackow do gory
-    @TODO: Ostatni poziom (ServiceWindow) powinno być w stanie otrzymywać budowany obiekt
-    @TODO: Zbuduj pierwotny, jako pusty
-    @TODO:  - przy zmianach w inputach dodawaj te klucze do obiektu
-    @TODO:  - w przypadku grup niech zwracaja obiekty
- */
 </script>
 
 <template>
