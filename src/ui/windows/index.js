@@ -80,7 +80,7 @@ export default {
                 type: 'select',
                 possibleValues: () => {
                     const rosStore = useRosStore()
-                    return Object.keys(rosStore.services)
+                    return rosStore.services
                 },
             },
         },

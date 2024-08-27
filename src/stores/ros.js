@@ -59,7 +59,7 @@ export const useRosStore = defineStore('ros', () => {
 
             ros.value.getTopics(
                 (newTopics) => {
-                    topics.value = newTopics.topics.forEach(
+                    topics.value = newTopics.topics.reduce(
                         (obj, topic, index) => {
                             obj[topic] = newTopics.types[index]
                             return obj
