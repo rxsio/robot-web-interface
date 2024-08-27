@@ -59,12 +59,12 @@ export const useRosStore = defineStore('ros', () => {
 
             ros.value.getTopics(
                 (newTopics) => {
-                    topics.value = newTopics.topics.reduce(
-                        (obj, topic, index) => {
-                            obj[topic] = newTopics.types[index]
-                            return obj
-                        }
-                    )
+                    let result = {}
+
+                    newTopics.topics.forEach((key, index) => {
+                        result[key] = newTopics.types[index]
+                    })
+                    topics.value = result
                 },
                 (error) => {
                     console.warn('Cannot get topics list', error)
