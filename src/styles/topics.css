@@ -1,0 +1,32 @@
+.content {
+    width: calc(100% - 16px);
+    margin: 8px;
+}
+.content-error {
+    height: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+    color: var(--v-error-base);
+}
+.content-error .v-icon {
+    font-size: 3em;
+    color: var(--v-error-base);
+}
+
+.content-name {
+    font-weight: bold;
+}
+.content-message {
+    padding: 8px;
+    font-size: 0.75em;
+    background-color: rgba(0, 0, 0, 0.1);
+}
+.content-message code {
+    padding: 0;
+    background: 0;
+}
+.content-small {
+    font-size: 0.75em;
+}

@@ -1,12 +1,17 @@
 <script setup>
 import { useTopic } from '@/core/roslibExtensions'
 import { useRosStore } from '@/stores'
-import { defineProps, ref, watch } from 'vue'
+import { defineProps, onBeforeUnmount, ref, watch } from 'vue'
 
 const props = defineProps(['extraConfig'])
 
 const rosStore = useRosStore()
 const topic = ref(null)
+const result = ref(JSON.stringify({ a: { b: 3 }, c: 'test' }, null, 2))
+
+const clear = () => {
+    result.value = null
+}
 
 watch(
     () => [props.extraConfig.topic],
@@ -21,22 +26,52 @@ watch(
             rosStore.topics[props.extraConfig.topic]
         )
         topic.value.subscribe((msg) => {
-            console.log('msg', msg)
+            result.value = msg
         })
     }
 )
+
+onBeforeUnmount(() => {
+    if (topic.value !== null) {
+        topic.unsubscribe()
+    }
+})
 </script>
 
 <template>
-    <div>
-        TOPIC LISTENER: {{ props.extraConfig.topic }}
+    <div class="content">
         <div
-            v-if="!props.extraConfig.topic"
-            color="error"
+            v-if="!!props.extraConfig.topic"
+            class="content-error"
         >
+            <v-icon>mdi-magnify</v-icon>
             Topic not selected
+        </div>
+        <div v-if="!props.extraConfig.topic">
+            <div class="content-name">
+                {{ props.extraConfig.topic || 'Unknown' }}
+            </div>
+
+            <div v-if="result">
+                <pre class="content-message"><code>{{ result }}</code></pre>
+                <br />
+                <v-btn
+                    @click="clear"
+                    color="error"
+                >
+                    <v-icon>mdi-broadcast</v-icon>
+                    Clear
+                </v-btn>
+            </div>
+
+            <div
+                class="content-small"
+                v-if="!result"
+            >
+                Waiting for message...
+            </div>
         </div>
     </div>
 </template>
 
-<style scoped></style>
+<style scoped src="@/styles/topics.css"></style>
