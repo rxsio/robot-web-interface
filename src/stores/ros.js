@@ -57,7 +57,7 @@ export const useRosStore = defineStore('ros', () => {
 
             connected.value = ros.value.isConnected
 
-            ros.getTopics(
+            ros.value.getTopics(
                 (newTopics) => {
                     topics.value = newTopics.topics.forEach(
                         (obj, topic, index) => {
@@ -71,7 +71,7 @@ export const useRosStore = defineStore('ros', () => {
                     topics.value = {}
                 }
             )
-            ros.getServices(
+            ros.value.getServices(
                 (newServices) => {
                     services.value = newServices
                 },
