@@ -51,7 +51,7 @@ export default {
         icon: 'mdi-eye-outline',
         defaultShape: {
             w: 4,
-            h: 2,
+            h: 15,
         },
         barControls: [],
         configOptions: {
@@ -71,7 +71,7 @@ export default {
         icon: 'mdi-broadcast',
         defaultShape: {
             w: 4,
-            h: 2,
+            h: 15,
         },
         barControls: [],
         configOptions: {

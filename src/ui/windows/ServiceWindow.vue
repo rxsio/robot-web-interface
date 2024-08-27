@@ -41,7 +41,7 @@ watch(
 )
 
 watch(
-    () => [serviceType],
+    () => [serviceType.value],
     // eslint-disable-next-line no-unused-vars
     (oldValue, newValue, onCleanup) => {
         serviceRequestDetails.value = null
