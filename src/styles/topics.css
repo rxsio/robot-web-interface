@@ -31,3 +31,7 @@
 .content-small {
     font-size: 0.75em;
 }
+
+.error {
+    color: var(--v-error-base);
+}

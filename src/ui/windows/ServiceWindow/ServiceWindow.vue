@@ -11,6 +11,8 @@ const rosStore = useRosStore()
 const serviceType = ref(null)
 const serviceRequestDetails = ref(null)
 const request = ref({})
+const requestResponse = ref(null)
+const requestError = ref(null)
 
 const call = () => {
     if (
@@ -18,8 +20,21 @@ const call = () => {
         serviceType.value !== null &&
         serviceRequestDetails.value !== null
     ) {
+        requestError.value = null
+
         callService(props.extraConfig.service, serviceType.value, request.value)
+            .then((serviceResponse) => {
+                requestResponse.value = serviceResponse
+            })
+            .catch((error) => {
+                requestError.value = error
+            })
     }
+}
+
+const clear = () => {
+    requestError.value = null
+    requestResponse.value = null
 }
 
 const updateParameters = (value) => {
@@ -29,6 +44,7 @@ const updateParameters = (value) => {
 const fetchServiceType = () => {
     serviceType.value = null
     request.value = null
+    requestResponse.value = null
 
     if (rosStore.ros === null) {
         return
@@ -140,10 +156,36 @@ defineExpose({
                 <template v-else>
                     <div class="content-small">No request parameters</div>
                 </template>
+
+                <template v-if="requestResponse">
+                    <div class="content-small">Response</div>
+                    <pre
+                        class="content-message"
+                    ><code>{{ requestResponse }}</code></pre>
+                </template>
+
+                <template v-if="requestResponse">
+                    <div class="content-small error">Error</div>
+                    <pre
+                        class="content-message error"
+                    ><code>{{ requestError }}</code></pre>
+                </template>
             </template>
             <template v-else>
                 <div class="content-small">Fetching request details...</div>
             </template>
+            
+        </div>
+            <v-btn
+                @click="clear"
+                color="error"
+                block
+                v-if="requestResponse || requestError"
+                :disabled="!serviceType"
+            >
+                <v-icon>mdi-delete-outline</v-icon>
+                Clear
+            </v-btn>
             <v-btn
                 @click="call"
                 color="primary"
