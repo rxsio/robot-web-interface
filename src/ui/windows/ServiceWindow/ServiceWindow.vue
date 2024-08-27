@@ -2,7 +2,7 @@
 import { callService } from '@/core/roslibExtensions'
 import { useRosStore } from '@/stores'
 import ServiceParameters from '@/ui/windows/ServiceWindow/components/ServiceParameters.vue'
-import { defineProps, ref, watch } from 'vue'
+import { defineExpose, defineProps, ref, watch } from 'vue'
 
 const props = defineProps(['extraConfig'])
 
@@ -23,31 +23,67 @@ const call = () => {
     }
 }
 
+const fetchServiceType = () => {
+    serviceType.value = null
+
+    if (rosStore.ros === null) {
+        return
+    }
+
+    rosStore.ros.getServiceType(
+        props.extraConfig.service,
+        (newServiceType) => {
+            serviceType.value = newServiceType
+        },
+        (error) => {
+            console.warn(
+                'Cannot get service type. Service name: ',
+                props.extraConfig.service,
+                ', error: ',
+                error
+            )
+        }
+    )
+}
+
+const fetchServiceRequestDetails = () => {
+    serviceRequestDetails.value = null
+
+    if (rosStore.ros === null) {
+        return
+    }
+
+    rosStore.ros.getServiceRequestDetails(
+        serviceType.value,
+        (requestDetails) => {
+            serviceRequestDetails.value = rosStore.ros.decodeTypeDefs(
+                requestDetails.typedefs
+            )
+        },
+        (error) => {
+            console.warn(
+                'Cannot get service request details. Service type: ',
+                serviceType.value,
+                ', error: ',
+                error
+            )
+        }
+    )
+}
+
+const control = (id) => {
+    switch (id) {
+        case 'reload':
+            fetchServiceType()
+            break
+    }
+}
+
 watch(
     () => [props.extraConfig.service, rosStore.ros],
     // eslint-disable-next-line no-unused-vars
     (oldValue, newValue, onCleanup) => {
-        console.log(serviceType)
-        serviceType.value = null
-
-        if (rosStore.ros === null) {
-            return
-        }
-
-        rosStore.ros.getServiceType(
-            props.extraConfig.service,
-            (newServiceType) => {
-                serviceType.value = newServiceType
-            },
-            (error) => {
-                console.warn(
-                    'Cannot get service type. Service name: ',
-                    props.extraConfig.service,
-                    ', error: ',
-                    error
-                )
-            }
-        )
+        fetchServiceType()
     }
 )
 
@@ -55,29 +91,13 @@ watch(
     () => [serviceType.value],
     // eslint-disable-next-line no-unused-vars
     (oldValue, newValue, onCleanup) => {
-        serviceRequestDetails.value = null
-
-        if (rosStore.ros === null) {
-            return
-        }
-
-        rosStore.ros.getServiceRequestDetails(
-            serviceType.value,
-            (requestDetails) => {
-                serviceRequestDetails.value =
-                    rosStore.ros.decodeTypeDefs(requestDetails)
-            },
-            (error) => {
-                console.warn(
-                    'Cannot get service request details. Service type: ',
-                    serviceType.value,
-                    ', error: ',
-                    error
-                )
-            }
-        )
+        fetchServiceRequestDetails()
     }
 )
+
+defineExpose({
+    control,
+})
 </script>
 
 <template>
@@ -109,6 +129,7 @@ watch(
             <v-btn
                 @click="call"
                 color="primary"
+                block
                 :disabled="!serviceType"
             >
                 <v-icon>mdi-broadcast</v-icon>

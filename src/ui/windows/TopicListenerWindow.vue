@@ -1,7 +1,7 @@
 <script setup>
 import { useTopic } from '@/core/roslibExtensions'
 import { useRosStore } from '@/stores'
-import { defineProps, onBeforeUnmount, ref, watch } from 'vue'
+import { defineExpose, defineProps, onBeforeUnmount, ref, watch } from 'vue'
 
 const props = defineProps(['extraConfig'])
 
@@ -10,25 +10,37 @@ const rosStore = useRosStore()
 const topic = ref(null)
 const result = ref(null)
 
+const start = () => {
+    if (topic.value !== null) {
+        topic.value.unsubscribe()
+    }
+
+    topic.value = useTopic(
+        props.extraConfig.topic,
+        rosStore.topics[props.extraConfig.topic]
+    )
+    topic.value.subscribe((msg) => {
+        result.value = msg
+    })
+}
+
 const clear = () => {
     result.value = null
+}
+
+const control = (id) => {
+    switch (id) {
+        case 'reload':
+            start()
+            break
+    }
 }
 
 watch(
     () => [props.extraConfig.topic, rosStore.ros],
     // eslint-disable-next-line no-unused-vars
     (oldVal, newVal, _) => {
-        if (topic.value !== null) {
-            topic.value.unsubscribe()
-        }
-
-        topic.value = useTopic(
-            props.extraConfig.topic,
-            rosStore.topics[props.extraConfig.topic]
-        )
-        topic.value.subscribe((msg) => {
-            result.value = msg
-        })
+        start()
     }
 )
 
@@ -36,6 +48,10 @@ onBeforeUnmount(() => {
     if (topic.value !== null) {
         topic.value.unsubscribe()
     }
+})
+
+defineExpose({
+    control,
 })
 </script>
 
@@ -59,6 +75,7 @@ onBeforeUnmount(() => {
                 <v-btn
                     @click="clear"
                     color="error"
+                    block
                 >
                     <v-icon>mdi-delete-outline</v-icon>
                     Clear

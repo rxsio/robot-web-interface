@@ -53,7 +53,14 @@ export default {
             w: 4,
             h: 15,
         },
-        barControls: [],
+        barControls: [
+            {
+                id: 'reload',
+                name: 'Reload',
+                icon: 'mdi-reload',
+                mode: () => Modes.Normal,
+            },
+        ],
         configOptions: {
             topic: {
                 name: 'Topic',
@@ -73,7 +80,14 @@ export default {
             w: 4,
             h: 15,
         },
-        barControls: [],
+        barControls: [
+            {
+                id: 'reload',
+                name: 'Reload',
+                icon: 'mdi-reload',
+                mode: () => Modes.Normal,
+            },
+        ],
         configOptions: {
             service: {
                 name: 'Service',
