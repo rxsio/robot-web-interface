@@ -27,6 +27,7 @@ watch(
     () => [props.extraConfig.service, rosStore.ros],
     // eslint-disable-next-line no-unused-vars
     (oldValue, newValue, onCleanup) => {
+        console.log(serviceType)
         serviceType.value = null
 
         if (rosStore.ros === null) {
@@ -82,7 +83,7 @@ watch(
 <template>
     <div class="content">
         <div
-            v-if="!!props.extraConfig.service"
+            v-if="!props.extraConfig.service"
             class="content-error"
         >
             <v-icon>mdi-magnify</v-icon>
