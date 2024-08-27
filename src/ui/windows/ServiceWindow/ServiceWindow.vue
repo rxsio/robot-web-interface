@@ -10,6 +10,7 @@ const rosStore = useRosStore()
 
 const serviceType = ref(null)
 const serviceRequestDetails = ref(null)
+const request = ref({})
 
 const call = () => {
     if (
@@ -17,19 +18,17 @@ const call = () => {
         serviceType.value !== null &&
         serviceRequestDetails.value !== null
     ) {
-        // verify and collect
-
-        callService(props.extraConfig.service, serviceType.value)
+        callService(props.extraConfig.service, serviceType.value, request.value)
     }
 }
 
 const updateParameters = (value) => {
-    alert(value)
-    console.log(value)
+    request.value = value
 }
 
 const fetchServiceType = () => {
     serviceType.value = null
+    request.value = null
 
     if (rosStore.ros === null) {
         return
