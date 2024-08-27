@@ -1,5 +1,5 @@
 import { Modes, useGStreamerStore, useRosStore } from '@/stores'
-import ServiceWindow from '@/ui/windows/ServiceWindow.vue'
+import ServiceWindow from '@/ui/windows/ServiceWindow/ServiceWindow.vue'
 import TopicListenerWindow from '@/ui/windows/TopicListenerWindow.vue'
 
 import CameraWindow from './CameraWindow.vue'

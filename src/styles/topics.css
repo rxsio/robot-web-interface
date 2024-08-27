@@ -19,6 +19,7 @@
     font-weight: bold;
 }
 .content-message {
+    display: block;
     padding: 8px;
     font-size: 0.75em;
     background-color: rgba(0, 0, 0, 0.1);
