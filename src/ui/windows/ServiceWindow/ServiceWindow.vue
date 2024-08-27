@@ -122,13 +122,22 @@ defineExpose({
                 </div>
             </div>
             <template v-if="serviceRequestDetails">
-                <div class="content-small">Request</div>
-                <code class="content-message">
-                    <ServiceParameters :parameters="serviceRequestDetails" />
-                </code>
+                <template
+                    v-if="Object.keys(serviceRequestDetails).length !== 0"
+                >
+                    <div class="content-small">Request Details</div>
+                    <code class="content-message">
+                        <ServiceParameters
+                            :parameters="serviceRequestDetails"
+                        />
+                    </code>
+                </template>
+                <template v-else>
+                    <div class="content-small">No request parameters</div>
+                </template>
             </template>
             <template v-else>
-                <div class="content-small">Fetching request...</div>
+                <div class="content-small">Fetching request details...</div>
             </template>
             <v-btn
                 @click="call"
