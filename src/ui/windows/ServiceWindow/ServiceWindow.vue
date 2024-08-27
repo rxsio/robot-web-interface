@@ -53,6 +53,10 @@ const fetchServiceRequestDetails = () => {
         return
     }
 
+    if (serviceType.value === null) {
+        return
+    }
+
     rosStore.ros.getServiceRequestDetails(
         serviceType.value,
         (requestDetails) => {
