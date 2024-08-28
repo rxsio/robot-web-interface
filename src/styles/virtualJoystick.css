@@ -1,0 +1,25 @@
+.content {
+    width: calc(100% - 16px);
+    margin: 0 8px;
+}
+
+.content-center {
+    height: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+}
+.content-center .v-icon {
+    font-size: 3em;
+}
+
+.content-joystick {
+    display: flex;
+    justify-content: center;
+}
+
+.content-controls {
+    max-width: 400px;
+    margin: 0 auto;
+}

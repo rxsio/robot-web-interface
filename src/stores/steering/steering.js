@@ -37,6 +37,7 @@ export const useSteeringStore = defineStore('steering', () => {
         inverseCylinder: 'mdi-axis-z-rotate-clockwise',
 
         keyboard: 'mdi-keyboard',
+        virtualJoystick: 'mdi-gesture-tap',
     }
 
     const currentInput = computed(() => {
@@ -74,13 +75,18 @@ export const useSteeringStore = defineStore('steering', () => {
             }
 
             if (currentInput.value === InputType.Keyboard) {
-                return InputType.Keyboard
+                return keyboardSteeringStore.currentMode
             }
+
             return InputType.None
         },
         set(newValue) {
             if (currentInput.value === InputType.Joystick) {
                 joystickSteeringStore.currentMode = newValue
+            }
+
+            if (currentInput.value === InputType.Keyboard) {
+                keyboardSteeringStore.currentMode = newValue
             }
         },
     })
@@ -117,6 +123,7 @@ export const useSteeringStore = defineStore('steering', () => {
     }
 
     return {
+        currentInput,
         currentMode,
         enabled,
         currentGear,

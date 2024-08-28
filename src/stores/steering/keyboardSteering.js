@@ -17,6 +17,9 @@ export const useKeyboardSteeringStore = defineStore('keyboardSteering', () => {
         left: false,
     })
     const cmdVel = ref(null)
+    const virtualJoystick = ref(false)
+    const virtualJoystickX = ref(0)
+    const virtualJoystickY = ref(0)
 
     const clickListener = ref(null)
     const keyDownListener = ref(null)
@@ -30,6 +33,28 @@ export const useKeyboardSteeringStore = defineStore('keyboardSteering', () => {
         { linear: 1.0, angular: 1.0 },
     ])
     const config = computed(() => gearConfig.value[gear.value - 1])
+
+    const currentMode = computed({
+        get() {
+            if (virtualJoystick.value) {
+                return 'virtualJoystick'
+            }
+
+            return 'keyboard'
+        },
+        set(newMode) {
+            if (newMode == 'virtualJoystick') {
+                virtualJoystick.value = true
+            } else {
+                virtualJoystick.value = false
+            }
+        },
+    })
+
+    const updateVirtualJoystickPosition = (x, y) => {
+        virtualJoystickX.value = x
+        virtualJoystickY.value = y
+    }
 
     function takeOverControl() {
         if (!rosStore.ros) return
@@ -70,15 +95,31 @@ export const useKeyboardSteeringStore = defineStore('keyboardSteering', () => {
     }
 
     function transmitStatus() {
-        const keys = pressedKeys.value
-        let x = 0.0,
-            y = 0.0
+        let x = 0.0
+        let y = 0.0
 
-        if (keys.forwards && !keys.backwards) x = 1.0
-        if (keys.backwards && !keys.forwards) x = -1.0
+        if (currentMode === 'keyboard') {
+            const keys = pressedKeys.value
 
-        if (keys.right && !keys.left) y = -1.0
-        if (keys.left && !keys.right) y = 1.0
+            if (keys.forwards && !keys.backwards) {
+                x = 1.0
+            }
+            if (keys.backwards && !keys.forwards) {
+                x = -1.0
+            }
+
+            if (keys.right && !keys.left) {
+                y = -1.0
+            }
+            if (keys.left && !keys.right) {
+                y = 1.0
+            }
+        }
+
+        if (currentMode === 'virtualJoystick') {
+            x = virtualJoystickX.value
+            y = virtualJoystickY.value
+        }
 
         x *= config.value.linear
         y *= config.value.angular
@@ -190,7 +231,8 @@ export const useKeyboardSteeringStore = defineStore('keyboardSteering', () => {
         gear,
         config,
         enabled,
-
+        currentMode,
+        updateVirtualJoystickPosition,
         takeOverControl,
         giveUpControl,
         start,
