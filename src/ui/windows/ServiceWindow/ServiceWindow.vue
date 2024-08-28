@@ -28,6 +28,13 @@ const call = () => {
             })
             .catch((error) => {
                 requestError.value = error
+                console.warn(
+                    'Error occurred when calling service',
+                    props.extraConfig.service,
+                    serviceType.value,
+                    request.value,
+                    error
+                )
             })
     }
 }
@@ -164,7 +171,7 @@ defineExpose({
                     ><code>{{ requestResponse }}</code></pre>
                 </template>
 
-                <template v-if="requestResponse">
+                <template v-if="requestError">
                     <div class="content-small error">Error</div>
                     <pre
                         class="content-message error"
