@@ -63,7 +63,9 @@ export const useKeyboardSteeringStore = defineStore('keyboardSteering', () => {
 
         if (!clickListener.value) {
             clickListener.value = document.addEventListener('click', () => {
-                steeringStore.giveUpControl()
+                if (currentMode.value === 'keyboard') {
+                    steeringStore.giveUpControl()
+                }
             })
         }
 
@@ -82,6 +84,7 @@ export const useKeyboardSteeringStore = defineStore('keyboardSteering', () => {
 
     function giveUpControl() {
         enabled.value = false
+        currentMode.value = 'keyboard'
 
         if (clickListener.value) {
             document.removeEventListener('click', clickListener.value)
