@@ -72,7 +72,7 @@ export const useKeyboardSteeringStore = defineStore('keyboardSteering', () => {
         cmdVel.value = new ROSLIB.Topic({
             ros: rosStore.ros,
             name: '/cmd_vel',
-            messageType: 'geometry_msgs/Twist',
+            messageType: 'geometry_msgs/StampedTwist',
         })
 
         if (statusTransmitter.value) {
@@ -128,15 +128,18 @@ export const useKeyboardSteeringStore = defineStore('keyboardSteering', () => {
         y *= config.value.angular
 
         let twist = new ROSLIB.Message({
-            linear: {
-                x: x,
-                y: 0,
-                z: 0,
-            },
-            angular: {
-                x: 0,
-                y: 0,
-                z: y,
+            header: 'auto',
+            twist: {
+                linear: {
+                    x: x,
+                    y: 0,
+                    z: 0,
+                },
+                angular: {
+                    x: 0,
+                    y: 0,
+                    z: y,
+                },
             },
         })
         cmdVel.value.publish(twist)
