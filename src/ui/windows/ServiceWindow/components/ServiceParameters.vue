@@ -8,8 +8,8 @@ const emit = defineEmits(['update'])
 const result = ref({})
 
 const update = (key, value) => {
-    result[key] = value
-    emit('update', result.value)
+    result.value[key] = value
+    emit('update', JSON.parse(JSON.stringify(result.value)))
 }
 </script>
 
@@ -22,7 +22,7 @@ const update = (key, value) => {
             :key="key.toString()"
             class="parameter"
         >
-            <template v-if="typeof props.parameters[key] !== 'object'">
+            <template v-if="typeof props.parameters['_' + key] !== 'object'">
                 <ServiceParameter
                     :name="key"
                     :type="props.parameters['_' + key]"

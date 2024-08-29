@@ -20,7 +20,6 @@ const call = () => {
         serviceType.value !== null &&
         serviceRequestDetails.value !== null
     ) {
-        console.log(request.value)
         requestError.value = null
 
         callService(props.extraConfig.service, serviceType.value, request.value)
@@ -46,7 +45,6 @@ const clear = () => {
 }
 
 const updateParameters = (value) => {
-    console.log(value)
     request.value = value
 }
 
@@ -142,7 +140,7 @@ defineExpose({
             <v-icon>mdi-magnify</v-icon>
             Service not selected
         </div>
-        <div v-if="props.extraConfig.service">
+        <div v-else>
             <div class="content-name">
                 {{ props.extraConfig.service || 'Unknown' }}
                 <br />
