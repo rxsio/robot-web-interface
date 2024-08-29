@@ -128,7 +128,11 @@ export const useKeyboardSteeringStore = defineStore('keyboardSteering', () => {
         y *= config.value.angular
 
         let twist = new ROSLIB.Message({
-            header: 'auto',
+            header: {
+                seq: 1,
+                stamp: 0,
+                frame_id: currentMode.value,
+            },
             twist: {
                 linear: {
                     x: x,
