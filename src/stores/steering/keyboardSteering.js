@@ -131,7 +131,9 @@ export const useKeyboardSteeringStore = defineStore('keyboardSteering', () => {
             header: {
                 stamp: {
                     sec: Math.floor(new Date().getTime() / 1000),
-                    nsec: 0,
+                    nsec: Math.floor(
+                        (new Date().getTime() % 1000) * 1000 * 1000
+                    ),
                 },
                 frame_id: currentMode.value,
             },
