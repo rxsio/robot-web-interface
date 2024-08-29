@@ -63,7 +63,7 @@ export const useKeyboardSteeringStore = defineStore('keyboardSteering', () => {
 
         if (!clickListener.value) {
             clickListener.value = document.addEventListener('click', () => {
-                if (currentMode === 'keyboard') {
+                if (currentMode.value === 'keyboard') {
                     steeringStore.giveUpControl()
                 }
             })
@@ -100,8 +100,8 @@ export const useKeyboardSteeringStore = defineStore('keyboardSteering', () => {
     function transmitStatus() {
         let x = 0.0
         let y = 0.0
-
-        if (currentMode === 'keyboard') {
+        console.log(currentMode, currentMode.value)
+        if (currentMode.value === 'keyboard') {
             const keys = pressedKeys.value
 
             if (keys.forwards && !keys.backwards) {
@@ -119,7 +119,7 @@ export const useKeyboardSteeringStore = defineStore('keyboardSteering', () => {
             }
         }
 
-        if (currentMode === 'virtualJoystick') {
+        if (currentMode.value === 'virtualJoystick') {
             x = virtualJoystickX.value
             y = virtualJoystickY.value
         }
