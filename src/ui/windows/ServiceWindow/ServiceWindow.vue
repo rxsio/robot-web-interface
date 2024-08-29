@@ -20,6 +20,7 @@ const call = () => {
         serviceType.value !== null &&
         serviceRequestDetails.value !== null
     ) {
+        console.log(request.value)
         requestError.value = null
 
         callService(props.extraConfig.service, serviceType.value, request.value)
@@ -45,6 +46,7 @@ const clear = () => {
 }
 
 const updateParameters = (value) => {
+    console.log(value)
     request.value = value
 }
 
