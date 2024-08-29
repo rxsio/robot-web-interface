@@ -130,7 +130,7 @@ export const useKeyboardSteeringStore = defineStore('keyboardSteering', () => {
         let twist = new ROSLIB.Message({
             header: {
                 stamp: {
-                    sec: new Date().getTime() / 1000,
+                    sec: Math.floor(new Date().getTime() / 1000),
                     nsec: 0,
                 },
                 frame_id: currentMode.value,
