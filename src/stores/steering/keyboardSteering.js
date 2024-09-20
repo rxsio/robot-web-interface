@@ -100,7 +100,7 @@ export const useKeyboardSteeringStore = defineStore('keyboardSteering', () => {
     function transmitStatus() {
         let x = 0.0
         let y = 0.0
-        console.log(currentMode, currentMode.value)
+
         if (currentMode.value === 'keyboard') {
             const keys = pressedKeys.value
 
