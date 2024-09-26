@@ -1,10 +1,10 @@
 {
     "views": {
-        "dynamic": false,
-        "url": "/views.json"
+        "dynamic": true,
+        "url": "/config/views.json"
     },
     "layout": {
         "dynamic": true,
-        "url": "/layout.json"
+        "url": "/config/layout.json"
     }
 }
