@@ -112,7 +112,7 @@ for mount in config.mounts:
         EMountType.PAGE: PageStaticFiles
     }.get(mount.type, SPAStaticFiles)
 
-    directory = os.path.join(os.getcwd(), mount.directory)
+    directory = mount.directory # os.path.join(os.getcwd(), mount.directory)
     if not os.path.exists(directory):
         warnings.warn(f"Cannot find directory {mount.directory} for mount {mount.path}")
         continue
