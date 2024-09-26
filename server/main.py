@@ -117,6 +117,8 @@ for mount in config.mounts:
         warnings.warn(f"Cannot find directory {mount.directory} for mount {mount.path}")
         continue
 
+    print(f"Mounting {directory} as {mount.path}")
+    
     app.mount(
         mount.path,
         static_files(directory=directory),
