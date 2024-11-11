@@ -72,7 +72,7 @@ export const useKeyboardSteeringStore = defineStore('keyboardSteering', () => {
         cmdVel.value = new ROSLIB.Topic({
             ros: rosStore.ros,
             name: '/cmd_vel',
-            messageType: 'geometry_msgs/StampedTwist',
+            messageType: 'geometry_msgs/TwistStamped',
         })
 
         if (statusTransmitter.value) {
