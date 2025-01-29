@@ -10,6 +10,7 @@ from starlette.types import Scope
 
 from starlette.staticfiles import StaticFiles
 
+PhotoExtensions = ["jpg"]
 
 class FTPStaticFiles(StaticFiles):
 
@@ -32,12 +33,13 @@ class FTPStaticFiles(StaticFiles):
         items = os.listdir(full_path)
         directories = [item for item in items if os.path.isdir(os.path.join(full_path, item))]
         files = [item for item in items if os.path.isfile(os.path.join(full_path, item))]
-        print(files, directories)
+
         try:
             context = {
                 "path": path,
                 "files": files,
-                "directories": directories
+                "directories": directories,
+                "is_360_photo": lambda x: any(x.lower().endswith(y) for y in PhotoExtensions)
             }
             return self.templates.TemplateResponse(
                 "ftp.jinja",

@@ -141,7 +141,7 @@
                             <div class="control control-csv" data-src="{{ file }}">📈</div>
                         {% endif %}
 
-                        {% if file.endswith('jpg') %}
+                        {% if is_360_photo(file) %}
                             <div class="control control-360" data-src="{{ file }}">360</div>
                         {% endif %}
 
