@@ -3,9 +3,8 @@ import { computed, ref } from 'vue'
 import { defineStore } from 'pinia'
 
 export const useRosStore = defineStore('ros', () => {
-    const address = ref(window.location.hostname)
-    //const address = ref('firo2.local')
-    const port = ref(8081)
+    const address = ref(`ros.${window.location.hostname}`)
+    const port = ref(443)
     const url = computed(() =>
         new URL(`wss://${address.value}:${port.value}`).toString()
     )
