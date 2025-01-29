@@ -26,11 +26,6 @@ if config_turn is None:
 
 templates = Jinja2Templates(directory="templates")
 
-ssl = {
-    "ssl_keyfile": os.path.join(os.getcwd(), config.ssl.key),
-    "ssl_certfile": os.path.join(os.getcwd(), config.ssl.certificate)
-}
-
 app = FastAPI()
 
 # region Models
@@ -140,6 +135,5 @@ if __name__ == "__main__":
     uvicorn.run(
         "main:app",
         port=443,
-        host="0.0.0.0",
-        **ssl
+        host="0.0.0.0"
     )
