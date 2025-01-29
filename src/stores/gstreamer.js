@@ -10,8 +10,8 @@ export const CamerasStatus = {
 
 export const useGStreamerStore = defineStore('gstreamer', () => {
     const protocol = 'wss'
-    const address = window.location.hostname
-    const port = 8443
+    const address = `webrtc.${window.location.hostname}`;
+    const port = 443
 
     const url = computed(() =>
         new URL(`${protocol}://${address}:${port}`).toString()
