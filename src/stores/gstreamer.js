@@ -19,18 +19,18 @@ export const useGStreamerStore = defineStore('gstreamer', () => {
     const config = computed(async () => {
         let turnServers = null
 
-        await fetch(`https://${window.location.hostname}/getCamerasConfiguration`).then(
-            async (r) => {
-                if (r.status !== 200) {
-                    turn.value = false
-                    console.error('Cannot get TURN configuration')
-                } else {
-                    turn.value = true
-                    turnServers = await r.json()
-                    console.log('TURN Configuration', turnServers)
-                }
+        await fetch(
+            `https://${window.location.hostname}/getCamerasConfiguration`
+        ).then(async (r) => {
+            if (r.status !== 200) {
+                turn.value = false
+                console.error('Cannot get TURN configuration')
+            } else {
+                turn.value = true
+                turnServers = await r.json()
+                console.log('TURN Configuration', turnServers)
             }
-        )
+        })
 
         const defaultServers = {
             urls: [
