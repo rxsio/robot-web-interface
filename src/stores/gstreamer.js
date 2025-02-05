@@ -19,7 +19,7 @@ export const useGStreamerStore = defineStore('gstreamer', () => {
     const config = computed(async () => {
         let turnServers = null
 
-        await fetch(`https://${address}/getCamerasConfiguration`).then(
+        await fetch(`https://${window.location.hostname}/getCamerasConfiguration`).then(
             async (r) => {
                 if (r.status !== 200) {
                     turn.value = false
