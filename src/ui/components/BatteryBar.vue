@@ -6,23 +6,23 @@ import colors from 'vuetify/lib/util/colors'
 const batteryLevelStore = useBatteryLevelStore()
 
 const coverLevel = computed(() => {
-    return 100 - batteryLevelStore.percentage + '%'
+    return (1 - batteryLevelStore.percentage) * 100 + '%'
 })
 
 const batteryColor = computed(() => {
-    if (batteryLevelStore.percentage < 10) {
+    if (batteryLevelStore.percentage < 0.1) {
         return colors.pink.base
     }
 
-    if (batteryLevelStore.percentage < 25) {
+    if (batteryLevelStore.percentage < 0.25) {
         return colors.red.base
     }
 
-    if (batteryLevelStore.percentage < 50) {
+    if (batteryLevelStore.percentage < 0.5) {
         return colors.amber.base
     }
 
-    if (batteryLevelStore.percentage < 75) {
+    if (batteryLevelStore.percentage < 0.75) {
         return colors.green.base
     }
 
