@@ -28,7 +28,9 @@ export const useKeyboardSteeringStore = defineStore('keyboardSteering', () => {
 
     // this should be controlled by a launch file
     const gearConfig = ref([
+        { linear: 0.05, angular: 0.05},
         { linear: 0.1, angular: 0.1 },
+        { linear: 0.25, angular: 0.25},
         { linear: 0.5, angular: 0.5 },
         { linear: 1.0, angular: 1.0 },
     ])
@@ -75,6 +77,8 @@ export const useKeyboardSteeringStore = defineStore('keyboardSteering', () => {
             messageType: 'geometry_msgs/TwistStamped',
         })
 
+        resetPressedKeys();
+
         if (statusTransmitter.value) {
             cancelAnimationFrame(statusTransmitter.value)
             statusTransmitter.value = null
@@ -85,6 +89,8 @@ export const useKeyboardSteeringStore = defineStore('keyboardSteering', () => {
     function giveUpControl() {
         enabled.value = false
         currentMode.value = 'keyboard'
+
+        resetPressedKeys();
 
         if (clickListener.value) {
             document.removeEventListener('click', clickListener.value)
@@ -155,9 +161,18 @@ export const useKeyboardSteeringStore = defineStore('keyboardSteering', () => {
         statusTransmitter.value = requestAnimationFrame(transmitStatus)
     }
 
+    function resetPressedKeys() {
+        pressedKeys.value = {
+            forwards: false,
+            backwards: false,
+            right: false,
+            left: false,
+        }
+    }
+
     function onKeyDown(event) {
         if (steeringStore.currentMode === 'keyboard' && steeringStore.enabled) {
-            switch (event.key) {
+            switch (event.key.toLowerCase()) {
                 case 'w':
                     pressedKeys.value.forwards = true
                     break
@@ -170,10 +185,10 @@ export const useKeyboardSteeringStore = defineStore('keyboardSteering', () => {
                 case 'd':
                     pressedKeys.value.right = true
                     break
-                case ',':
+                case 'q':
                     if (gear.value > 1) gear.value--
                     break
-                case '.':
+                case 'e':
                     if (gear.value < 3) gear.value++
                     break
             }
@@ -182,15 +197,12 @@ export const useKeyboardSteeringStore = defineStore('keyboardSteering', () => {
     function onKeyUp(event) {
         if (
             steeringStore.currentMode === 'keyboard' &&
-            event.key === ' ' &&
-            event.ctrlKey
+            event.key.toLowerCase() === 'q' &&
+            event.ctrlKey &&
+            event.shiftKey
         ) {
-            pressedKeys.value = {
-                forwards: false,
-                backwards: false,
-                right: false,
-                left: false,
-            }
+            resetPressedKeys();
+
             if (steeringStore.enabled) {
                 steeringStore.giveUpControl()
             } else {

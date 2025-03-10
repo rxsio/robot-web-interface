@@ -25,6 +25,8 @@ export const useSteeringStore = defineStore('steering', () => {
         1: 'mdi-numeric-1',
         2: 'mdi-numeric-2',
         3: 'mdi-numeric-3',
+        4: 'mdi-numeric-4',
+        5: 'mdi-numeric-5'
     }
 
     const modeIcons = {
