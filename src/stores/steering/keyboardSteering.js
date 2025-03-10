@@ -28,9 +28,9 @@ export const useKeyboardSteeringStore = defineStore('keyboardSteering', () => {
 
     // this should be controlled by a launch file
     const gearConfig = ref([
-        { linear: 0.05, angular: 0.05},
+        { linear: 0.05, angular: 0.05 },
         { linear: 0.1, angular: 0.1 },
-        { linear: 0.25, angular: 0.25},
+        { linear: 0.25, angular: 0.25 },
         { linear: 0.5, angular: 0.5 },
         { linear: 1.0, angular: 1.0 },
     ])
@@ -77,7 +77,7 @@ export const useKeyboardSteeringStore = defineStore('keyboardSteering', () => {
             messageType: 'geometry_msgs/TwistStamped',
         })
 
-        resetPressedKeys();
+        resetPressedKeys()
 
         if (statusTransmitter.value) {
             cancelAnimationFrame(statusTransmitter.value)
@@ -90,7 +90,7 @@ export const useKeyboardSteeringStore = defineStore('keyboardSteering', () => {
         enabled.value = false
         currentMode.value = 'keyboard'
 
-        resetPressedKeys();
+        resetPressedKeys()
 
         if (clickListener.value) {
             document.removeEventListener('click', clickListener.value)
@@ -201,7 +201,7 @@ export const useKeyboardSteeringStore = defineStore('keyboardSteering', () => {
             event.ctrlKey &&
             event.shiftKey
         ) {
-            resetPressedKeys();
+            resetPressedKeys()
 
             if (steeringStore.enabled) {
                 steeringStore.giveUpControl()
