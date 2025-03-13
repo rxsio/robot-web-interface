@@ -28,11 +28,14 @@ jobs:
         with:
           node-version: 18
 
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4
+
       - name: Dependencies
-        run: npm ci
+        run: pnpm ci
       
       - name: Build
-        run: npm run build
+        run: pnpm run build
       
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v2

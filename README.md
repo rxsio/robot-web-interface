@@ -3,25 +3,25 @@
 ## Project setup
 
 ```shell
-npm install
+pnpm install
 ```
 
 ### Compiles and hot-reloads for development
 
 ```shell
-npm run serve
+pnpm run serve
 ```
 
 ### Compiles and minifies for production
 
 ```shell
-npm run build
+pnpm run build
 ```
 
 ### Lints and fixes files
 
 ```shell
-npm run lint
+pnpm run lint
 ```
 
 ### Customize configuration
