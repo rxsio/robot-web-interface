@@ -35,5 +35,20 @@
             }
         },
         "nextId": 2
+    },
+    "steering": {
+        "shape": [],
+        "windows": {},
+        "nextId": 0
+    },
+    "camera": {
+        "shape": [],
+        "windows": {},
+        "nextId": 0
+    },
+    "radiation": {
+        "shape": [],
+        "windows": {},
+        "nextId": 0
     }
 }
